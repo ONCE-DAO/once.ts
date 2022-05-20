@@ -1,6 +1,6 @@
 {
   "name": "once.ts",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -16,8 +16,6 @@
     "url": "https://github.com/phibar-once/once.ts/issues"
   },
   "homepage": "https://github.com/phibar-once/once.ts#readme",
-  "dependencies": {
-  },
   "devDependencies": {
     "@types/jest": "^27.5.1",
     "@types/node": "^17.0.33",
