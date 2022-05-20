@@ -1,6 +1,5 @@
 import OnceNode from "../2_systems/OnceNode.class.mjs";
 import Once, { OnceRuntimeResolver } from "../3_services/Once.interface.mjs";
-
 export default abstract class OnceKernel {
   static async start(): Promise<Once> {
     const once: Once = await this.discover();
@@ -18,7 +17,13 @@ export default abstract class OnceKernel {
   }
 
   static async discover(): Promise<Once> {
-    console.log("START DISCOVER");
+    console.log("START DISCOVER fff");
+    const f = await (
+      await import(
+        "../../../../../Once.Server/dist/once.server/main/OnceServer.mjs"
+      )
+    ).default;
+    (await f.start()).start();
 
     if (this.RuntimeIs.NODE_LOADER()) {
       //   return (
@@ -26,9 +31,11 @@ export default abstract class OnceKernel {
       //   ).default.start();
     }
     if (this.RuntimeIs.NODE_JS()) {
-      //   return (
-      //     await import("../2_systems/Once/OnceNodeServer.class.js")
-      //   ).default.start();
+      // return (
+      //   await import(
+      //     "../../../../../Once.Browser/dist/once.browser@main/OnceServer.mjs"
+      //   )
+      // ).default.start();
     }
     if (this.RuntimeIs.BROWSER()) {
     }
@@ -63,5 +70,9 @@ export default abstract class OnceKernel {
         self.constructor &&
         self.constructor.name === "DedicatedWorkerGlobalScope",
     };
+  }
+
+  static test() {
+    return "test";
   }
 }
