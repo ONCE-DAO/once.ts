@@ -17,13 +17,7 @@ export default abstract class OnceKernel {
   }
 
   static async discover(): Promise<Once> {
-    console.log("START DISCOVER fff");
-    const f = await (
-      await import(
-        "../../../../../Once.Server/dist/once.server/main/OnceServer.mjs"
-      )
-    ).default;
-    (await f.start()).start();
+    console.log("START DISCOVER");
 
     if (this.RuntimeIs.NODE_LOADER()) {
       //   return (
@@ -31,11 +25,16 @@ export default abstract class OnceKernel {
       //   ).default.start();
     }
     if (this.RuntimeIs.NODE_JS()) {
-      // return (
+      // await (
       //   await import(
-      //     "../../../../../Once.Browser/dist/once.browser@main/OnceServer.mjs"
+      //     "../../../../../Once.Server/dist/once.server/main/OnceServer.mjs"
       //   )
-      // ).default.start();
+      // ).default;
+      return (
+        await import(
+          "../../../../../Once.Server/dist/once.server/main/OnceServer.mjs"
+        )
+      ).default.start();
     }
     if (this.RuntimeIs.BROWSER()) {
     }

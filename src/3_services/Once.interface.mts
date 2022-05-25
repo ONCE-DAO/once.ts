@@ -1,5 +1,5 @@
 declare global {
-  var ONCE: Once | undefined;
+  var ONCE: Once;
   var NODE_JS: boolean;
 }
 
