@@ -20,16 +20,13 @@ export default abstract class OnceKernel {
     console.log("START DISCOVER");
 
     if (this.RuntimeIs.NODE_LOADER()) {
-      //   return (
-      //     await import("../2_systems/Once/OnceNodeImportLoader.class.js")
-      //   ).default.start();
+      return (
+        await import(
+          "../../../../../Once.Loader/dist/once.loader/main/2_systems/OnceNodeImportLoader.mjs"
+        )
+      ).default.start();
     }
     if (this.RuntimeIs.NODE_JS()) {
-      // await (
-      //   await import(
-      //     "../../../../../Once.Server/dist/once.server/main/OnceServer.mjs"
-      //   )
-      // ).default;
       return (
         await import(
           "../../../../../Once.Server/dist/once.server/main/OnceServer.mjs"
