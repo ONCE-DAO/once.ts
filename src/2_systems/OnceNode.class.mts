@@ -1,4 +1,4 @@
-import Once, { OnceMode, OnceState } from "../3_services/Once.interface.mjs";
+import Once, { OnceMode, OnceState } from "../../../../../Thinglish/dist/thinglish/main/3_services/Once.interface.mjs";
 
 export default class OnceNode implements Once {
   ENV = process.env;
