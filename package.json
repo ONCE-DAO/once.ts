@@ -3,6 +3,13 @@
   "version": "0.0.1",
   "description": "",
   "main": "index.js",
+  "package": "tla.EAM.Once",
+  "onceDependencies": [
+    "thinglish",
+    "once.server",
+    "once.browser",
+    "once.loader"
+  ],
   "scripts": {
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest"
   },
