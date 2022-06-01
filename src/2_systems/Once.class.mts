@@ -4,4 +4,4 @@ export {
   load,
   resolve,
   globalPreload,
-} from "../../../../../Once.Loader/dist/once.loader/main/2_systems/OnceNodeImportLoader.mjs";
+} from "../../../../../Once/dist/once.loader/main/2_systems/OnceNodeImportLoader.mjs";
