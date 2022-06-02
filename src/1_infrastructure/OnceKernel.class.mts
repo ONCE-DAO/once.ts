@@ -17,8 +17,6 @@ export default abstract class OnceKernel {
   }
 
   static async discover(): Promise<Once> {
-    console.log("START DISCOVER");
-
     if (this.RuntimeIs.NODE_LOADER()) {
       return (
         await import(
