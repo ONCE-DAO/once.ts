@@ -1,8 +1,11 @@
 {
-  "extends": "./../../../../../../tsconfig",
+  "extends": "../../../../../tsconfig",
   "compilerOptions": {
     "rootDir": "./src",
-    "outDir": "../../dist/once.ts/main"
+    "outDir": "../../../../../Scenarios/localhost/tla/EAM/Once.ts/main/",
+    "paths": {
+      "ior:esm/*":["./../../../../../Scenarios/localhost/*"],
+    }
   },
   "include": [
     "./src/**/*"

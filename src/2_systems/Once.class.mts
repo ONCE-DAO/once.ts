@@ -4,4 +4,4 @@ export {
   load,
   resolve,
   globalPreload,
-} from "../../../../../Once/dist/once.loader/main/2_systems/OnceNodeImportLoader.mjs";
+} from "../../../../../../../Scenarios/localhost/tla/EAM/Once.Loader/main/2_systems/OnceNodeImportLoader.mjs";

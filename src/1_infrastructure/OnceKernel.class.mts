@@ -1,5 +1,6 @@
 import OnceNode from "../2_systems/OnceNode.class.mjs";
-import Once, { OnceRuntimeResolver } from "../../../../../Thinglish/dist/thinglish/main/3_services/Once.interface.mjs";
+import Once, { OnceRuntimeResolver } from "../../../../../../../Scenarios/localhost/tla/EAM/Thinglish/main/3_services/Once.interface.mjs";
+// import Once, { OnceRuntimeResolver } from "ior:esm/tla/EAM/Thinglish/main/3_services/Once.interface.mjs";
 export default abstract class OnceKernel {
   static async start(): Promise<Once> {
     const once: Once = await this.discover();
@@ -20,14 +21,14 @@ export default abstract class OnceKernel {
     if (this.RuntimeIs.NODE_LOADER()) {
       return (
         await import(
-          "../../../../../Once/dist/once.loader/main/2_systems/OnceNodeImportLoader.mjs"
+          "../../../../../../../Scenarios/localhost/tla/EAM/Once.Loader/main/2_systems/OnceNodeImportLoader.mjs"
         )
       ).default.start();
     }
     if (this.RuntimeIs.NODE_JS()) {
       return (
         await import(
-          "../../../../../Once/dist/once.server/main/OnceServer.mjs"
+          "../../../../../../../Scenarios/localhost/tla/EAM/Once.Server/main/OnceServer.mjs"
         )
       ).default.start();
     }
