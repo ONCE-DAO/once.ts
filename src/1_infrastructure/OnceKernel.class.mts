@@ -1,5 +1,5 @@
 import OnceNode from "../2_systems/OnceNode.class.mjs";
-import Once, { OnceRuntimeResolver } from "../../../../../../../../Scenarios/localhost/tla/EAM/Thinglish/main/dist/3_services/Once.interface.mjs"
+import Once, { OnceRuntimeResolver } from "../../../../../../../../Scenarios/localhost/tla/EAM/Thinglish/thinglish/main/dist/3_services/Once.interface.mjs"
 // import Once, { OnceRuntimeResolver } from "ior:esm/tla/EAM/Thinglish/main/3_services/Once.interface.mjs";
 export default abstract class OnceKernel {
   static async start(): Promise<Once> {
