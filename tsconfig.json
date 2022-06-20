@@ -2,7 +2,7 @@
   "extends": "../../../../../../tsconfig",
   "compilerOptions": {
     "rootDir": "./src",
-    "outDir": "../../../../../../Scenarios/localhost/tla/EAM/Once/ts/main/",
+    "outDir": "../../../../../../Scenarios/localhost/tla/EAM/Once/ts/main/dist",
     // "paths": {
     //   "ior:esm/*":["./../../../../../Scenarios/localhost/*"],
     // }
@@ -14,6 +14,7 @@
   "exclude": [
     "test",
     "**/test/**/*",
-    "node_modules"
+    "node_modules",
+    "../../../../../../Scenarios/localhost/tla/EAM/Once/ts/main/"
   ]
 }
