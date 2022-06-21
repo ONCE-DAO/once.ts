@@ -1,14 +1,14 @@
 {
-  "name": "once",
+  "name": "Once",
   "version": "0.0.1",
   "description": "",
   "main": "index.js",
   "namespace": "tla.EAM",
   "onceDependencies": [
-    "thinglish",
-    "server",
-    "browser",
-    "loader"
+    "Thinglish",
+    "Server",
+    "Browser",
+    "Loader"
   ],
   "scripts": {
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest"
