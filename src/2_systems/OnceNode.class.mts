@@ -1,4 +1,4 @@
-import Once, { OnceMode, OnceState } from "ior:esm:/tla.EAM.Thinglish.thinglish[main]";
+import Once, { OnceMode, OnceState } from "ior:esm:/tla.EAM.Thinglish[main]";
 
 
 export default class OnceNode implements Once {

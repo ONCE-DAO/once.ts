@@ -1,9 +1,9 @@
 {
-  "name": "ts",
+  "name": "once",
   "version": "0.0.1",
   "description": "",
   "main": "index.js",
-  "namespace": "tla.EAM.Once",
+  "namespace": "tla.EAM",
   "onceDependencies": [
     "thinglish",
     "server",
