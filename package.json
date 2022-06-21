@@ -6,9 +6,9 @@
   "namespace": "tla.EAM.Once",
   "onceDependencies": [
     "thinglish",
-    "once.server",
-    "once.browser",
-    "once.loader"
+    "server",
+    "browser",
+    "loader"
   ],
   "scripts": {
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest"
