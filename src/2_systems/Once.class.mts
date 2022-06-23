@@ -3,10 +3,7 @@ import OnceKernel from "../1_infrastructure/OnceKernel.class.mjs";
 
 await OnceKernel.start();
 
-export let load: loadType | undefined;
-export let resolve: resolveType | undefined;
-export let globalPreload: preloadType | undefined;
-
+export let load: loadType | undefined, resolve: resolveType | undefined, globalPreload: preloadType | undefined;
 if (ONCE.mode === OnceMode.NODE_LOADER) {
   load = (ONCE as OnceNodeImportLoader).load;
   resolve = (ONCE as OnceNodeImportLoader).resolve
