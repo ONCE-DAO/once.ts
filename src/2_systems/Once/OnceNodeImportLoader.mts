@@ -1,4 +1,7 @@
-import Once, { OnceMode, OnceState, resolveContext, loadContext, OnceNodeImportLoader } from "../../../../../../../../Scenarios/localhost/tla/EAM/Thinglish/dev/index.mjs";
+import DefaultEAMD from "../../1_infrastructure/EAMD.class.mjs";
+import EAMDInterface from "../../3_services/EAMD.interface.mjs";
+import Once, { OnceMode, OnceState, resolveContext, loadContext, OnceNodeImportLoader } from "../../3_services/Once.interface.mjs";
+import Scenario from "../Scenario.class.mjs";
 import { BaseNodeOnce } from "./BaseOnce.class.mjs";
 
 export default class DefaultOnceNodeImportLoader extends BaseNodeOnce implements Once, OnceNodeImportLoader {
@@ -6,9 +9,11 @@ export default class DefaultOnceNodeImportLoader extends BaseNodeOnce implements
   state = OnceState.DISCOVER_SUCCESS;
   global: typeof globalThis = global;
 
-  static start() {
-    return new DefaultOnceNodeImportLoader();
+  static async start() {
+    const eamd = await DefaultEAMD.getInstance(Scenario.Default)
+    return new DefaultOnceNodeImportLoader(eamd);
   }
+
 
   async start(): Promise<void> {
     console.log("ONCE WILL START AS NODE_LOADER");
@@ -33,10 +38,6 @@ export default class DefaultOnceNodeImportLoader extends BaseNodeOnce implements
     console.log(new Date())
 
     console.log("ONCE STARTED AS NODE_LOADER");
-  }
-
-  async getEAMD() {
-    return undefined;
   }
 
   async resolve(

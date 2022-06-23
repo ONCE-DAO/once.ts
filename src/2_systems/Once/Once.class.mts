@@ -1,4 +1,4 @@
-import { loadType, OnceMode, OnceNodeImportLoader, preloadType, resolveType } from "../../../../../../../../Scenarios/localhost/tla/EAM/Thinglish/dev/3_services/Once.interface.mjs";
+import { loadType, OnceMode, OnceNodeImportLoader, preloadType, resolveType } from "../../3_services/Once.interface.mjs";
 import OnceKernel from "../../1_infrastructure/OnceKernel.class.mjs";
 
 await OnceKernel.start();

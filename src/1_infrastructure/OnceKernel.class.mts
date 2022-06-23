@@ -1,5 +1,4 @@
-import OnceNode from "../2_systems/Once/OnceNode.class.mjs";
-import Once, { OnceRuntimeResolver } from "../../../../../../../Scenarios/localhost/tla/EAM/Thinglish/dev/3_services/Once.interface.mjs"
+import Once, { OnceRuntimeResolver } from "../3_services/Once.interface.mjs"
 export default abstract class OnceKernel {
   static async start(): Promise<Once> {
     const once: Once = await this.discover();
@@ -28,11 +27,13 @@ export default abstract class OnceKernel {
       ).default.start();
     }
     if (this.RuntimeIs.NODE_JS()) {
-      return (
+
+      return await (
         await import(
-          "../../../../../../../Scenarios/localhost/tla/EAM/Once/Server/dev/OnceServer.mjs"
+          "../OnceServer.mjs"
         )
       ).default.start();
+
     }
     if (this.RuntimeIs.BROWSER()) {
     }
@@ -40,7 +41,8 @@ export default abstract class OnceKernel {
     }
     if (this.RuntimeIs.WEB_WORKER()) {
     }
-    return new OnceNode();
+    //TODO@Merge maybe replace with non discovered ONCE
+    throw new Error("Once not discovered")
   }
 
   static get RuntimeIs(): OnceRuntimeResolver {
