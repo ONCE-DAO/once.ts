@@ -11,10 +11,12 @@ export default interface Submodule {
   installDependencies(): Promise<void>;
   build(watch?: boolean): Promise<void>;
   linkNodeModules(): Promise<void>;
-  updateTsConfig(scenariosPath:string): Promise<void>;
-  updateBranchToCheckoutVersion(eamd:EAMD):Promise<void>
+  updateTsConfig(scenariosPath: string): Promise<void>;
+  updateBranchToCheckoutVersion(eamd: EAMD): Promise<void>
   // afterbuild(): void;
   watch(): Promise<void>;
+  discoverFiles(): string[];
+  basePath: string;
   // init(config: { path?: string, url?: string, branch?: string }): Promise<Submodule>;
   // addFromRemoteUrl(args: AddSubmoduleArgs): Promise<Submodule>;
 }

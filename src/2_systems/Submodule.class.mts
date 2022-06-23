@@ -3,12 +3,14 @@ import { join, relative } from "path";
 import { execSync, spawn } from "child_process";
 import Submodule from "../3_services/Submodule.interface.mjs";
 import { DefaultNpmPackage } from "./NpmPackage.class.mjs";
-import { cpSync, existsSync, mkdirSync, rmdirSync, rmSync, symlinkSync, unlink, unlinkSync, writeFileSync, readFileSync } from 'fs';
+import { cpSync, existsSync, mkdirSync, rmdirSync, rmSync, symlinkSync, unlink, unlinkSync, writeFileSync, readFileSync, readdirSync, statSync } from 'fs';
 import simpleGit, { SimpleGit } from "simple-git";
 import GitRepository, {
   GitRepositoryParameter,
   NotAGitRepositoryError,
 } from "../3_services/GitRepository.interface.mjs";
+import UcpComponentDescriptor from "./Things/BaseUcpComponentDescriptor.class.mjs";
+import ServerSideUcpComponentDescriptor from "./Things/ServerSideUcpComponentDescriptor.class.mjs";
 // import * as ts from "typescript"
 export default class DefaultSubmodule
   extends DefaultGitRepository
@@ -106,10 +108,13 @@ export default class DefaultSubmodule
 
   async updateBranchToCheckoutVersion(): Promise<void> {
     const checkoutBranch = DefaultGitRepository.getBranch(this.gitRepository)
-    console.log(this.name, await (await this.gitRepository.getConfig("remote.origin.url")).value,this.path, this.branch, checkoutBranch)
-   
+    console.log(this.name, await (await this.gitRepository.getConfig("remote.origin.url")).value, this.path, this.branch, checkoutBranch)
+
     debugger;
   }
+
+  private get rootDir() { return "./src" }
+  private get sourceDir() { return join(this.folderPath, this.rootDir) }
 
   async updateTsConfig(scenarioPath: string): Promise<void> {
     const submoduleConfig = join(this.basePath, this.path, "tsconfig.json");
@@ -125,11 +130,11 @@ export default class DefaultSubmodule
 
     tsconfig.extends = relative(join(this.basePath, this.path), mainConfig);
     if (!tsconfig.compilerOptions) tsconfig.compilerOptions = {}
-    tsconfig.compilerOptions.rootDir = "./src"
+    tsconfig.compilerOptions.rootDir = this.rootDir
     tsconfig.compilerOptions.outDir = relative(join(this.basePath, this.path), join(this.basePath, this.distributionFolder))
 
     tsconfig.include = [
-      "./src",
+      this.rootDir,
       // relative(join(this.basePath, this.path), join(this.basePath, scenarioPath))
     ]
     tsconfig.exclude = [
@@ -154,6 +159,12 @@ export default class DefaultSubmodule
   }
 
   async build(watch: boolean = false): Promise<void> {
+
+    const ucpComponentDescriptor = UcpComponentDescriptor.getDescriptor(this.package.namespace, this.package.name, this.package.version) as ServerSideUcpComponentDescriptor
+
+    // TODO@Merge Add Export 
+    // ucpComponentDescriptor.createExportFile(this);
+
     if (existsSync(join(this.baseDir, "tsconfig.json"))) {
       return await this.buildTypescript(watch);
     }
@@ -169,6 +180,30 @@ export default class DefaultSubmodule
 
     //   compDesc.writeToDistPath();
     // }
+
+
+  }
+
+  discoverFiles(): string[] {
+
+    //if (!this.folderPath) throw new Error("Missing path")
+    let dir = this.sourceDir;
+
+    let filesToReturn: string[] = [];
+    function walkDir(currentPath: string) {
+      let files = readdirSync(currentPath);
+      for (let i in files) {
+        let curFile = join(currentPath, files[i]);
+        if (statSync(curFile).isFile()) {
+          filesToReturn.push(curFile.replace(dir, ''));
+        } else if (statSync(curFile).isDirectory()) {
+          walkDir(curFile);
+        }
+      }
+    };
+    walkDir(dir);
+    return filesToReturn;
+
   }
 
   async linkNodeModules(): Promise<void> {
@@ -209,7 +244,7 @@ export default class DefaultSubmodule
 
 
     if (watch) {
-      spawn("npx", ["tsc", "--project", "tsconfig.build.json","--watch", "--preserveWatchOutput"], {
+      spawn("npx", ["tsc", "--project", "tsconfig.build.json", "--watch", "--preserveWatchOutput"], {
         stdio: 'inherit',
         cwd: join(this.baseDir),
       });
@@ -261,4 +296,6 @@ export default class DefaultSubmodule
   private get distribution_node_modules() {
     return join(this.basePath, this.distributionFolder, "node_modules");
   }
+
+
 }
