@@ -1,7 +1,8 @@
 import DefaultEAMD from "../../1_infrastructure/EAMD.class.mjs";
-import EAMDInterface from "../../3_services/EAMD.interface.mjs";
+import { loaderReturnValue } from "../../3_services/Loader.interface.mjs";
 import Once, { OnceMode, OnceState, resolveContext, loadContext, OnceNodeImportLoader } from "../../3_services/Once.interface.mjs";
 import Scenario from "../Scenario.class.mjs";
+import DefaultIOR from "../Things/DefaultIOR.class.mjs";
 import { BaseNodeOnce } from "./BaseOnce.class.mjs";
 
 export default class DefaultOnceNodeImportLoader extends BaseNodeOnce implements Once, OnceNodeImportLoader {
@@ -46,8 +47,8 @@ export default class DefaultOnceNodeImportLoader extends BaseNodeOnce implements
     defaultResolve: Function
   ): Promise<{ url: string }> {
     console.log("RESOLVE", specifier);
-    // if (specifier.startsWith("ior:"))
-    // specifier = await DefaultIOR.load(specifier, { returnValue: loaderReturnValue.path });
+    if (specifier.startsWith("ior:"))
+    specifier = await DefaultIOR.load(specifier, { returnValue: loaderReturnValue.path });
     return defaultResolve(specifier, context, defaultResolve);
   }
 
