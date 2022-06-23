@@ -11,10 +11,11 @@
   },
   "include": [
     "./src",
+    "test",
     "../../../../../Scenarios/localhost"
   ],
   "exclude": [
-    "**/test/**/*",
+    // "**/test/**/*",
     "dist",
     "node_modules",
     "../../../../../Scenarios/localhost/tla/EAM/Once/dev"
