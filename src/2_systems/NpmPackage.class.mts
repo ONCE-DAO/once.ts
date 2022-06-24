@@ -1,3 +1,5 @@
+// ##IGNORE_TRANSFORMER##
+
 import { existsSync, readFileSync } from "fs";
 import { join } from "path";
 import { EMPTY_NAME, EMPTY_NAMESPACE } from "../1_infrastructure/Constants.mjs";

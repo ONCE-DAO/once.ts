@@ -1,3 +1,5 @@
+// ##IGNORE_TRANSFORMER##
+
 import NpmPackage from "../../3_services/NpmPackage.interface.mjs";
 import ClassDescriptorInterface from "../../3_services/Thing/ClassDescriptor.interface.mjs";
 import InterfaceDescriptorInterface from "../../3_services/Thing/InterfaceDescriptor.interface.mjs";
