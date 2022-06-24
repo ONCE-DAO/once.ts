@@ -1,3 +1,4 @@
+// ##IGNORE_TRANSFORMER##
 import UcpComponentDescriptorInterface, { UcpComponentDescriptorStatics } from "../../3_services/Thing/UcpComponentDescriptor.interface.mjs";
 
 let ActiveUcpComponentDescriptor: UcpComponentDescriptorStatics;

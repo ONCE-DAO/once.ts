@@ -108,9 +108,9 @@ function compileModule(dir: string, ignoreErrors = false, deleteOutDir = false) 
   const { config } = ts.readConfigFile(configFile, ts.sys.readFile)
   const { options, fileNames, errors } = ts.parseJsonConfigFileContent(config, ts.sys, dir)
   options.noEmitOnError = !ignoreErrors;
-  (options as PluginOptions).ONCESTUFF = "some value"
 
-
+  //TODO Make it dynamic
+  (options as PluginOptions).onceIOR = "ior:esm:/tla.EAM.Once[dev]";
 
   const transformerPath = "./Scenarios/localhost/tla/EAM/Thinglish/Transformer/merge/3_services/transformer.cjs"
   if (!dir.includes("thinglish.transformer"))
@@ -122,7 +122,7 @@ function compileModule(dir: string, ignoreErrors = false, deleteOutDir = false) 
 
 type PluginOptions = ts.CompilerOptions & {
   plugins?: { transform: string }[],
-  ONCESTUFF?: string
+  onceIOR?: string,
 }
 
 const moduleDirs = [

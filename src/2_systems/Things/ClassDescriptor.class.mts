@@ -1,3 +1,4 @@
+// ##IGNORE_TRANSFORMER##
 import Class from "../../3_services/Class.interface.mjs";
 import ClassDescriptorInterface from "../../3_services/Thing/ClassDescriptor.interface.mjs";
 import InterfaceDescriptorInterface from "../../3_services/Thing/InterfaceDescriptor.interface.mjs";

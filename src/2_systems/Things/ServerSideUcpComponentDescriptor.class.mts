@@ -1,8 +1,8 @@
+// ##IGNORE_TRANSFORMER##
 
 import fs from 'fs';
 import path from 'path';
 import DefaultUcpComponentDescriptor, { UcpComponentDescriptorInitParameters } from "./DefaultUcpComponentDescriptor.class.mjs";
-// import { ServerSideNpmPackage } from "./ServerSideNpmPackage.class.mjs";
 import UcpComponentDescriptorInterface, { UcpComponentDescriptorDataStructure } from "../../3_services/Thing/UcpComponentDescriptor.interface.mjs";
 import ClassDescriptorInterface from "../../3_services/Thing/ClassDescriptor.interface.mjs";
 import { ThingStatics } from '../../3_services/Thing/Thing.interface.mjs';
