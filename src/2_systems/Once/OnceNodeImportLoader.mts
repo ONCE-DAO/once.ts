@@ -14,8 +14,8 @@ export default class DefaultOnceNodeImportLoader extends BaseNodeOnce implements
     const eamd = await DefaultEAMD.getInstance(Scenario.Default)
     return new DefaultOnceNodeImportLoader(eamd);
   }
-
-
+  
+  
   async start(): Promise<void> {
     console.log("ONCE WILL START AS NODE_LOADER");
 
@@ -48,7 +48,7 @@ export default class DefaultOnceNodeImportLoader extends BaseNodeOnce implements
   ): Promise<{ url: string }> {
     console.log("RESOLVE", specifier);
     if (specifier.startsWith("ior:"))
-    specifier = await DefaultIOR.load(specifier, { returnValue: loaderReturnValue.path });
+      specifier = await DefaultIOR.load(specifier, { returnValue: loaderReturnValue.path });
     return defaultResolve(specifier, context, defaultResolve);
   }
 
