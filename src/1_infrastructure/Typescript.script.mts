@@ -1,3 +1,4 @@
+import { execSync } from "child_process";
 import { existsSync, rm, rmSync, symlinkSync } from "fs";
 import { join } from "path";
 import ts from "typescript";
@@ -103,6 +104,8 @@ function compile(sourceFiles: string[], dir: string, options: ts.CompilerOptions
 }
 
 function compileModule(dir: string, ignoreErrors = false, deleteOutDir = false) {
+  console.log("start compiling ", dir);
+
   const configFile = ts.findConfigFile(dir, ts.sys.fileExists, 'tsconfig.build.json')
   if (!configFile) throw Error('tsconfig.json not found')
   const { config } = ts.readConfigFile(configFile, ts.sys.readFile)
@@ -112,9 +115,11 @@ function compileModule(dir: string, ignoreErrors = false, deleteOutDir = false) 
 
 
 
-  const transformerPath = "./Scenarios/localhost/tla/EAM/Thinglish/Transformer/merge/3_services/transformer.cjs"
-  if (!dir.includes("thinglish.transformer"))
+  const transformerPath = join(process.cwd(), "Scenarios/localhost/tla/EAM/Thinglish/Transformer/merge/3_services/transformer.cjs")
+  if (!dir.includes("thinglish.transformer")) {
+    execSync("npx ts-patch i", { cwd: dir });
     (options as PluginOptions).plugins = [{ transform: transformerPath }]
+  }
 
   deleteOutDir && options.outDir && existsSync(options.outDir) && rmSync(options.outDir, { recursive: true })
   compile(fileNames, dir, options, ignoreErrors)
@@ -126,12 +131,12 @@ type PluginOptions = ts.CompilerOptions & {
 }
 
 const moduleDirs = [
-  "./Components/tla/EAM/Thinglish/Transformer/thinglish.transformer@merge",
-  "./Components/tla/EAM/Once/once@dev",
-  "./Components/tla/EAM/Once/Server/once.server@dev"
+  "Components/tla/EAM/Thinglish/Transformer/thinglish.transformer@merge",
+  "Components/tla/EAM/Once/once@dev",
+  "Components/tla/EAM/Once/Server/once.server@dev"
 ]
 existsSync("./Scenarios/localhost") && rmSync("./Scenarios/localhost", { recursive: true })
-moduleDirs.forEach(dir => compileModule(dir, true))
+moduleDirs.forEach(dir => compileModule(join(process.cwd(), dir), true))
 
 
 
