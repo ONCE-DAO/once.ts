@@ -1,3 +1,6 @@
+// ##IGNORE_TRANSFORMER##
+
+
 // Eine mögliche alternativer Loader ohne direkte abhängichkeit zu Once mit loop Detection
 
 import path from "path";
@@ -70,7 +73,7 @@ ${hitFiles.map(x => x.path).join(' =>\n')}
 class OnceSmallNodeImportLoader {
 
     normalizePath4Url(path: string): string {
-        return path.replace(/\.m(tj)s$/, '').replace(/.*\/EAMD\.ucp\//, '').replaceAll('.', '_').replace(/\/([12345]_\w+)/, '.$1');
+        return path.replace(/\.m[tj]s$/, '').replace(/.*\/EAMD\.ucp\//, '').replaceAll('.', '_').replace(/\/([12345]_\w+)/, '.$1');
     }
 
     async resolve(
