@@ -14,7 +14,7 @@ type GitRepositorySubmodule = GitRepository & Submodule;
 export default class DefaultEAMD extends DefaultGitRepository implements EAMD {
   eamdDirectory: string;
   scenario: Scenario;
-  
+
   static async getInstance(scenario: DefaultScenario): Promise<EAMD> {
     const gitRepository = simpleGit(scenario.eamdPath, { binary: "git" });
     const branch = await DefaultEAMD.getBranch(gitRepository)
@@ -56,7 +56,8 @@ export default class DefaultEAMD extends DefaultGitRepository implements EAMD {
 
     for (let sub of submodules) {
 
-      
+      //await sub.initNewComponent();
+
       await sub.updateTsConfig(this.scenario.scenarioPath)
       console.log(`run build for ${sub.name}@${sub.branch}`);
       await sub.linkNodeModules();

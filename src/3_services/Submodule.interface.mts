@@ -8,6 +8,7 @@ export default interface Submodule {
   branch: string;
   package: NpmPackage;
   distributionFolder: string;
+  initNewComponent(): Promise<void>;
   installDependencies(): Promise<void>;
   build(watch?: boolean): Promise<void>;
   linkNodeModules(): Promise<void>;

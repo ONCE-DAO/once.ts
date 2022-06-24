@@ -105,7 +105,7 @@ export class DefaultGitRepository implements GitRepository {
     });
   }
 
-  private async getSubmoduleValue(key: string): Promise<string> {
+  protected async getSubmoduleValue(key: string): Promise<string> {
     const rawResult = await this.gitRepository.raw(
       "config",
       "--file",

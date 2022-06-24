@@ -116,6 +116,43 @@ export default class DefaultSubmodule
   private get rootDir() { return "./src" }
   private get sourceDir() { return join(this.folderPath, this.rootDir) }
 
+
+  async initNewComponent(): Promise<void> {
+    const packageFile = join(this.path, "package.json");
+    if (!existsSync(packageFile)) throw new Error(`fail to find file ${packageFile}`)
+
+    let packageData = readFileSync(packageFile).toString();
+    let packageJson = JSON.parse(packageData);
+
+    if (packageJson.name) return;
+
+    console.log("init new component: " + this.name);
+
+    let gitUrl = await this.getSubmoduleValue("remote.origin.url");
+    let username = await this.getSubmoduleValue("user.name");
+
+    if (!this.path.match("EAMD.ucp")) throw new Error(`fail to init: Component is not in EAMD.ucp Directory`);
+    const componentPath = this.path.replace(/.+EAMD.ucp\//, '');
+
+    let packerSplit = componentPath.split('/');
+    const nameAndBranch = packerSplit.pop();
+    const componentName = packerSplit.pop();
+    const namespace = packerSplit.join(".");
+
+    packageJson.name = componentName;
+    packageJson.namespace = namespace;
+
+    packageJson.author = username;
+
+    packageJson.repository.url = 'git+' + gitUrl;
+    if (gitUrl.match("github")) {
+      packageJson.bugs.url = gitUrl + '/issues';
+      packageJson.homepage = gitUrl + '#readme'
+    }
+
+  }
+
+
   async updateTsConfig(scenarioPath: string): Promise<void> {
     const submoduleConfig = join(this.basePath, this.path, "tsconfig.json");
     const submoduleBuildConfig = join(this.basePath, this.path, "tsconfig.build.json");
