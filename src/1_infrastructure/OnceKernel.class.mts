@@ -14,7 +14,7 @@ export default abstract class OnceKernel {
     once.global.ONCE = once;
     return once;
   }
-  
+
   static async discover(): Promise<Once> {
     console.log("Try to discover runtime");
 
@@ -29,7 +29,7 @@ export default abstract class OnceKernel {
       await import("../2_systems/EAMD/ServerSideEAMDLoader.class.mjs")
       return await (
         await import(
-          "/ior:esm:/tla.EAM.Once.Server[dev]"
+          "ior:esm:/tla.EAM.Once.Server[dev]"
         )
       ).OnceNodeServer.start()
     }

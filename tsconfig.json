@@ -7,38 +7,7 @@
       {
         "transform": "../../../../../Scenarios/localhost/tla/EAM/Thinglish/Transformer/merge/3_services/transformer.cjs"
       }
-    ],
-    "paths": {
-      "1_infrastructure/*": [
-        "./src/1_infrastructure/*"
-      ],
-      "ior:esm:/tla.EAM.Thinglish.Transformer[merge]": [
-        "Scenarios/localhost/tla/EAM/Thinglish/Transformer/merge/main.js"
-      ],
-      "ior:esm:/tla.EAM.Thinglish[dev]": [
-        "Scenarios/localhost/tla/EAM/Thinglish/dev/index.d.mts",
-        "Scenarios/localhost/tla/EAM/Thinglish/dev/index.mjs"
-      ],
-      "/ior:esm:/tla.EAM.Thinglish[dev]": [
-        "Scenarios/localhost/tla/EAM/Thinglish/dev/index.d.mts",
-        "Scenarios/localhost/tla/EAM/Thinglish/dev/index.mjs"
-      ],
-      "ior:esm:/tla.EAM.Once.Browser[dev]": [
-        "Scenarios/localhost/tla/EAM/Once/Browser/dev/src/OnceServer.mts"
-      ],
-      "/ior:esm:/tla.EAM.Once.Server[dev]": [
-        "Scenarios/localhost/tla/EAM/Once/Server/dev/index.d.mts",
-        "Scenarios/localhost/tla/EAM/Once/Server/dev/index.mjs"
-      ],
-      "ior:esm:/tla.EAM.Once.Server[dev]": [
-        "Scenarios/localhost/tla/EAM/Once/Server/dev/index.d.mts",
-        "Scenarios/localhost/tla/EAM/Once/Server/dev/index.mjs"
-      ],
-      "ior:esm:/tla.EAM.Once[dev]": [
-        "Scenarios/localhost/tla/EAM/Once/dev/index.d.mts",
-        "Scenarios/localhost/tla/EAM/Once/dev/index.mjs"
-      ]
-    }
+    ]
   },
   "include": [
     "./src",
