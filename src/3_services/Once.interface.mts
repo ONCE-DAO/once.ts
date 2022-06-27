@@ -12,7 +12,8 @@ export default interface Once {
   state: OnceState;
   start(): Promise<void>;
   global: typeof globalThis;
-  eamd: EAMD
+  eamd: EAMD;
+  OnceLoader: OnceNodeImportLoader | undefined;
 }
 
 export interface OnceNodeImportLoader {
