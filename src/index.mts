@@ -4,9 +4,13 @@ import { BaseNodeOnce } from "./2_systems/Once/BaseOnce.class.mjs";
 import Once, { OnceMode, OnceState } from "./3_services/Once.interface.mjs";
 import InterfaceDescriptor from "./2_systems/Things/InterfaceDescriptor.class.mjs";
 import ClassDescriptor from "./2_systems/Things/ClassDescriptor.class.mjs";
+import InterfaceDescriptorInterface from "./3_services/Thing/InterfaceDescriptor.interface.mjs";
+import ClassDescriptorInterface from "./3_services/Thing/ClassDescriptor.interface.mjs";
+import BaseThing from "./1_infrastructure/BaseThing.class.mjs";
+import OnceKernel from "./1_infrastructure/OnceKernel.class.mjs";
 
 
 export {
     DefaultIOR, EAMD, BaseNodeOnce, Once, OnceMode, OnceState,
-    InterfaceDescriptor, ClassDescriptor
+    InterfaceDescriptor, ClassDescriptor, InterfaceDescriptorInterface, ClassDescriptorInterface, BaseThing, OnceKernel
 }
