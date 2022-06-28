@@ -1,6 +1,6 @@
 import ServerSideEAMDLoader from "../../../src/2_systems/EAMD/ServerSideEAMDLoader.class.mjs";
 import DefaultIOR from "../../../src/2_systems/Things/DefaultIOR.class.mjs";
-import { DefaultIOR as ScenarioDefaultIOR } from "../../../../../../../../Scenarios/localhost/tla/EAM/Once/dev/index.mjs"
+import { DefaultIOR as ScenarioDefaultIOR } from "../../../../../../../../Scenarios/localhost/webroot/tla/EAM/Once/dev/index.mjs"
 import { DefaultIOR as IorImportDefaultIOR } from "ior:esm:/tla.EAM.Once[dev]"
 
 // beforeEach(async () => {
