@@ -14,8 +14,12 @@ export default class DefaultOnceNodeImportLoader extends BaseNodeOnce implements
     const eamd = await DefaultEAMD.getInstance(Scenario.Default)
     return new DefaultOnceNodeImportLoader(eamd);
   }
-  
-  
+
+  get OnceLoader() {
+    return this;
+  }
+
+
   async start(): Promise<void> {
     console.log("ONCE WILL START AS NODE_LOADER");
 

@@ -1,3 +1,4 @@
+// ##IGNORE_TRANSFORMER##
 
 
 interface callback { (result: any): void };

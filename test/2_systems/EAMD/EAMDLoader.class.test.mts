@@ -1,8 +1,7 @@
 import ServerSideEAMDLoader from "../../../src/2_systems/EAMD/ServerSideEAMDLoader.class.mjs";
 import DefaultIOR from "../../../src/2_systems/Things/DefaultIOR.class.mjs";
-import {DefaultIOR as ScenarioDefaultIOR} from "../../../../../../../../Scenarios/localhost/tla/EAM/Once/dev/index.mjs"
-// import { DefaultIOR as IorImportDefaultIOR} from "ior:esm:/tla.EAM.Once[dev]"
-
+import { DefaultIOR as ScenarioDefaultIOR } from "../../../../../../../../Scenarios/localhost/tla/EAM/Once/dev/index.mjs"
+import { DefaultIOR as IorImportDefaultIOR } from "ior:esm:/tla.EAM.Once[dev]"
 
 // beforeEach(async () => {
 //   if (ONCE_STARTED === false) await OnceNodeServer.start();
@@ -30,10 +29,9 @@ describe("EAMD Loader", () => {
     expect(loadedDefaultIOR).toEqual(
       ScenarioDefaultIOR
     );
-    // TODO@MERGE try to get this working
-    // expect(loadedDefaultIOR).toEqual(
-    //   IorImportDefaultIOR
-    // );
+    expect(loadedDefaultIOR).toEqual(
+      IorImportDefaultIOR
+    );
   });
 
   test("NODE_ENV", () => {

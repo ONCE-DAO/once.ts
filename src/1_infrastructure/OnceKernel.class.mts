@@ -11,6 +11,9 @@ export default abstract class OnceKernel {
     state:\t${once.state}
     ----------------------------------
     `);
+    if (once.global.ONCE !== undefined && "resolve" in once.global.ONCE) {
+      once.OnceLoader = once.global.ONCE;
+    }
     once.global.ONCE = once;
     return once;
   }
@@ -19,6 +22,7 @@ export default abstract class OnceKernel {
     console.log("Try to discover runtime");
 
     if (this.RuntimeIs.NODE_LOADER()) {
+      await import("../2_systems/EAMD/ServerSideEAMDLoader.class.mjs")
       return (
         await import(
           "../2_systems/Once/OnceNodeImportLoader.mjs"

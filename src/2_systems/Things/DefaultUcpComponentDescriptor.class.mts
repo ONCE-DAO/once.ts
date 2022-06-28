@@ -5,6 +5,7 @@ import ClassDescriptorInterface from "../../3_services/Thing/ClassDescriptor.int
 import InterfaceDescriptorInterface from "../../3_services/Thing/InterfaceDescriptor.interface.mjs";
 import { ThingStatics } from "../../3_services/Thing/Thing.interface.mjs";
 import UcpComponentDescriptorInterface from "../../3_services/Thing/UcpComponentDescriptor.interface.mjs";
+import { DefaultNpmPackage } from "../NpmPackage.class.mjs";
 
 export default class DefaultUcpComponentDescriptor implements UcpComponentDescriptorInterface {
 
@@ -137,8 +138,7 @@ export default class DefaultUcpComponentDescriptor implements UcpComponentDescri
   }
 
   initBasics(packagePath: string, packageName: string, packageVersion: string | undefined): UcpComponentDescriptorInterface {
-    // TODO@MERGE Create package store
-    // this.npmPackage = DefaultNpmPackage.getByPackage(packagePath, packageName, packageVersion || '');
+    this.npmPackage = DefaultNpmPackage.getByPackage(packagePath, packageName, packageVersion || '');
     let name = this.myClass.getDescriptorName(packagePath, packageName, packageVersion);
     this.myClass._componentDescriptorStore[name] = this;
     return this;
