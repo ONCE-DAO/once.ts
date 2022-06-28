@@ -21,7 +21,7 @@ await eamd.runForSubmodules(async (sub: Submodule & GitRepository) => {
   }
 
   await sub.checkout(sub.branch);
-  await sub.installDependencies();
+  // await sub.installDependencies();
 });
 
 !existsSync("Scenarios") && mkdirSync("Scenarios");
