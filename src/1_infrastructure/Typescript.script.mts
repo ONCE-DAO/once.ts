@@ -104,7 +104,7 @@ function compile(sourceFiles: string[], dir: string, options: ts.CompilerOptions
 
 function compileModule(dir: string, ignoreErrors = false, deleteOutDir = false) {
   const configFile = ts.findConfigFile(dir, ts.sys.fileExists, 'tsconfig.build.json')
-  if (!configFile) throw Error('tsconfig.json not found')
+  if (!configFile) throw Error(dir + 'tsconfig.build.json not found ')
   const { config } = ts.readConfigFile(configFile, ts.sys.readFile)
   const { options, fileNames, errors } = ts.parseJsonConfigFileContent(config, ts.sys, dir)
   options.noEmitOnError = !ignoreErrors;
