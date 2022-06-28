@@ -6,6 +6,7 @@ export default interface EAMD extends GitRepository {
   eamdDirectory: string;
   build(watch?: boolean): Promise<void>
   scenario: Scenario
+  createPathsConfig(submodules?: (Submodule & GitRepository)[]): Promise<void>
 
   runForSubmodules(fn: (submodule: Submodule & GitRepository) => Promise<void>): Promise<void>
   // installedAt: Date | undefined;
@@ -28,5 +29,6 @@ export enum EAMD_FOLDERS {
   ROOT = "EAMD.ucp",
   COMPONENTS = "Components",
   SCENARIOS = "Scenarios",
-  MISSING_NAMESPACE = "MISSING_NAMESPACE"
+  MISSING_NAMESPACE = "MISSING_NAMESPACE",
+  WEB_ROOT = "webroot"
 }

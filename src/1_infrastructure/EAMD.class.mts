@@ -4,7 +4,7 @@ import simpleGit, { SimpleGit } from "simple-git";
 import { DefaultGitRepository } from "../2_systems/GitRepository.class.mjs";
 import DefaultScenario from "../2_systems/Scenario.class.mjs";
 import DefaultSubmodule from "../2_systems/Submodule.class.mjs";
-import EAMD from "../3_services/EAMD.interface.mjs";
+import EAMD, { EAMD_FOLDERS } from "../3_services/EAMD.interface.mjs";
 import GitRepository from "../3_services/GitRepository.interface.mjs";
 import Scenario from "../3_services/Scenario.interface.mjs";
 import Submodule from "../3_services/Submodule.interface.mjs";
@@ -28,6 +28,7 @@ export default class DefaultEAMD extends DefaultGitRepository implements EAMD {
     this.eamdDirectory = scenario.eamdPath;
     this.scenario = scenario;
   }
+
 
   async discover(): Promise<{ [i: string]: string }> {
 
@@ -67,7 +68,7 @@ export default class DefaultEAMD extends DefaultGitRepository implements EAMD {
     }
   }
 
-  private async createPathsConfig(submodules?: GitRepositorySubmodule[]) {
+  async createPathsConfig(submodules?: (Submodule & GitRepository)[] | undefined): Promise<void> {
     if (submodules === undefined) {
       submodules = await this.getSortedSubmodules();
     }
@@ -98,6 +99,10 @@ export default class DefaultEAMD extends DefaultGitRepository implements EAMD {
 
   }
 
+  // private async createPathsConfig(submodules?: GitRepositorySubmodule[]) {
+
+  // }
+
   async runForSubmodules(fn: (submodule: GitRepositorySubmodule) => Promise<void>): Promise<void> {
     for (let sub of await this.getSortedSubmodules()) {
       await fn(sub)
@@ -105,7 +110,7 @@ export default class DefaultEAMD extends DefaultGitRepository implements EAMD {
   }
 
   private getDistributionFolderFor(sub: GitRepositorySubmodule): string {
-    return join(this.scenario.scenarioPath, ...sub.package.namespace.split("."), sub.package.name, sub.branch)
+    return join(this.scenario.scenarioPath, EAMD_FOLDERS.WEB_ROOT, ...sub.package.namespace.split("."), sub.package.name, sub.branch)
   }
 
   private async getSortedSubmodules(): Promise<GitRepositorySubmodule[]> {
