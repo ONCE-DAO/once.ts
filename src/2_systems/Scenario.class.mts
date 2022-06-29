@@ -15,7 +15,7 @@ export default class DefaultScenario implements Scenario {
     constructor(eamdPath: string, name = DEFAULT_SCENARIO) {
         this.eamdPath = eamdPath
         this.name = name
-        !existsSync(this.scenarioPath) && mkdirSync(this.scenarioPath, { recursive: true })
+        !existsSync(this.webRoot) && mkdirSync(this.webRoot, { recursive: true })
     }
 
     get scenarioPath(): string {

@@ -1,9 +1,9 @@
 {
   "name": "Once",
-  "version": "0.0.1",
+  "namespace": "tla.EAM",
+  "version": "dev",
   "description": "",
   "main": "index.mjs",
-  "namespace": "tla.EAM",
   "onceDependencies": [
     "Transformer",
     "Thinglish",
@@ -11,9 +11,6 @@
     "Browser",
     "Loader"
   ],
-  "scripts": {
-    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/phibar-once/once.ts.git"
@@ -34,5 +31,8 @@
     "ts-node": "^10.7.0",
     "ts-patch": "^2.0.1",
     "typescript": "4.7.2"
+  },
+  "scripts": {
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest"
   }
 }
