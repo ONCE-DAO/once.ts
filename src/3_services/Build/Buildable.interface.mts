@@ -1,6 +1,8 @@
+import BuildConfig from "./BuildConfig.interface.mjs"
+
 export default interface Buildable {
-    install(): Promise<void>
-    beforeBuild(): Promise<void>
-    build(): Promise<void>
-    afterBuild(): Promise<void>
+    install(config:BuildConfig): Promise<void>
+    beforeBuild(config:BuildConfig): Promise<void>
+    build(config:BuildConfig): Promise<void>
+    afterBuild(config:BuildConfig): Promise<void>
 }

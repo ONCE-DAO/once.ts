@@ -2,6 +2,7 @@ import { execSync } from "child_process";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 import Buildable from "../../../3_services/Build/Buildable.interface.mjs";
+import BuildConfig from "../../../3_services/Build/BuildConfig.interface.mjs";
 import { CustomPackageJson, CustomPackageJsonKeys } from "../../../3_services/Build/Npm/CustomPackageJson.type.mjs";
 import NpmPackage, { NotAnNpmPackage as NotANpmPackage, NPM_PACKAGE_CONSTANTS } from "../../../3_services/Build/Npm/NpmPackage.interface.mjs";
 
@@ -14,22 +15,22 @@ export default class DefaultNpmPackage implements NpmPackage, Buildable {
             throw new NotANpmPackage(path)
 
     }
-    async install(): Promise<void> {
+    async install(config: BuildConfig): Promise<void> {
         this.logBuildInfo("install")
         execSync("npm i", { cwd: this.path, stdio: "inherit" })
-        console.log("npm dependencies installed");        
+        console.log("npm dependencies installed");
         console.log("done\n");
     }
-    async beforeBuild(): Promise<void> {
+    async beforeBuild(config: BuildConfig): Promise<void> {
         this.logBuildInfo("beforeBuild")
         console.log("done\n");
     }
-    async build(): Promise<void> {
+    async build(config: BuildConfig): Promise<void> {
         this.logBuildInfo("build")
         //TODO create node_modules link
         console.log("done\n");
     }
-    async afterBuild(): Promise<void> {
+    async afterBuild(config: BuildConfig): Promise<void> {
         this.logBuildInfo("afterBuild")
         console.log("done\n");
     }
@@ -49,7 +50,6 @@ export default class DefaultNpmPackage implements NpmPackage, Buildable {
     static init(path: string, fallbackName: string, fallbackNamespace: string, version?: string): NpmPackage {
         const npmPackage = new this(path)
         npmPackage.setFallBackValue("name", fallbackName)
-        npmPackage.setFallBackValue("namespace", fallbackNamespace)
         version && npmPackage.setValue("version", version)
 
         return npmPackage;
@@ -74,13 +74,6 @@ export default class DefaultNpmPackage implements NpmPackage, Buildable {
      */
     get name(): string {
         return this.getPackageJsonValue("name")
-    }
-
-    /**
-     * returns the namespace value of package.json
-     */
-    get namespace(): string {
-        return this.getPackageJsonValue("namespace")
     }
 
     private setValue<KEY extends CustomPackageJsonKeys>(property: KEY, value: CustomPackageJson[KEY]) {

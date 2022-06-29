@@ -3,7 +3,6 @@ import { CustomPackageJson } from "./CustomPackageJson.type.mjs";
 
 export default interface NpmPackage extends Buildable {
   name: string;
-  namespace: string;
   path: string;
   packageJson: CustomPackageJson
 }

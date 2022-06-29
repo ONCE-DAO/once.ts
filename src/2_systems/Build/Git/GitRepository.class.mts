@@ -2,6 +2,8 @@ import { execSync } from "child_process";
 import { existsSync } from "fs";
 import { join } from "path";
 import simpleGit, { SimpleGit } from "simple-git";
+import Buildable from "../../../3_services/Build/Buildable.interface.mjs";
+import BuildConfig from "../../../3_services/Build/BuildConfig.interface.mjs";
 import GitRepository, { NotAGitRepositoryError } from "../../../3_services/Build/Git/GitRepository.interface.mjs";
 import SubmoduleInterface from "../../../3_services/Build/Git/GitSubmodule.interface.mjs";
 
@@ -9,17 +11,19 @@ export default class DefaultGitRepository implements GitRepository {
     path: string;
     remoteUrl: string;
     branch: string;
-    protected readonly gitRepository: SimpleGit
+    readonly gitRepository: SimpleGit
+    protected readonly srcComponentsDirectory: string
 
-    static async init(path: string): Promise<GitRepository> {
+    static async init(path: string, srcComponentsDirectory: string): Promise<GitRepository> {
         if (!existsSync(join(path, ".git"))) throw new NotAGitRepositoryError();
-        const gitRepository = simpleGit(path, { binary: "git" });
-
+        const gitRepository = simpleGit(path, { binary: "git", baseDir: path });
 
         return new DefaultGitRepository(
             path,
             await this.getRemoteUrl(gitRepository),
-            await this.getBranch(gitRepository)
+            await this.getBranch(gitRepository),
+            srcComponentsDirectory,
+            gitRepository
         );
     }
 
@@ -33,27 +37,44 @@ export default class DefaultGitRepository implements GitRepository {
         return status.current || "";
     }
 
-    protected constructor(path: string, remoteUrl: string, branch: string) {
+    protected constructor(path: string, remoteUrl: string, branch: string, srcComponentsDirectory: string, gitRepository: SimpleGit) {
         this.path = path;
         this.remoteUrl = remoteUrl;
         this.branch = branch;
-        this.gitRepository = simpleGit(this.path, { binary: "git" });
-    }
-    install(): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
-    beforeBuild(): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
-    build(): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
-    afterBuild(): Promise<void> {
-        throw new Error("Method not implemented.");
+        this.srcComponentsDirectory = srcComponentsDirectory
+        this.gitRepository = gitRepository;
     }
 
+    async setOrigin(origin: string): Promise<void> {
+        await this.gitRepository.remote(["set-url", "origin", origin])
+    }
 
-    async getSubmodules(submoduleInit: (path: string) => Promise<SubmoduleInterface>): Promise<SubmoduleInterface[]> {
+    async install(config: BuildConfig): Promise<void> {
+        this.logBuildInfo("GitRepository", "install")
+        await this.updateSubmodules()
+        console.log("done\n");
+    }
+
+    async beforeBuild(config: BuildConfig): Promise<void> {
+        this.logBuildInfo("GitRepository", "beforeBuild")
+        console.log("done\n");
+    }
+
+    async build(config: BuildConfig): Promise<void> {
+        this.logBuildInfo("GitRepository", "build")
+        console.log("done\n");
+    }
+
+    async afterBuild(config: BuildConfig): Promise<void> {
+        this.logBuildInfo("GitRepository", "afterBuild")
+        console.log("done\n");
+    }
+
+    protected logBuildInfo(className: string, method: keyof Buildable) {
+        console.log(`${className} [${import.meta.url}]\nrun ${method} for ${this.path}`);
+    }
+
+    async getSubmodules(submoduleInit: (path: string, srcComponentsDirectory: string) => Promise<SubmoduleInterface>): Promise<SubmoduleInterface[]> {
         const submodules: (SubmoduleInterface)[] = [];
         const modules = execSync("git submodule foreach --quiet 'echo $name'", {
             encoding: "utf8",
@@ -64,28 +85,38 @@ export default class DefaultGitRepository implements GitRepository {
 
         for (let module of modules) {
             const branch = await this.getSubmoduleValue(`submodule.${module}.branch`);
-            const name = module.replace(`@${branch}`, "");
-            const path = await this.getSubmoduleValue(`submodule.${module}.path`);
+            const relativeSubmodulePath = await this.getSubmoduleValue(`submodule.${module}.path`);
+            const remoteUrl = await this.getSubmoduleValue(`submodule.${module}.url`);
 
-            const submodule = await submoduleInit(join(this.path, path));
-            // await submoduleInit(
-            //     module.replace(`@${branch}`, ""),
-            //     await this.getSubmoduleValue(`submodule.${module}.path`),
-            //     await this.getSubmoduleValue(`submodule.${module}.url`),
-            //     branch,
-            //     { baseDir: this.path }
-            // )
+            const submodule = await submoduleInit(join(this.path, relativeSubmodulePath), this.srcComponentsDirectory);
+            if (remoteUrl !== submodule.remoteUrl) {
+                await submodule.setOrigin(remoteUrl)
+                console.warn(`mismatch between .gitmodules remote-url and gitRepository remote-url
+                .gitmodules\t${submodule.remoteUrl}
+                repository\t${remoteUrl}
+                
+                repository has been updated to .gitmodules url. If you want to stay with repository url
+                call
+                git submodule set-url ${relativeSubmodulePath} ${remoteUrl}
+
+                and run build again
+                `)
+            }
+            await submodule.checkout(branch)
             submodules.push(submodule);
         }
         return submodules;
     }
-    checkout(branch: string): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
-    updateSubmodules(): Promise<void> {
-        throw new Error("Method not implemented.");
+
+    async checkout(branch: string): Promise<void> {
+        if (branch !== this.branch)
+            await this.gitRepository.checkout([branch])
     }
 
+    async updateSubmodules(): Promise<void> {
+        await this.gitRepository.subModule(["update", "--init", "--remote", "--recursive"])
+        console.log(`Submodules updated for ${this.path}`);
+    }
 
     private async getSubmoduleValue(key: string): Promise<string> {
         const rawResult = await this.gitRepository.raw(

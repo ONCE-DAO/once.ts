@@ -2,7 +2,7 @@ import ComponentInterface from "../../3_services/UCP/Component.interface.mjs";
 import EAMDInterface, { EAMD_CONSTANTS } from "../../3_services/UCP/EAMD.interface.mjs";
 import ScenarioInterface from "../../3_services/UCP/Scenario.interface.mjs";
 import DefaultComponent from "./DefaultComponent.class.mjs";
-import { DefaultScenario } from "./DefaultScenario.mjs";
+import { DefaultScenario } from "./Scenario.class.mjs";
 
 
 

@@ -6,7 +6,7 @@ import ScenarioInterface from "../../3_services/UCP/Scenario.interface.mjs";
 
 export class DefaultScenario implements ScenarioInterface {
     domain: string = EAMD_CONSTANTS.DEFAULT_SCENARIO_DOMAIN;
-    basePath: string = process.cwd();
+    private basePath: string = process.cwd();
 
     private constructor() {
 
@@ -31,6 +31,4 @@ export class DefaultScenario implements ScenarioInterface {
         mkdirSync(this.scenarioPath, { recursive: true })
         return this
     }
-
-
 }

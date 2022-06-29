@@ -10,7 +10,6 @@ export default interface ComponentBuilder extends Buildable {
     namespace: string; //TODO rename in package and explain
     version: string;
     path: string;
-    gitRepository: GitRepository;
     submodule: GitSubmodule;
     npmPackage: NpmPackage;
     typescriptProject: TypescriptProject;

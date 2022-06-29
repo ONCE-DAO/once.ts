@@ -1,41 +1,54 @@
 import { chmodSync, writeFileSync } from "fs";
-import { join } from "path";
-import Buildable from "../../../3_services/Build/Buildable.interface.mjs";
+import { dirname, relative, resolve, sep } from "path";
+import { basename, join } from "path";
+import { SimpleGit } from "simple-git";
+import BuildConfig from "../../../3_services/Build/BuildConfig.interface.mjs";
 import GitRepository from "../../../3_services/Build/Git/GitRepository.interface.mjs";
 import GitSubmodule, { GIT_SUBMODULE_CONSTANTS } from "../../../3_services/Build/Git/GitSubmodule.interface.mjs";
 import DefaultGitRepository from "./GitRepository.class.mjs";
 
-export default class DefaultGitSubmodule extends DefaultGitRepository implements GitSubmodule, Buildable {
-    static async init(path: string): Promise<GitSubmodule> {
-        const gitRepo = await DefaultGitRepository.init(path)
-        return new DefaultGitSubmodule(gitRepo)
+export default class DefaultGitSubmodule extends DefaultGitRepository implements GitSubmodule {
+    get name(): string {
+        return basename(dirname(this.path))
     }
 
-    protected constructor(gitRepository: GitRepository) {
-        super(gitRepository.path, gitRepository.remoteUrl, gitRepository.branch)
+    get namespace(): string {
+        const directory = join(this.path, "..", "..")
+        const namespaceFolder = relative(this.srcComponentsDirectory, directory)
+        return namespaceFolder.split(sep).join(".")
     }
 
-    async install(): Promise<void> {
-        this.logBuildInfo("install")
+    static async init(path: string, srcComponentsDirectory: string): Promise<GitSubmodule> {
+        const gitRepo = await DefaultGitRepository.init(path, srcComponentsDirectory) as DefaultGitRepository
+        return new DefaultGitSubmodule(gitRepo, srcComponentsDirectory, gitRepo.gitRepository)
+    }
+
+    protected constructor(gitRepository: GitRepository, srcComponentsDirectory: string, simpleGitRepository: SimpleGit) {
+        super(gitRepository.path, gitRepository.remoteUrl, gitRepository.branch, srcComponentsDirectory, simpleGitRepository)
+    }
+
+    async install(config: BuildConfig): Promise<void> {
+        await super.install(config)
+        this.logBuildInfo("GitSubmodule", "install")
         this.writePostCheckoutHook()
-        console.log("done\n");        
+        console.log("done\n");
     }
-    async beforeBuild(): Promise<void> {
-        this.logBuildInfo("beforeBuild")
-        console.log("done\n");        
+    async beforeBuild(config: BuildConfig): Promise<void> {
+        await super.beforeBuild(config)
+        this.logBuildInfo("GitSubmodule", "beforeBuild")
+        console.log("done\n");
     }
-    async build(): Promise<void> {
-        this.logBuildInfo("build")
-        console.log("done\n");        
+    async build(config: BuildConfig): Promise<void> {
+        await super.build(config)
+        this.logBuildInfo("GitSubmodule", "build")
+        console.log("done\n");
     }
-    async afterBuild(): Promise<void> {
-        this.logBuildInfo("afterBuild")
-        console.log("done\n");        
+    async afterBuild(config: BuildConfig): Promise<void> {
+        await super.afterBuild(config)
+        this.logBuildInfo("GitSubmodule", "afterBuild")
+        console.log("done\n");
     }
 
-    private logBuildInfo(method: keyof Buildable) {
-        console.log(`GitSubModule [${import.meta.url}]\nrun ${method} for ${this.path}`);
-    }
 
     private writePostCheckoutHook(): void {
         writeFileSync(this.PostCheckFilePath, `
@@ -66,7 +79,7 @@ export default class DefaultGitSubmodule extends DefaultGitRepository implements
         fi`)
         chmodSync(this.PostCheckFilePath, "755")
         console.log(`Wrote post-checkout-hook to ${this.PostCheckFilePath}`);
-        
+
     }
 
     private get PostCheckFilePath() {

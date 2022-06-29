@@ -1,25 +1,32 @@
-import { writeFileSync } from "fs";
+import { join } from "path";
 import Buildable from "../../3_services/Build/Buildable.interface.mjs";
 import ComponentBuilder from "../../3_services/Build/BuildComponent.interface.mjs";
+import BuildConfig from "../../3_services/Build/BuildConfig.interface.mjs";
 import EAMRepository from "../../3_services/Build/EAMRepository.interface.mjs";
 import GitRepository from "../../3_services/Build/Git/GitRepository.interface.mjs";
+import { DefaultScenario } from "../UCP/Scenario.class.mjs";
 import DefaultComponentBuilder from "./ComponentBuilder.class.mjs";
 import DefaultGitRepository from "./Git/GitRepository.class.mjs";
 import DefaultGitSubmodule from "./Git/GitSubmodule.class.mjs";
 
 export default class DefaultEAMRepository implements EAMRepository {
-    private scenarioDomain: string;
-    private basePath: string;
     private gitRepository: GitRepository;
+    private buildConfig: BuildConfig;
 
     static async init(scenarioDomain: string, basePath: string): Promise<EAMRepository> {
-        const gitRepository = await DefaultGitRepository.init(basePath);
-        return new DefaultEAMRepository(scenarioDomain, basePath, gitRepository);
+        const buildConfig: BuildConfig = {
+            scenario: await DefaultScenario.init(scenarioDomain, basePath),
+            eamdPath: basePath,
+            sourceComponentsPath: join(basePath, "Components"),
+        }
+
+        const gitRepository = await DefaultGitRepository.init(basePath, buildConfig.sourceComponentsPath);
+
+        return new DefaultEAMRepository(buildConfig, gitRepository);
     }
 
-    private constructor(scenarioDomain: string, basePath: string, gitRepository: GitRepository) {
-        this.scenarioDomain = scenarioDomain;
-        this.basePath = basePath;
+    private constructor(buildConfig: BuildConfig, gitRepository: GitRepository) {
+        this.buildConfig = buildConfig;
         this.gitRepository = gitRepository;
     }
 
@@ -30,7 +37,7 @@ export default class DefaultEAMRepository implements EAMRepository {
 
     private async runBuildStep(prop: keyof Buildable) {
         (await this.getComponentBuilder()).forEach(async (component) => {
-            await component[prop]()
+            await component[prop](this.buildConfig)
         })
     }
 
