@@ -39,6 +39,18 @@ export default class DefaultGitRepository implements GitRepository {
         this.branch = branch;
         this.gitRepository = simpleGit(this.path, { binary: "git" });
     }
+    install(): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+    beforeBuild(): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+    build(): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+    afterBuild(): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
 
 
     async getSubmodules(submoduleInit: (path: string) => Promise<SubmoduleInterface>): Promise<SubmoduleInterface[]> {
@@ -55,7 +67,7 @@ export default class DefaultGitRepository implements GitRepository {
             const name = module.replace(`@${branch}`, "");
             const path = await this.getSubmoduleValue(`submodule.${module}.path`);
 
-            const submodule = await submoduleInit(path);
+            const submodule = await submoduleInit(join(this.path, path));
             // await submoduleInit(
             //     module.replace(`@${branch}`, ""),
             //     await this.getSubmoduleValue(`submodule.${module}.path`),
@@ -70,7 +82,7 @@ export default class DefaultGitRepository implements GitRepository {
     checkout(branch: string): Promise<void> {
         throw new Error("Method not implemented.");
     }
-    updateSubmodules(): void {
+    updateSubmodules(): Promise<void> {
         throw new Error("Method not implemented.");
     }
 
@@ -86,4 +98,8 @@ export default class DefaultGitRepository implements GitRepository {
         return rawResult.replace(/\n$/, "");
     }
 
+    protected get gitDir(): string {
+        const gitDir = execSync("git rev-parse --git-dir", { cwd: this.path }).toString()
+        return gitDir.replace("\n", "")
+    }
 }

@@ -64,7 +64,7 @@ export default class DefaultEAMD implements EAMDInterface {
 
     async prepareBuild(): Promise<void> {
         for (const component of this.components) {
-            await component.prepareBuild()
+            // await component.prepareBuild()
         }
     }
 }

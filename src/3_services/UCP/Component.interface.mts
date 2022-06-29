@@ -7,5 +7,4 @@ export default interface Component {
     version: string;
     units: Unit[];
     descriptor: UcpComponentDescriptorInterface;
-    prepareBuild(): Promise<void>
 }

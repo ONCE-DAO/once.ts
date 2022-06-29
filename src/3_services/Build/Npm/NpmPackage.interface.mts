@@ -1,11 +1,14 @@
+import Buildable from "../Buildable.interface.mjs";
 import { CustomPackageJson } from "./CustomPackageJson.type.mjs";
 
-export default interface NpmPackage {
+export default interface NpmPackage extends Buildable {
   name: string;
   namespace: string;
   path: string;
   packageJson: CustomPackageJson
 }
+
+export interface BuildableNpmPackage extends NpmPackage, Buildable { }
 export enum NPM_PACKAGE_CONSTANTS {
   PACKAGE_JSON_FILE = "package.json",
 }

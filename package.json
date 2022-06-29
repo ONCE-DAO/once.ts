@@ -1,7 +1,7 @@
 {
   "name": "Once",
   "namespace": "tla.EAM",
-  "version": "dev",
+  "version": "build",
   "description": "",
   "main": "index.mjs",
   "onceDependencies": [

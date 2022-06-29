@@ -1,15 +1,41 @@
+import { execSync } from "child_process";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
+import Buildable from "../../../3_services/Build/Buildable.interface.mjs";
 import { CustomPackageJson, CustomPackageJsonKeys } from "../../../3_services/Build/Npm/CustomPackageJson.type.mjs";
 import NpmPackage, { NotAnNpmPackage as NotANpmPackage, NPM_PACKAGE_CONSTANTS } from "../../../3_services/Build/Npm/NpmPackage.interface.mjs";
 
-export default class DefaultNpmPackage implements NpmPackage {
+export default class DefaultNpmPackage implements NpmPackage, Buildable {
     path: string;
 
     private constructor(path: string) {
         this.path = path;
         if (!existsSync(this.packageJsonFilePath))
             throw new NotANpmPackage(path)
+
+    }
+    async install(): Promise<void> {
+        this.logBuildInfo("install")
+        execSync("npm i", { cwd: this.path, stdio: "inherit" })
+        console.log("npm dependencies installed");        
+        console.log("done\n");
+    }
+    async beforeBuild(): Promise<void> {
+        this.logBuildInfo("beforeBuild")
+        console.log("done\n");
+    }
+    async build(): Promise<void> {
+        this.logBuildInfo("build")
+        //TODO create node_modules link
+        console.log("done\n");
+    }
+    async afterBuild(): Promise<void> {
+        this.logBuildInfo("afterBuild")
+        console.log("done\n");
+    }
+
+    private logBuildInfo(method: keyof Buildable) {
+        console.log(`DefaultNpmPackage [${import.meta.url}]\nrun ${method} for ${this.path}`);
     }
 
     /**
@@ -25,6 +51,7 @@ export default class DefaultNpmPackage implements NpmPackage {
         npmPackage.setFallBackValue("name", fallbackName)
         npmPackage.setFallBackValue("namespace", fallbackNamespace)
         version && npmPackage.setValue("version", version)
+
         return npmPackage;
     }
 

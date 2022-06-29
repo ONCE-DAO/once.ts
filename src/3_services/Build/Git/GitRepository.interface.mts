@@ -1,24 +1,13 @@
+import Buildable from "../Buildable.interface.mjs";
 import GitSubmodule from "./GitSubmodule.interface.mjs";
 
-export default interface GitRepository {
+export default interface GitRepository extends Buildable{
   path: string;
   remoteUrl: string;
   branch: string;
-
   checkout(branch: string): Promise<void>;
-  updateSubmodules(): void
-
+  updateSubmodules(): Promise<void>
   getSubmodules(submoduleInit: (path: string) => Promise<GitSubmodule>): Promise<GitSubmodule[]>
-
-  // getSubmodules(
-  //   submoduleConstructor: (
-  //     name: string,
-  //     path: string,
-  //     url: string,
-  //     branch: string,
-  //     { baseDir, clone, init }: GitRepositoryParameter
-  //   ) => Promise<GitSubmodule & GitRepository>
-  // ): Promise<(GitSubmodule & GitRepository)[]>;
 }
 
 export enum GIT_REPOSITORY_CONSTANTS {
