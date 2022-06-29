@@ -8,9 +8,10 @@ import InterfaceDescriptorInterface from "./3_services/Thing/InterfaceDescriptor
 import ClassDescriptorInterface from "./3_services/Thing/ClassDescriptor.interface.mjs";
 import BaseThing from "./1_infrastructure/BaseThing.class.mjs";
 import OnceKernel from "./1_infrastructure/OnceKernel.class.mjs";
+import Thing, { ThingStatics } from "./3_services/Thing/Thing.interface.mjs";
 
 
 export {
     DefaultIOR, EAMD, BaseNodeOnce, Once, OnceMode, OnceState,
-    InterfaceDescriptor, ClassDescriptor, InterfaceDescriptorInterface, ClassDescriptorInterface, BaseThing, OnceKernel
+    InterfaceDescriptor, ClassDescriptor, InterfaceDescriptorInterface, ClassDescriptorInterface, BaseThing, OnceKernel, ThingStatics, Thing
 }
