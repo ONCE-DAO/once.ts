@@ -53,6 +53,12 @@ export default class ServerSideUcpComponentDescriptor extends DefaultUcpComponen
     }
   }
 
+  // HACK Need better source
+  get scenarioDirectory(): string {
+    if (!this.npmPackage.path) throw new Error("missing path");
+    return path.join(...this.npmPackage.path.split('.'), this.npmPackage.name, this.npmPackage.version || 'latest')
+  }
+
   get descriptorFileName() { return 'ComponentDescriptor.json' }
 
   writeToPath(writePath: string) {

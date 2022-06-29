@@ -12,7 +12,7 @@
   "include": [
     "./src",
     "../../../../../Scenarios/localhost/webroot",
-    "test",
+    "./test",
   ],
   "exclude": [
     "dist",
