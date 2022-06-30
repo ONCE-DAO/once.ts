@@ -3,7 +3,7 @@
 import fs from 'fs';
 import path from 'path';
 import DefaultUcpComponentDescriptor, { UcpComponentDescriptorInitParameters } from "./DefaultUcpComponentDescriptor.class.mjs";
-import UcpComponentDescriptorInterface, { UcpComponentDescriptorDataStructure } from "../../3_services/Thing/UcpComponentDescriptor.interface.mjs";
+import UcpComponentDescriptorInterface, { UcpComponentDescriptorDataStructure, UcpComponentDescriptorStatics } from "../../3_services/Thing/UcpComponentDescriptor.interface.mjs";
 import ClassDescriptorInterface from "../../3_services/Thing/ClassDescriptor.interface.mjs";
 import { ThingStatics } from '../../3_services/Thing/Thing.interface.mjs';
 import NpmPackage from '../../3_services/NpmPackage.interface.mjs';
@@ -13,7 +13,7 @@ import GitRepository from '../../3_services/GitRepository.interface.mjs';
 import Submodule from '../../3_services/Submodule.interface.mjs';
 
 
-export default class ServerSideUcpComponentDescriptor extends DefaultUcpComponentDescriptor implements UcpComponentDescriptorInterface {
+const NewServerSideUcpComponentDescriptor = class ServerSideUcpComponentDescriptor extends DefaultUcpComponentDescriptor implements UcpComponentDescriptorInterface {
 
   exportFile: string = "index.ts";
 
@@ -231,3 +231,16 @@ export default class ServerSideUcpComponentDescriptor extends DefaultUcpComponen
 
 }
 
+
+let ServerSideUcpComponentDescriptor: UcpComponentDescriptorStatics = NewServerSideUcpComponentDescriptor;
+// declare global {
+//   var CashServerSideUcpComponentDescriptor: UcpComponentDescriptorStatics | undefined;
+// }
+
+// if (typeof global.CashServerSideUcpComponentDescriptor === "undefined") {
+//   global.CashServerSideUcpComponentDescriptor = NewServerSideUcpComponentDescriptor;
+// } else {
+//   ServerSideUcpComponentDescriptor = global.CashServerSideUcpComponentDescriptor;
+// }
+
+export default ServerSideUcpComponentDescriptor;
