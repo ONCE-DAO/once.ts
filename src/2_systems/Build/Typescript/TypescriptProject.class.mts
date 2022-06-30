@@ -7,13 +7,22 @@ import DefaultTransformer from "./Transformer.class.mjs";
 
 export default class DefaultTypescriptProject implements TypescriptProject {
     private path: string;
+    name: string;
+    namespace: string;
+    version: string;
 
-    constructor(path: string) {
+    constructor(path: string, name: string, namespace: string, version: string) {
         this.path = path;
+        this.name = name;
+        this.namespace = namespace;
+        this.version = version;
+
     }
 
-    static async init(path: string): Promise<TypescriptProject> {
-        return new DefaultTypescriptProject(path)
+
+    static async init(path: string, name: string, namespace: string, version: string): Promise<TypescriptProject> {
+
+        return new DefaultTypescriptProject(path, name, namespace, version)
     }
 
     async install(config: BuildConfig): Promise<void> {
@@ -31,10 +40,11 @@ export default class DefaultTypescriptProject implements TypescriptProject {
         this.logBuildInfo("build")
         install({ basedir: this.path }) //ts-patch
 
-        
+
         const transformer = await DefaultTransformer.init(this.path, config)
-        transformer.transpile()
-        //TODO run TSBuild
+        const files = await transformer.transpile()
+        await transformer.writeConfigPaths(files, this.name, this.namespace, this.version)
+
         console.log("done\n");
     }
     async afterBuild(config: BuildConfig): Promise<void> {

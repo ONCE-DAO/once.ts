@@ -27,12 +27,12 @@ export default class DefaultEAMRepository implements EAMRepository {
         const gitRepository = await DefaultGitRepository.init(basePath, buildConfig.sourceComponentsPath);
 
         //TODO@pb move to config
-        const transformer = (await this.getComponentBuilder(gitRepository,buildConfig)).find(x => x.name === "Transformer" && x.namespace === "tla.EAM.Thinglish" && x.version === "build")
+        const transformer = (await this.getComponentBuilder(gitRepository, buildConfig)).find(x => x.name === "Transformer" && x.namespace === "tla.EAM.Thinglish" && x.version === "build")
         if (transformer === undefined) throw "Without transformer once cannot be build"
         buildConfig.distributionFolder = transformer.distributionFolder;
         await transformer.install(buildConfig);
         await transformer.build(buildConfig);
-        buildConfig.transformer?.push({ transform: join(transformer.distributionFolder, "index.cjs"), transformProgram: true })
+        buildConfig.transformer?.push({ transform: join(transformer.distributionFolder, "index.cjs"), type:"program" })
 
         return new DefaultEAMRepository(buildConfig, gitRepository);
     }

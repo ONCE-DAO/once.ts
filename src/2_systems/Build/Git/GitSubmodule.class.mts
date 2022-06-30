@@ -41,6 +41,7 @@ export default class DefaultGitSubmodule extends DefaultGitRepository implements
     async build(config: BuildConfig, distributionFolder: string): Promise<void> {
         await super.build(config, distributionFolder)
         this.logBuildInfo("GitSubmodule", "build")
+        
         console.log("done\n");
     }
     async afterBuild(config: BuildConfig, distributionFolder: string): Promise<void> {
@@ -48,7 +49,6 @@ export default class DefaultGitSubmodule extends DefaultGitRepository implements
         this.logBuildInfo("GitSubmodule", "afterBuild")
         console.log("done\n");
     }
-
 
     private writePostCheckoutHook(): void {
         writeFileSync(this.PostCheckFilePath, `

@@ -14,7 +14,7 @@ export default class DefaultComponentBuilder implements ComponentBuilder {
     submodule: SubmoduleInterface;
     npmPackage: NpmPackageInterface;
     typescriptProject: TypescriptProjectInterface;
-    
+
     distributionFolder: string
 
     get buildables() {
@@ -37,7 +37,7 @@ export default class DefaultComponentBuilder implements ComponentBuilder {
     static async init(submodule: SubmoduleInterface, buildConfig: BuildConfig): Promise<ComponentBuilder> {
 
         const npmPackage = DefaultNpmPackage.init(submodule.path, submodule.name, submodule.namespace, submodule.branch) as DefaultNpmPackage
-        const typescriptProject = await DefaultTypescriptProject.init(submodule.path)
+        const typescriptProject = await DefaultTypescriptProject.init(submodule.path, submodule.name, submodule.namespace, submodule.branch)
 
         return new DefaultComponentBuilder(submodule.path, submodule, npmPackage, typescriptProject, buildConfig)
     }
