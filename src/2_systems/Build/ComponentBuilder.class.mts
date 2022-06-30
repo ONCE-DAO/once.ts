@@ -14,6 +14,7 @@ export default class DefaultComponentBuilder implements ComponentBuilder {
     submodule: SubmoduleInterface;
     npmPackage: NpmPackageInterface;
     typescriptProject: TypescriptProjectInterface;
+    
     distributionFolder: string
 
     get buildables() {

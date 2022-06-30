@@ -29,7 +29,9 @@ export default class DefaultTypescriptProject implements TypescriptProject {
     }
     async build(config: BuildConfig): Promise<void> {
         this.logBuildInfo("build")
-        install({ basedir: this.path })
+        install({ basedir: this.path }) //ts-patch
+
+        
         const transformer = await DefaultTransformer.init(this.path, config)
         transformer.transpile()
         //TODO run TSBuild

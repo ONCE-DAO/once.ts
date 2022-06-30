@@ -2,11 +2,11 @@
   "extends": "../../../../../tsconfig.json",
   "compilerOptions": {
     "rootDir": "./src",
-    "plugins": [
-      {
-        "transform": "/Users/phibar/EAMD/EAMD.ucp-build/Scenarios/de/wo-da/test/tla/EAM/Thinglish/Transformer/build/index.cjs"
-      }
-    ],
+    // "plugins": [
+    //   {
+    //     "transform": "/Users/phibar/EAMD/EAMD.ucp-build/Scenarios/de/wo-da/test/tla/EAM/Thinglish/Transformer/build/index.cjs"
+    //   }
+    // ],
     "noEmit": false,
     "noEmitOnError": false
   },
