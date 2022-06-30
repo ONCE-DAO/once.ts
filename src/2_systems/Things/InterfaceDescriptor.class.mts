@@ -7,6 +7,8 @@ import UcpComponentDescriptor from "./BaseUcpComponentDescriptor.class.mjs";
 let NewInterfaceDescriptor = class InterfaceDescriptor implements InterfaceDescriptorInterface {
     public readonly name: string;
 
+    id: string = Math.round(Math.random() * 10000000) + '';
+
     readonly extends: InterfaceDescriptorInterface[] = [];
     readonly implementations: ClassDescriptorInterface[] = [];
     private static _lastDescriptor: InterfaceDescriptorInterface;
@@ -107,6 +109,7 @@ let NewInterfaceDescriptor = class InterfaceDescriptor implements InterfaceDescr
     constructor(ucpComponentDescriptor: UcpComponentDescriptorInterface, interfaceName: string) {
         this.name = interfaceName;
         ucpComponentDescriptor.register(this);
+        console.log(`New InterfaceDescriptor: ${this.name} ${this.id}`);
         return this;
     }
 }

@@ -197,7 +197,7 @@ export default class DefaultSubmodule
 
   async build(watch: boolean = false): Promise<void> {
 
-    const ucpComponentDescriptor = UcpComponentDescriptor.getDescriptor(this.package.namespace, this.package.name, this.package.version) as ServerSideUcpComponentDescriptor
+    //const ucpComponentDescriptor = UcpComponentDescriptor.getDescriptor(this.package.namespace, this.package.name, this.package.version) as ServerSideUcpComponentDescriptor
 
     // TODO@Merge Add Export 
     // ucpComponentDescriptor.createExportFile(this);

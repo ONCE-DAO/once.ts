@@ -3,7 +3,7 @@
 import fs from 'fs';
 import path from 'path';
 import DefaultUcpComponentDescriptor, { UcpComponentDescriptorInitParameters } from "./DefaultUcpComponentDescriptor.class.mjs";
-import UcpComponentDescriptorInterface, { UcpComponentDescriptorDataStructure, UcpComponentDescriptorStatics } from "../../3_services/Thing/UcpComponentDescriptor.interface.mjs";
+import { ServerSideUcpComponentDescriptorInterface, UcpComponentDescriptorDataStructure, UcpComponentDescriptorStatics } from "../../3_services/Thing/UcpComponentDescriptor.interface.mjs";
 import ClassDescriptorInterface from "../../3_services/Thing/ClassDescriptor.interface.mjs";
 import { ThingStatics } from '../../3_services/Thing/Thing.interface.mjs';
 import NpmPackage from '../../3_services/NpmPackage.interface.mjs';
@@ -13,7 +13,7 @@ import GitRepository from '../../3_services/GitRepository.interface.mjs';
 import Submodule from '../../3_services/Submodule.interface.mjs';
 
 
-const NewServerSideUcpComponentDescriptor = class ServerSideUcpComponentDescriptor extends DefaultUcpComponentDescriptor implements UcpComponentDescriptorInterface {
+const NewServerSideUcpComponentDescriptor = class ServerSideUcpComponentDescriptor extends DefaultUcpComponentDescriptor implements ServerSideUcpComponentDescriptorInterface {
 
   exportFile: string = "index.ts";
 
@@ -61,7 +61,7 @@ const NewServerSideUcpComponentDescriptor = class ServerSideUcpComponentDescript
 
   get descriptorFileName() { return 'ComponentDescriptor.json' }
 
-  writeToPath(writePath: string) {
+  writeToPath(writePath: string): void {
 
     let outputData: UcpComponentDescriptorDataStructure = {
       name: this.name,
@@ -122,7 +122,7 @@ const NewServerSideUcpComponentDescriptor = class ServerSideUcpComponentDescript
 
   }
 
-  async createExportFile(subModule: Submodule & GitRepository) {
+  async createExportFile(subModule: Submodule & GitRepository): Promise<void> {
 
     // TODO@merge move to build process perhaps submodule
     let files = subModule.discoverFiles().filter(f => f.match(/(class|interface)\.mts$/)).sort();

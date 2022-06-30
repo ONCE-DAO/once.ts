@@ -1,3 +1,4 @@
+import { LoaderID } from "../3_services/Loader.interface.mjs";
 import Once, { OnceRuntimeResolver } from "../3_services/Once.interface.mjs"
 export default abstract class OnceKernel {
   static async start(): Promise<Once> {
@@ -15,6 +16,8 @@ export default abstract class OnceKernel {
       once.OnceLoader = once.global.ONCE;
     }
     once.global.ONCE = once;
+
+    // console.log("LoaderID Implementations:" + LoaderID.implementations.map(x => x.name).join(","));
     return once;
   }
 
