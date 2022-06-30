@@ -107,3 +107,8 @@ dist
 # MacOS Store
 .DS_Store
 tsconfig.build.json
+
+
+*.d.mts
+*.mjs
+*.mjs.map

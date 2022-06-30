@@ -49,23 +49,23 @@ export default class DefaultGitRepository implements GitRepository {
         await this.gitRepository.remote(["set-url", "origin", origin])
     }
 
-    async install(config: BuildConfig): Promise<void> {
+    async install(config: BuildConfig, distributionFolder: string): Promise<void> {
         this.logBuildInfo("GitRepository", "install")
         await this.updateSubmodules()
         console.log("done\n");
     }
 
-    async beforeBuild(config: BuildConfig): Promise<void> {
+    async beforeBuild(config: BuildConfig, distributionFolder: string): Promise<void> {
         this.logBuildInfo("GitRepository", "beforeBuild")
         console.log("done\n");
     }
 
-    async build(config: BuildConfig): Promise<void> {
+    async build(config: BuildConfig, distributionFolder: string): Promise<void> {
         this.logBuildInfo("GitRepository", "build")
         console.log("done\n");
     }
 
-    async afterBuild(config: BuildConfig): Promise<void> {
+    async afterBuild(config: BuildConfig, distributionFolder: string): Promise<void> {
         this.logBuildInfo("GitRepository", "afterBuild")
         console.log("done\n");
     }

@@ -27,24 +27,24 @@ export default class DefaultGitSubmodule extends DefaultGitRepository implements
         super(gitRepository.path, gitRepository.remoteUrl, gitRepository.branch, srcComponentsDirectory, simpleGitRepository)
     }
 
-    async install(config: BuildConfig): Promise<void> {
-        await super.install(config)
+    async install(config: BuildConfig, distributionFolder: string): Promise<void> {
+        await super.install(config, distributionFolder)
         this.logBuildInfo("GitSubmodule", "install")
         this.writePostCheckoutHook()
         console.log("done\n");
     }
-    async beforeBuild(config: BuildConfig): Promise<void> {
-        await super.beforeBuild(config)
+    async beforeBuild(config: BuildConfig, distributionFolder: string): Promise<void> {
+        await super.beforeBuild(config, distributionFolder)
         this.logBuildInfo("GitSubmodule", "beforeBuild")
         console.log("done\n");
     }
-    async build(config: BuildConfig): Promise<void> {
-        await super.build(config)
+    async build(config: BuildConfig, distributionFolder: string): Promise<void> {
+        await super.build(config, distributionFolder)
         this.logBuildInfo("GitSubmodule", "build")
         console.log("done\n");
     }
-    async afterBuild(config: BuildConfig): Promise<void> {
-        await super.afterBuild(config)
+    async afterBuild(config: BuildConfig, distributionFolder: string): Promise<void> {
+        await super.afterBuild(config, distributionFolder)
         this.logBuildInfo("GitSubmodule", "afterBuild")
         console.log("done\n");
     }

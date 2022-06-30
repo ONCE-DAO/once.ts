@@ -1,5 +1,5 @@
 import { execSync } from "child_process";
-import { existsSync, readFileSync, writeFileSync } from "fs";
+import { existsSync, mkdir, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "fs";
 import { join } from "path";
 import Buildable from "../../../3_services/Build/Buildable.interface.mjs";
 import BuildConfig from "../../../3_services/Build/BuildConfig.interface.mjs";
@@ -15,24 +15,34 @@ export default class DefaultNpmPackage implements NpmPackage, Buildable {
             throw new NotANpmPackage(path)
 
     }
-    async install(config: BuildConfig): Promise<void> {
+    async install(config: BuildConfig, distributionFolder: string): Promise<void> {
         this.logBuildInfo("install")
         execSync("npm i", { cwd: this.path, stdio: "inherit" })
         console.log("npm dependencies installed");
         console.log("done\n");
     }
-    async beforeBuild(config: BuildConfig): Promise<void> {
+    async beforeBuild(config: BuildConfig, distributionFolder: string): Promise<void> {
         this.logBuildInfo("beforeBuild")
         console.log("done\n");
     }
-    async build(config: BuildConfig): Promise<void> {
+    async build(config: BuildConfig, distributionFolder: string): Promise<void> {
         this.logBuildInfo("build")
-        //TODO create node_modules link
+        this.symlinkNodeModules(this.path, distributionFolder)
         console.log("done\n");
     }
-    async afterBuild(config: BuildConfig): Promise<void> {
+    async afterBuild(config: BuildConfig, distributionFolder: string): Promise<void> {
         this.logBuildInfo("afterBuild")
         console.log("done\n");
+    }
+
+    private symlinkNodeModules(from: string, to: string) {
+        mkdirSync(to, { recursive: true })
+        from = join(from, NPM_PACKAGE_CONSTANTS.NODE_MODULES)
+        to = join(to, NPM_PACKAGE_CONSTANTS.NODE_MODULES)
+        if (!existsSync(from)) return;
+        if (existsSync(to)) rmSync(to, { recursive: true })
+        symlinkSync(from, to)
+        console.log(`symlink created for node_module in ${to}`);
     }
 
     private logBuildInfo(method: keyof Buildable) {
