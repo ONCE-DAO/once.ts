@@ -16,7 +16,7 @@ export default class DefaultTransformer implements Transformer {
         const readConfig = ts.readConfigFile(configFile, ts.sys.readFile);
         const parsedConfig = ts.parseJsonConfigFileContent(readConfig.config, ts.sys, baseDir);
         parsedConfig.options.noEmit = false;
-        parsedConfig.options.noEmitOnError = false;
+        // parsedConfig.options.noEmitOnError = false;
         parsedConfig.options.outDir = buildConfig.distributionFolder;
         (parsedConfig.options as any).listEmittedFiles = true;
         (parsedConfig.options as PluginOptions).plugins = buildConfig.transformer;
@@ -55,8 +55,8 @@ export default class DefaultTransformer implements Transformer {
         const compilerHost = ts.createCompilerHost(this.config.options);
         compilerHost.getSourceFile = this.getSourceFile.bind(this)
         const program = ts.createProgram([...this.config.fileNames, this.ExportFileName], this.config.options, compilerHost);
-        const emit = program.emit();
-        const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emit.diagnostics);
+        const emitResult = program.emit();
+        const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
         if (allDiagnostics.length) {
             const formatHost: ts.FormatDiagnosticsHost = {
                 getCanonicalFileName: (path) => path,
@@ -65,12 +65,17 @@ export default class DefaultTransformer implements Transformer {
             }
 
             const message = ts.formatDiagnostics(allDiagnostics, formatHost);
-            if (emit.emitSkipped)
+            if (emitResult.emitSkipped)
                 console.error(message);
             else
-                console.log(message);
+                console.error(message);
         }
-        return emit.emittedFiles || []
+
+        let exitCode = emitResult.emitSkipped ? 1 : 0;
+        console.log(`Process exiting with code '${exitCode}'.`);
+        exitCode && process.exit(exitCode);
+      
+        return emitResult.emittedFiles || []
     }
 
     private get pathsConfig() {
@@ -110,8 +115,6 @@ export default class DefaultTransformer implements Transformer {
     }
 
     private getSourceFile(fileName: string, languageVersion: ts.ScriptTarget, onError?: (message: string) => void): ts.SourceFile | undefined {
-        console.log(fileName);
-
         const sourceText = this.getSourceText(fileName)
         if (sourceText)
             return ts.createSourceFile(fileName, sourceText, languageVersion)
