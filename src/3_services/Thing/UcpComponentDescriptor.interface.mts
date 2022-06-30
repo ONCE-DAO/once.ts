@@ -20,6 +20,12 @@ export default interface UcpComponentDescriptorInterface {
     initBasics(packagePath: string, packageName: string, packageVersion: string | undefined): UcpComponentDescriptorInterface
 }
 
+export interface ServerSideUcpComponentDescriptorInterface extends UcpComponentDescriptorInterface {
+    get scenarioDirectory(): string;
+    writeToPath(writePath: string): void;
+    get defaultExportObject(): ThingStatics<any> | InterfaceDescriptorInterface | undefined
+}
+
 export interface UcpComponentDescriptorStatics {
     register(packagePath: string, packageName: string, packageVersion: string | undefined): Function
     getDescriptor(packagePath: string, packageName: string, packageVersion: string | undefined): UcpComponentDescriptorInterface

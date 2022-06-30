@@ -28,11 +28,14 @@ class EAMDLoader extends BaseLoader implements Loader {
     if (ONCE.eamd == undefined) throw new Error("Missing EAMD in ONCE");
 
     let eamdRepos = (await global.ONCE?.eamd?.discover());
-
-    const repoPath = eamdRepos?.[ior.href];
+    let iorString = ior.href;
+    if (ior.namespaceObject) {
+      iorString = iorString.replace('/' + ior.namespaceObject, '')
+    }
+    const repoPath = eamdRepos?.[iorString];
     if (repoPath === undefined) {
       throw new Error(
-        "Missing Mapping from Namespace to Repository: " + ior.href
+        "Missing Mapping from Namespace to Repository: " + iorString
       );
     }
     // Build ist deaktiviert

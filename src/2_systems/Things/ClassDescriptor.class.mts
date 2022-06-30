@@ -1,6 +1,6 @@
 // ##IGNORE_TRANSFORMER##
 import Class from "../../3_services/Class.interface.mjs";
-import ClassDescriptorInterface from "../../3_services/Thing/ClassDescriptor.interface.mjs";
+import ClassDescriptorInterface, { ClassDescriptorStatics } from "../../3_services/Thing/ClassDescriptor.interface.mjs";
 import InterfaceDescriptorInterface from "../../3_services/Thing/InterfaceDescriptor.interface.mjs";
 import UcpComponentDescriptorInterface from "../../3_services/Thing/UcpComponentDescriptor.interface.mjs";
 import InterfaceDescriptor from "./InterfaceDescriptor.class.mjs";
@@ -8,7 +8,7 @@ import InterfaceDescriptor from "./InterfaceDescriptor.class.mjs";
 
 const UcpComponentDescriptor = (await import("./BaseUcpComponentDescriptor.class.mjs")).default;
 
-export default class ClassDescriptor implements ClassDescriptorInterface {
+const NewClassDescriptor = class ClassDescriptor implements ClassDescriptorInterface {
 
     private static _classDescriptorStore = new WeakMap<Class<any>, ClassDescriptorInterface>();
     ucpComponentDescriptor!: UcpComponentDescriptorInterface;
@@ -221,5 +221,16 @@ export default class ClassDescriptor implements ClassDescriptorInterface {
 
 }
 
+let ClassDescriptor: ClassDescriptorStatics = NewClassDescriptor;
+// declare global {
+//     var CashClassDescriptor: ClassDescriptorStatics | undefined;
+// }
 
+// if (typeof global.CashClassDescriptor === "undefined") {
+//     global.CashClassDescriptor = NewClassDescriptor;
+// } else {
+//     ClassDescriptor = global.CashClassDescriptor;
+// }
+
+export default ClassDescriptor;
 
