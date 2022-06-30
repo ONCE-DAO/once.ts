@@ -8,5 +8,5 @@ export default interface TypescriptProject extends Buildable {
 }
 
 export const TYPESCRIPT_PROJECT = {
-    EXPORTS_FILE_NAME: "index"
+    EXPORTS_FILE_NAME: "UcpExport"
 }

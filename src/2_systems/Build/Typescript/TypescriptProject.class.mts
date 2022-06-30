@@ -4,10 +4,6 @@ import Buildable from "../../../3_services/Build/Buildable.interface.mjs";
 import BuildConfig from "../../../3_services/Build/BuildConfig.interface.mjs";
 import TypescriptProject from "../../../3_services/Build/Typescript/TypescriptProject.interface.mjs";
 import DefaultTransformer from "./Transformer.class.mjs";
-import { answer } from "ior:esm:/tla.EAM.Once.Server[build]";
-console.log(answer);
-
-// answer
 
 export default class DefaultTypescriptProject implements TypescriptProject {
     private path: string;

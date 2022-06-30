@@ -32,15 +32,14 @@ export default class DefaultTransformer implements Transformer {
     async writeConfigPaths(files: string[], name: string, namespace: string, version: string): Promise<void> {
         let config = this.pathsConfig;
         if (!config.compilerOptions.paths) config.compilerOptions.paths = {}
-
+        const d = ".d."
         let exportFiles = files
             .filter(file => file.includes(TYPESCRIPT_PROJECT.EXPORTS_FILE_NAME))
             .map(file => relative(this.buildConfig.eamdPath, file))
-            .sort((a, b) => {
-                if (a.includes(".d.")) return 1
-                if (b.includes(".d.")) return -1;
-                return 0
-            })
+            .sort((a, b) =>
+                a.includes(d) ?
+                    b.includes(d) ? 0 : -1 :
+                    b.includes(d) ? 1 : 0)
 
         config.compilerOptions.paths[`ior:esm:/${namespace}.${name}[${version}]`] = exportFiles
         writeFileSync(this.tsconfigFilePath, JSON.stringify(config, null, 2))
