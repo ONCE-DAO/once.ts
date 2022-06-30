@@ -134,7 +134,7 @@ export default class DefaultUcpComponentDescriptor implements UcpComponentDescri
   }
 
   initBasics(packagePath: string, packageName: string, packageVersion: string | undefined): UcpComponentDescriptorInterface {
-    throw "not implemented"
+    // throw "not implemented"
     // this.npmPackage = DefaultNpmPackage.getByPackage(packagePath, packageName, packageVersion || '');
     let name = this.myClass.getDescriptorName(packagePath, packageName, packageVersion);
     this.myClass._componentDescriptorStore[name] = this;

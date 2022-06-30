@@ -3,11 +3,12 @@ import ts from "typescript"
 
 export default interface Transformer {
     transpile(): Promise<string[]>
-    writeTsConfigPaths(files: string[],name:string, namespace:string, version:string): Promise<void>
+    writeTsConfigPaths(files: string[], name: string, namespace: string, version: string): Promise<void>
+    extendIndexFile(files: string[]): Promise<void>
 }
 
 export const TRANSFORMER = {
-    CONFIG_PATHS_FILE: "tsconfig.paths.json"
+    CONFIG_PATHS_FILE: "tsconfig.paths.json",
 }
 
 export type PluginOptions = ts.CompilerOptions & {

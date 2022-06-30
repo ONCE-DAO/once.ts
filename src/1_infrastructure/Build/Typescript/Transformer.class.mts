@@ -1,9 +1,11 @@
-import { existsSync, writeFileSync } from "fs";
-import { join, relative } from "path";
+import { existsSync, readFileSync, writeFileSync } from "fs";
+import path, { join, relative } from "path";
 import ts from "typescript";
 import BuildConfig from "../../../3_services/Build/BuildConfig.interface.mjs";
 import Transformer, { PluginOptions, TRANSFORMER } from "../../../3_services/Build/Typescript/Transformer.interface.mjs";
 import { TYPESCRIPT_PROJECT } from "../../../3_services/Build/Typescript/TypescriptProject.interface.mjs";
+import ClassDescriptorInterface from "../../../3_services/Thing/ClassDescriptor.interface.mjs";
+import InterfaceDescriptorInterface from "../../../3_services/Thing/InterfaceDescriptor.interface.mjs";
 export default class DefaultTransformer implements Transformer {
     config: ts.ParsedCommandLine;
     buildConfig: BuildConfig;
@@ -16,10 +18,11 @@ export default class DefaultTransformer implements Transformer {
         const readConfig = ts.readConfigFile(configFile, ts.sys.readFile);
         const parsedConfig = ts.parseJsonConfigFileContent(readConfig.config, ts.sys, baseDir);
         parsedConfig.options.noEmit = false;
-        // parsedConfig.options.noEmitOnError = false;
+        parsedConfig.options.noEmitOnError = false;
         parsedConfig.options.outDir = buildConfig.distributionFolder;
         (parsedConfig.options as any).listEmittedFiles = true;
-        (parsedConfig.options as PluginOptions).plugins = buildConfig.transformer;
+        if (!buildConfig.distributionFolder.includes("Transformer"))
+            (parsedConfig.options as PluginOptions).plugins = buildConfig.transformer;
         return new DefaultTransformer(parsedConfig, buildConfig);
     }
 
@@ -28,6 +31,82 @@ export default class DefaultTransformer implements Transformer {
         this.buildConfig = buildConfig;
     }
 
+    async extendIndexFile(files: string[]): Promise<void> {
+        if (this.buildConfig.distributionFolder.includes("Transformer")) return;
+        let exportList: string[] = [];
+        let defaultExport: string = "";
+
+        // let myFile = import.meta.url.replace(/^file:\/\//, '');
+        for (const file of files) {
+
+            //   const fileImport = baseDirectory + file.replace(/\.mts$/, '');
+            const fileImport = file.replace(/\.mts$/, '');
+            let moduleFile = path.relative(this.buildConfig.distributionFolder, fileImport);
+
+            moduleFile = moduleFile.match(/^\./) ? moduleFile : "./" + moduleFile;
+            let importedModule;
+            try {
+                importedModule = await import(fileImport)
+            } catch (e) {
+                console.log(e)
+            }
+            if (importedModule) {
+                let exportedModuleItems = { ...importedModule };
+                for (const itemKey of Object.keys(exportedModuleItems)) {
+                    let item = exportedModuleItems[itemKey];
+                    let descriptor: InterfaceDescriptorInterface | ClassDescriptorInterface | undefined;
+                    if ("allExtendedInterfaces" in item) {
+                        descriptor = item as InterfaceDescriptorInterface;
+
+                    } else if ("classDescriptor" in item && item.classDescriptor) {
+                        descriptor = item.classDescriptor as ClassDescriptorInterface;
+                    }
+
+                    if (descriptor && descriptor.componentExport && descriptor.componentExportName) {
+
+                        let line = "import ";
+                        line += itemKey === "default" ? descriptor.componentExportName : `{ ${itemKey} } `;
+                        line += ` from "./${moduleFile}";\n`
+
+                        // fs.writeSync(fd, line);
+
+                        // Import Real Interface
+                        // if ("allExtendedInterfaces" in item) {
+                        //     let exportName = this._getInterfaceExportName(baseDirectory + file, item.name);
+
+                        //     let interfaceLine = "import ";
+                        //     interfaceLine += exportName === "default" ? item.name : `{ ${exportName} } `;
+                        //     interfaceLine += ` from "./${moduleFile}";\n`
+                        //     exportList.push(item.name);
+                        //     fs.writeSync(fd, interfaceLine);
+
+                        // }
+
+                        if (descriptor.componentExport === "defaultExport") {
+                            defaultExport = descriptor.componentExportName;
+                        } else {
+                            exportList.push(descriptor.componentExportName);
+                        }
+
+                    }
+                }
+            }
+        }
+
+
+        if (defaultExport) {
+            let line = `export default ${defaultExport};\n`
+            // fs.writeSync(fd, line);
+        }
+        if (exportList.length > 0) {
+            let line = `export {${exportList.join(', ')}};\n`
+            // fs.writeSync(fd, line);
+        }
+
+        // fs.writeSync(fd, "// ########## Generated Export END ##########\n");
+        // fs.closeSync(fd);
+
+    }
 
     async writeTsConfigPaths(files: string[], name: string, namespace: string, version: string): Promise<void> {
         let config = this.pathsConfig;
@@ -54,6 +133,7 @@ export default class DefaultTransformer implements Transformer {
     async transpile(): Promise<string[]> {
         const compilerHost = ts.createCompilerHost(this.config.options);
         compilerHost.getSourceFile = this.getSourceFile.bind(this)
+
         const program = ts.createProgram([...this.config.fileNames, this.ExportFileName], this.config.options, compilerHost);
         const emitResult = program.emit();
         const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
@@ -74,9 +154,10 @@ export default class DefaultTransformer implements Transformer {
         let exitCode = emitResult.emitSkipped ? 1 : 0;
         console.log(`Process exiting with code '${exitCode}'.`);
         exitCode && process.exit(exitCode);
-      
+
         return emitResult.emittedFiles || []
     }
+
 
     private get pathsConfig() {
         existsSync(this.tsconfigFilePath) || writeFileSync(this.tsconfigFilePath, this.defaultPathFile)
@@ -114,6 +195,11 @@ export default class DefaultTransformer implements Transformer {
         return "ts";
     }
 
+    private get DefaultExportFileName() {
+        return join(this.config.options.rootDir || "", `${TYPESCRIPT_PROJECT.DEFAULT_EXPORT_FILE}.${this.ExportFileNameExtension}`)
+
+    }
+
     private getSourceFile(fileName: string, languageVersion: ts.ScriptTarget, onError?: (message: string) => void): ts.SourceFile | undefined {
         const sourceText = this.getSourceText(fileName)
         if (sourceText)
@@ -129,8 +215,105 @@ export default class DefaultTransformer implements Transformer {
                 : undefined
     }
 
+
     private createExportFileContent() {
-        return "export const answer=42;"
+        if (this.buildConfig.distributionFolder.includes("Transformer")) return
+        const files = this.config.fileNames
+        let fileContent = "export {}\n"
+
+
+
+        if (existsSync(this.DefaultExportFileName)) {
+            fileContent += readFileSync(this.DefaultExportFileName).toString()
+        }
+
+        console.log(fileContent);
+
+        // let exportList: string[] = [];
+        // let defaultExport: string = "";
+
+        // let myFile = import.meta.url.replace(/^file:\/\//, '');
+        // for (const file of files) {
+
+        //     //   const fileImport = baseDirectory + file.replace(/\.mts$/, '');
+        //     const fileImport = file.replace(/\.mts$/, '');
+        //     let moduleFile = path.relative(path.parse(myFile).dir, path.join(fileImport));
+
+        //     moduleFile = moduleFile.match(/^\./) ? moduleFile : "./" + moduleFile;
+        //     let importedModule;
+        //     try {
+        //         let p = import(moduleFile)
+        //         .then(importedModule => {
+        //             console.log(importedModule);
+
+        //         })
+        //         p.catch(e => { 
+        //             console.log(e) });
+
+
+
+        //         // importedModule = await p;
+        //     } catch (e) {
+        //         console.log(e)
+        //     }
+        //       if (importedModule) {
+        //         let exportedModuleItems = { ...importedModule };
+        //         for (const itemKey of Object.keys(exportedModuleItems)) {
+        //           let item = exportedModuleItems[itemKey];
+        //           let descriptor: InterfaceDescriptorInterface | ClassDescriptorInterface | undefined;
+        //           if ("allExtendedInterfaces" in item) {
+        //             descriptor = item as InterfaceDescriptorInterface;
+
+        //           } else if ("classDescriptor" in item && item.classDescriptor) {
+        //             descriptor = item.classDescriptor as ClassDescriptorInterface;
+        //           }
+
+        //           if (descriptor && descriptor.componentExport && descriptor.componentExportName) {
+
+        //             let line = "import ";
+        //             line += itemKey === "default" ? descriptor.componentExportName : `{ ${itemKey} } `;
+        //             line += ` from "./${moduleFile}";\n`
+
+        //             fs.writeSync(fd, line);
+
+        //             // Import Real Interface
+        //             if ("allExtendedInterfaces" in item) {
+        //               let exportName = this._getInterfaceExportName(baseDirectory + file, item.name);
+
+        //               let interfaceLine = "import ";
+        //               interfaceLine += exportName === "default" ? item.name : `{ ${exportName} } `;
+        //               interfaceLine += ` from "./${moduleFile}";\n`
+        //               exportList.push(item.name);
+        //               fs.writeSync(fd, interfaceLine);
+
+        //             }
+
+        //             if (descriptor.componentExport === "defaultExport") {
+        //               defaultExport = descriptor.componentExportName;
+        //             } else {
+        //               exportList.push(descriptor.componentExportName);
+        //             }
+
+        //           }
+        //         }
+        //       }
+        // }
+
+
+        // if (defaultExport) {
+        //   let line = `export default ${defaultExport};\n`
+        //   fs.writeSync(fd, line);
+        // }
+        // if (exportList.length > 0) {
+        //   let line = `export {${exportList.join(', ')}};\n`
+        //   fs.writeSync(fd, line);
+        // }
+
+        // fs.writeSync(fd, "// ########## Generated Export END ##########\n");
+        // fs.closeSync(fd);
+
+
+        return fileContent;
     }
 }
 
