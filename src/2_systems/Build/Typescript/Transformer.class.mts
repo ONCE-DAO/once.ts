@@ -4,7 +4,6 @@ import ts from "typescript";
 import BuildConfig from "../../../3_services/Build/BuildConfig.interface.mjs";
 import Transformer, { PluginOptions, TRANSFORMER } from "../../../3_services/Build/Typescript/Transformer.interface.mjs";
 import { TYPESCRIPT_PROJECT } from "../../../3_services/Build/Typescript/TypescriptProject.interface.mjs";
-
 export default class DefaultTransformer implements Transformer {
     config: ts.ParsedCommandLine;
     buildConfig: BuildConfig;
@@ -37,6 +36,11 @@ export default class DefaultTransformer implements Transformer {
         let exportFiles = files
             .filter(file => file.includes(TYPESCRIPT_PROJECT.EXPORTS_FILE_NAME))
             .map(file => relative(this.buildConfig.eamdPath, file))
+            .sort((a, b) => {
+                if (a.includes(".d.")) return 1
+                if (b.includes(".d.")) return -1;
+                return 0
+            })
 
         config.compilerOptions.paths[`ior:esm:/${namespace}.${name}[${version}]`] = exportFiles
         writeFileSync(this.tsconfigFilePath, JSON.stringify(config, null, 2))
@@ -65,41 +69,44 @@ export default class DefaultTransformer implements Transformer {
         return join(this.buildConfig.eamdPath, TRANSFORMER.CONFIG_PATHS_FILE)
     }
 
-    //   private async createPathsConfig(submodules?: GitRepositorySubmodule[]) {
-    //     if (submodules === undefined) {
-    //       submodules = await this.getSortedSubmodules();
-    //     }
-    //     const fileName = "tsconfigPaths.json"
+    private get ExportFileName() {
+        return join(this.config.options.rootDir || "", `${TYPESCRIPT_PROJECT.EXPORTS_FILE_NAME}.${this.ExportFileNameExtension}`)
+    }
 
-    //     let data = {
-    //       "compilerOptions": {
-    //         "baseUrl": ".",
-    //         "paths": {} as { [key: string]: string[] }
-    //       }
-    //     };
-
-    //     for (const submodule of submodules) {
-    //       const ior = `ior:esm:/${submodule.package.packageJson.namespace}.${submodule.package.packageJson.name}[${submodule.branch}]`;
-    //       if (submodule.package.packageJson.main === undefined) throw new Error("Missing main in Package.json in " + submodule.folderPath);
-    //       let modulePath = join(submodule.distributionFolder, submodule.package.packageJson.main.replace("dist/", ""));
-    //       const value: string[] = [modulePath];
-
-    //       if (submodule.package.packageJson.types !== undefined) {
-    //         value.unshift(join(submodule.distributionFolder, submodule.package.packageJson.types));
-    //       } else if (submodule.package.packageJson.main.endsWith('.mjs')) {
-    //         value.unshift(join(submodule.distributionFolder, submodule.package.packageJson.main.replace("dist/", "").replace(/\.m[jt]s$/, '.d.mts')));
-    //       }
-    //       data.compilerOptions.paths[ior] = value;
-    //     }
-
-    //     writeFileSync(fileName, JSON.stringify(data, null, 2), { encoding: 'utf8' });
-
-    //   }
+    private get ExportFileNameExtension() {
+        const module = this.config.options.module as Number;
+        if (module === ts.ModuleKind.CommonJS)
+            return "cts";
+        if (module >= ts.ModuleKind.ES2015 && module <= ts.ModuleKind.ESNext)
+            return "mts";
+        return "ts";
+    }
 
 
+    private getSourceFile(fileName: string, languageVersion: ts.ScriptTarget, onError?: (message: string) => void): ts.SourceFile | undefined {
+        console.log(fileName);
+
+        const sourceText = this.getSourceText(fileName)
+        if (sourceText)
+            return ts.createSourceFile(fileName, sourceText, languageVersion)
+        return undefined
+    }
+
+    private getSourceText(fileName: string): string | undefined {
+        return ts.sys.fileExists(fileName) ?
+            ts.sys.readFile(fileName)
+            : fileName === this.ExportFileName
+                ? this.createExportFileContent()
+                : undefined
+    }
+
+    private createExportFileContent() {
+        return "export const answer=42;"
+    }
     async transpile(): Promise<string[]> {
         const compilerHost = ts.createCompilerHost(this.config.options);
-        const program = ts.createProgram(this.config.fileNames, this.config.options, compilerHost);
+        compilerHost.getSourceFile = this.getSourceFile.bind(this)
+        const program = ts.createProgram([...this.config.fileNames, this.ExportFileName], this.config.options, compilerHost);
         const emit = program.emit();
         const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emit.diagnostics);
         if (allDiagnostics.length) {

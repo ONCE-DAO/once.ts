@@ -4,6 +4,10 @@ import Buildable from "../../../3_services/Build/Buildable.interface.mjs";
 import BuildConfig from "../../../3_services/Build/BuildConfig.interface.mjs";
 import TypescriptProject from "../../../3_services/Build/Typescript/TypescriptProject.interface.mjs";
 import DefaultTransformer from "./Transformer.class.mjs";
+import { answer } from "ior:esm:/tla.EAM.Once.Server[build]";
+console.log(answer);
+
+// answer
 
 export default class DefaultTypescriptProject implements TypescriptProject {
     private path: string;
@@ -16,9 +20,7 @@ export default class DefaultTypescriptProject implements TypescriptProject {
         this.name = name;
         this.namespace = namespace;
         this.version = version;
-
     }
-
 
     static async init(path: string, name: string, namespace: string, version: string): Promise<TypescriptProject> {
 
@@ -31,11 +33,13 @@ export default class DefaultTypescriptProject implements TypescriptProject {
         execSync("npx ts-patch i", { cwd: this.path, stdio: "inherit" })
         console.log("done\n");
     }
+
     async beforeBuild(config: BuildConfig): Promise<void> {
         this.logBuildInfo("beforeBuild")
         //TODO update tsconfig file paths, plugins
         console.log("done\n");
     }
+
     async build(config: BuildConfig): Promise<void> {
         this.logBuildInfo("build")
         install({ basedir: this.path }) //ts-patch
@@ -47,6 +51,7 @@ export default class DefaultTypescriptProject implements TypescriptProject {
 
         console.log("done\n");
     }
+
     async afterBuild(config: BuildConfig): Promise<void> {
         this.logBuildInfo("afterBuild")
         //TODO perhaps copy stuff
