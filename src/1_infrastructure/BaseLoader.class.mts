@@ -1,6 +1,6 @@
 
 import IOR from "../3_services/IOR.interface.mjs";
-import Loader, { LoaderStatic, loadingConfig } from "../3_services/Loader.interface.mjs";
+import Loader, { loadingConfig } from "../3_services/Loader.interface.mjs";
 import BaseThing from "./BaseThing.class.mjs";
 
 abstract class BaseLoader extends BaseThing<BaseLoader> implements Loader {

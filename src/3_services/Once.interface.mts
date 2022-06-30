@@ -1,4 +1,3 @@
-import EAMD from "./EAMD.interface.mjs";
 
 declare global {
   var ONCE: Once | Once & OnceNodeImportLoader;
@@ -12,7 +11,7 @@ export default interface Once {
   state: OnceState;
   start(): Promise<void>;
   global: typeof globalThis;
-  eamd: EAMD;
+  // eamd: EAMD; //TODO reimplement
   OnceLoader: OnceNodeImportLoader | undefined;
 }
 

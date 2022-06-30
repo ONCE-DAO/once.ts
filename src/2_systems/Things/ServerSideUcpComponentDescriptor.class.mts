@@ -6,11 +6,7 @@ import DefaultUcpComponentDescriptor, { UcpComponentDescriptorInitParameters } f
 import { ServerSideUcpComponentDescriptorInterface, UcpComponentDescriptorDataStructure, UcpComponentDescriptorStatics } from "../../3_services/Thing/UcpComponentDescriptor.interface.mjs";
 import ClassDescriptorInterface from "../../3_services/Thing/ClassDescriptor.interface.mjs";
 import { ThingStatics } from '../../3_services/Thing/Thing.interface.mjs';
-import NpmPackage from '../../3_services/NpmPackage.interface.mjs';
 import InterfaceDescriptorInterface from '../../3_services/Thing/InterfaceDescriptor.interface.mjs';
-import { DefaultNpmPackage } from '../NpmPackage.class.mjs';
-import GitRepository from '../../3_services/GitRepository.interface.mjs';
-import Submodule from '../../3_services/Submodule.interface.mjs';
 
 
 const NewServerSideUcpComponentDescriptor = class ServerSideUcpComponentDescriptor extends DefaultUcpComponentDescriptor implements ServerSideUcpComponentDescriptorInterface {
@@ -31,10 +27,6 @@ const NewServerSideUcpComponentDescriptor = class ServerSideUcpComponentDescript
     //this.identifier = basename(relativePath);
 
 
-    let npmPackage = DefaultNpmPackage.getByFolder(path) as NpmPackage;
-    if (!npmPackage) throw new Error("Could not find a NPM Package");
-
-    this.npmPackage = npmPackage;
     // this.name = npmPackage?.name;
     // this.version = npmPackage?.version;
     return this;
@@ -122,99 +114,100 @@ const NewServerSideUcpComponentDescriptor = class ServerSideUcpComponentDescript
 
   }
 
-  async createExportFile(subModule: Submodule & GitRepository): Promise<void> {
+  async createExportFile(): Promise<void> {
+    throw "not implemented"
 
-    // TODO@merge move to build process perhaps submodule
-    let files = subModule.discoverFiles().filter(f => f.match(/(class|interface)\.mts$/)).sort();
+    // // TODO@merge move to build process perhaps submodule
+    // let files = subModule.discoverFiles().filter(f => f.match(/(class|interface)\.mts$/)).sort();
 
-    if (files.length < 1) return;
-    let baseDirectory = path.join(subModule.path, 'src');
+    // if (files.length < 1) return;
+    // let baseDirectory = path.join(subModule.path, 'src');
 
-    let exportList: string[] = [];
-    let defaultExport: string = "";
-    let fd = fs.openSync(baseDirectory + `/${this.exportFile}`, 'w', 0o666);
+    // let exportList: string[] = [];
+    // let defaultExport: string = "";
+    // let fd = fs.openSync(baseDirectory + `/${this.exportFile}`, 'w', 0o666);
 
-    const defaultFile = baseDirectory + "/index.default.mts";
-    if (fs.existsSync(defaultFile)) {
-      let defaultData = fs.readFileSync(defaultFile).toString();
-      fs.writeSync(fd, "// ########## Default Export ##########\n");
-      fs.writeSync(fd, defaultData);
-      fs.writeSync(fd, "\n// ########## Default Export END ##########\n\n");
+    // const defaultFile = baseDirectory + "/index.default.mts";
+    // if (fs.existsSync(defaultFile)) {
+    //   let defaultData = fs.readFileSync(defaultFile).toString();
+    //   fs.writeSync(fd, "// ########## Default Export ##########\n");
+    //   fs.writeSync(fd, defaultData);
+    //   fs.writeSync(fd, "\n// ########## Default Export END ##########\n\n");
 
-    }
+    // }
 
-    fs.writeSync(fd, "// ########## Generated Export ##########\n");
+    // fs.writeSync(fd, "// ########## Generated Export ##########\n");
 
-    let myFile = import.meta.url.replace(/^file:\/\//, '');
-    for (const file of files) {
+    // let myFile = import.meta.url.replace(/^file:\/\//, '');
+    // for (const file of files) {
 
-      const fileImport = baseDirectory + file.replace(/\.mts$/, '');
-      let moduleFile = path.relative(path.parse(myFile).dir, path.join(subModule.basePath, fileImport));
+    //   const fileImport = baseDirectory + file.replace(/\.mts$/, '');
+    //   let moduleFile = path.relative(path.parse(myFile).dir, path.join(subModule.basePath, fileImport));
 
-      moduleFile = moduleFile.match(/^\./) ? moduleFile : "./" + moduleFile;
-      let importedModule;
-      try {
-        let p = import(moduleFile)
-        p.catch(e => { console.log(e) });
-        importedModule = await p;
-      } catch (e) {
-        console.log(e)
-      }
-      if (importedModule) {
-        let exportedModuleItems = { ...importedModule };
-        for (const itemKey of Object.keys(exportedModuleItems)) {
-          let item = exportedModuleItems[itemKey];
-          let descriptor: InterfaceDescriptorInterface | ClassDescriptorInterface | undefined;
-          if ("allExtendedInterfaces" in item) {
-            descriptor = item as InterfaceDescriptorInterface;
+    //   moduleFile = moduleFile.match(/^\./) ? moduleFile : "./" + moduleFile;
+    //   let importedModule;
+    //   try {
+    //     let p = import(moduleFile)
+    //     p.catch(e => { console.log(e) });
+    //     importedModule = await p;
+    //   } catch (e) {
+    //     console.log(e)
+    //   }
+    //   if (importedModule) {
+    //     let exportedModuleItems = { ...importedModule };
+    //     for (const itemKey of Object.keys(exportedModuleItems)) {
+    //       let item = exportedModuleItems[itemKey];
+    //       let descriptor: InterfaceDescriptorInterface | ClassDescriptorInterface | undefined;
+    //       if ("allExtendedInterfaces" in item) {
+    //         descriptor = item as InterfaceDescriptorInterface;
 
-          } else if ("classDescriptor" in item && item.classDescriptor) {
-            descriptor = item.classDescriptor as ClassDescriptorInterface;
-          }
+    //       } else if ("classDescriptor" in item && item.classDescriptor) {
+    //         descriptor = item.classDescriptor as ClassDescriptorInterface;
+    //       }
 
-          if (descriptor && descriptor.componentExport && descriptor.componentExportName) {
+    //       if (descriptor && descriptor.componentExport && descriptor.componentExportName) {
 
-            let line = "import ";
-            line += itemKey === "default" ? descriptor.componentExportName : `{ ${itemKey} } `;
-            line += ` from "./${moduleFile}";\n`
+    //         let line = "import ";
+    //         line += itemKey === "default" ? descriptor.componentExportName : `{ ${itemKey} } `;
+    //         line += ` from "./${moduleFile}";\n`
 
-            fs.writeSync(fd, line);
+    //         fs.writeSync(fd, line);
 
-            // Import Real Interface
-            if ("allExtendedInterfaces" in item) {
-              let exportName = this._getInterfaceExportName(baseDirectory + file, item.name);
+    //         // Import Real Interface
+    //         if ("allExtendedInterfaces" in item) {
+    //           let exportName = this._getInterfaceExportName(baseDirectory + file, item.name);
 
-              let interfaceLine = "import ";
-              interfaceLine += exportName === "default" ? item.name : `{ ${exportName} } `;
-              interfaceLine += ` from "./${moduleFile}";\n`
-              exportList.push(item.name);
-              fs.writeSync(fd, interfaceLine);
+    //           let interfaceLine = "import ";
+    //           interfaceLine += exportName === "default" ? item.name : `{ ${exportName} } `;
+    //           interfaceLine += ` from "./${moduleFile}";\n`
+    //           exportList.push(item.name);
+    //           fs.writeSync(fd, interfaceLine);
 
-            }
+    //         }
 
-            if (descriptor.componentExport === "defaultExport") {
-              defaultExport = descriptor.componentExportName;
-            } else {
-              exportList.push(descriptor.componentExportName);
-            }
+    //         if (descriptor.componentExport === "defaultExport") {
+    //           defaultExport = descriptor.componentExportName;
+    //         } else {
+    //           exportList.push(descriptor.componentExportName);
+    //         }
 
-          }
-        }
-      }
-    }
+    //       }
+    //     }
+    //   }
+    // }
 
 
-    if (defaultExport) {
-      let line = `export default ${defaultExport};\n`
-      fs.writeSync(fd, line);
-    }
-    if (exportList.length > 0) {
-      let line = `export {${exportList.join(', ')}};\n`
-      fs.writeSync(fd, line);
-    }
+    // if (defaultExport) {
+    //   let line = `export default ${defaultExport};\n`
+    //   fs.writeSync(fd, line);
+    // }
+    // if (exportList.length > 0) {
+    //   let line = `export {${exportList.join(', ')}};\n`
+    //   fs.writeSync(fd, line);
+    // }
 
-    fs.writeSync(fd, "// ########## Generated Export END ##########\n");
-    fs.closeSync(fd);
+    // fs.writeSync(fd, "// ########## Generated Export END ##########\n");
+    // fs.closeSync(fd);
 
   }
 

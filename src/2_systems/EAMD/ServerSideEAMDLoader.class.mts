@@ -25,47 +25,48 @@ class EAMDLoader extends BaseLoader implements Loader {
 
 
     if (typeof ONCE === "undefined") throw new Error("Missing ONCE");
-    if (ONCE.eamd == undefined) throw new Error("Missing EAMD in ONCE");
+    throw "not implemented"
+    // if (ONCE.eamd == undefined) throw new Error("Missing EAMD in ONCE");
 
-    let eamdRepos = (await global.ONCE?.eamd?.discover());
-    let iorString = ior.href;
-    if (ior.namespaceObject) {
-      iorString = iorString.replace('/' + ior.namespaceObject, '')
-    }
-    const repoPath = eamdRepos?.[iorString];
-    if (repoPath === undefined) {
-      throw new Error(
-        "Missing Mapping from Namespace to Repository: " + iorString
-      );
-    }
-    // Build ist deaktiviert
+    // let eamdRepos = (await global.ONCE?.eamd?.discover());
+    // let iorString = ior.href;
+    // if (ior.namespaceObject) {
+    //   iorString = iorString.replace('/' + ior.namespaceObject, '')
+    // }
+    // const repoPath = eamdRepos?.[iorString];
+    // if (repoPath === undefined) {
+    //   throw new Error(
+    //     "Missing Mapping from Namespace to Repository: " + iorString
+    //   );
+    // }
+    // // Build ist deaktiviert
 
-    // if (!ONCE.eamd.eamdRepository) throw new Error("Missing eamdRepository");
-    // let submodules = await ONCE.eamd.eamdRepository.getAndInstallSubmodule(
-    //   ior,
-    //   repoPath
-    // );
+    // // if (!ONCE.eamd.eamdRepository) throw new Error("Missing eamdRepository");
+    // // let submodules = await ONCE.eamd.eamdRepository.getAndInstallSubmodule(
+    // //   ior,
+    // //   repoPath
+    // // );
 
-    if (!ONCE.eamd.eamdDirectory) throw new Error("missing EAMD Directory")
+    // if (!ONCE.eamd.eamdDirectory) throw new Error("missing EAMD Directory")
 
-    const modulePath = path.join(ONCE.eamd.eamdDirectory, repoPath);
+    // const modulePath = path.join(ONCE.eamd.eamdDirectory, repoPath);
 
-    if (config?.returnValue === loaderReturnValue.path) {
-      return modulePath;
-    } else {
-      const result = await import(modulePath);
+    // if (config?.returnValue === loaderReturnValue.path) {
+    //   return modulePath;
+    // } else {
+    //   const result = await import(modulePath);
 
-      // HACK should be removed after Components exists
-      if (ior.namespaceObject !== undefined) {
-        if (!result[ior.namespaceObject])
-          throw new Error(
-            `Missing Object '${ior.namespaceObject}' in the export from file: '${modulePath}'`
-          );
-        return result[ior.namespaceObject];
-      } else {
-        return result;
-      }
-    }
+    //   // HACK should be removed after Components exists
+    //   if (ior.namespaceObject !== undefined) {
+    //     if (!result[ior.namespaceObject])
+    //       throw new Error(
+    //         `Missing Object '${ior.namespaceObject}' in the export from file: '${modulePath}'`
+    //       );
+    //     return result[ior.namespaceObject];
+    //   } else {
+    //     return result;
+    //   }
+    // }
   }
 
   canHandle(ior: IOR): number {

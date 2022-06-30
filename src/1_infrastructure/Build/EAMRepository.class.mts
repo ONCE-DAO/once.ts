@@ -1,11 +1,11 @@
 import { join } from "path";
 import { SimpleGit } from "simple-git";
+import { DefaultScenario } from "../../2_systems/UCP/Scenario.class.mjs";
 import Buildable from "../../3_services/Build/Buildable.interface.mjs";
 import ComponentBuilder from "../../3_services/Build/BuildComponent.interface.mjs";
 import BuildConfig from "../../3_services/Build/BuildConfig.interface.mjs";
 import EAMRepository from "../../3_services/Build/EAMRepository.interface.mjs";
 import GitRepository from "../../3_services/Build/Git/GitRepository.interface.mjs";
-import { DefaultScenario } from "../UCP/Scenario.class.mjs";
 import DefaultComponentBuilder from "./ComponentBuilder.class.mjs";
 import DefaultGitRepository from "./Git/GitRepository.class.mjs";
 import DefaultGitSubmodule from "./Git/GitSubmodule.class.mjs";
