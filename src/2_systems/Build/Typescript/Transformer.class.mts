@@ -29,7 +29,7 @@ export default class DefaultTransformer implements Transformer {
     }
 
 
-    async writeConfigPaths(files: string[], name: string, namespace: string, version: string): Promise<void> {
+    async writeTsConfigPaths(files: string[], name: string, namespace: string, version: string): Promise<void> {
         let config = this.pathsConfig;
         if (!config.compilerOptions.paths) config.compilerOptions.paths = {}
         const d = ".d."
@@ -41,8 +41,36 @@ export default class DefaultTransformer implements Transformer {
                     b.includes(d) ? 0 : -1 :
                     b.includes(d) ? 1 : 0)
 
-        config.compilerOptions.paths[`ior:esm:/${namespace}.${name}[${version}]`] = exportFiles
+        if (exportFiles.length) {
+            config.compilerOptions.paths[`ior:esm:/${namespace}.${name}[${version}]`] = exportFiles
+        }
+        else {
+            delete config.compilerOptions.paths[`ior:esm:/${namespace}.${name}[${version}]`]
+        }
+
         writeFileSync(this.tsconfigFilePath, JSON.stringify(config, null, 2))
+    }
+
+    async transpile(): Promise<string[]> {
+        const compilerHost = ts.createCompilerHost(this.config.options);
+        compilerHost.getSourceFile = this.getSourceFile.bind(this)
+        const program = ts.createProgram([...this.config.fileNames, this.ExportFileName], this.config.options, compilerHost);
+        const emit = program.emit();
+        const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emit.diagnostics);
+        if (allDiagnostics.length) {
+            const formatHost: ts.FormatDiagnosticsHost = {
+                getCanonicalFileName: (path) => path,
+                getCurrentDirectory: ts.sys.getCurrentDirectory,
+                getNewLine: () => ts.sys.newLine,
+            }
+
+            const message = ts.formatDiagnostics(allDiagnostics, formatHost);
+            if (emit.emitSkipped)
+                console.error(message);
+            else
+                console.log(message);
+        }
+        return emit.emittedFiles || []
     }
 
     private get pathsConfig() {
@@ -81,7 +109,6 @@ export default class DefaultTransformer implements Transformer {
         return "ts";
     }
 
-
     private getSourceFile(fileName: string, languageVersion: ts.ScriptTarget, onError?: (message: string) => void): ts.SourceFile | undefined {
         console.log(fileName);
 
@@ -101,27 +128,6 @@ export default class DefaultTransformer implements Transformer {
 
     private createExportFileContent() {
         return "export const answer=42;"
-    }
-    async transpile(): Promise<string[]> {
-        const compilerHost = ts.createCompilerHost(this.config.options);
-        compilerHost.getSourceFile = this.getSourceFile.bind(this)
-        const program = ts.createProgram([...this.config.fileNames, this.ExportFileName], this.config.options, compilerHost);
-        const emit = program.emit();
-        const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emit.diagnostics);
-        if (allDiagnostics.length) {
-            const formatHost: ts.FormatDiagnosticsHost = {
-                getCanonicalFileName: (path) => path,
-                getCurrentDirectory: ts.sys.getCurrentDirectory,
-                getNewLine: () => ts.sys.newLine,
-            }
-
-            const message = ts.formatDiagnostics(allDiagnostics, formatHost);
-            if (emit.emitSkipped)
-                console.error(message);
-            else
-                console.log(message);
-        }
-        return emit.emittedFiles || []
     }
 }
 

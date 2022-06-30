@@ -43,7 +43,7 @@ export default class DefaultTypescriptProject implements TypescriptProject {
 
         const transformer = await DefaultTransformer.init(this.path, config)
         const files = await transformer.transpile()
-        await transformer.writeConfigPaths(files, this.name, this.namespace, this.version)
+        await transformer.writeTsConfigPaths(files, this.name, this.namespace, this.version)
 
         console.log("done\n");
     }
