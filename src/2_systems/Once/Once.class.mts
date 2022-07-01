@@ -9,3 +9,5 @@ if (ONCE.mode === OnceMode.NODE_LOADER) {
   resolve = (ONCE as OnceNodeImportLoader).resolve
   globalPreload = (ONCE as OnceNodeImportLoader).globalPreload
 }
+
+console.log("EXPORT VALUES", load, resolve, globalPreload)

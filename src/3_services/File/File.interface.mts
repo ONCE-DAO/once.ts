@@ -1,9 +1,9 @@
 export default interface File {
     fullPath: string
-    basePath: string
-    exists: boolean;
-    extension: string;
-    filename:string;
+    get basePath(): string
+    get exists(): boolean;
+    get extension(): string;
+    get filename():string;
     write(content: string): void
     read(): string
 }

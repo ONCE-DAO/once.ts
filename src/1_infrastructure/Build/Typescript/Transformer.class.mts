@@ -21,8 +21,8 @@ export default class DefaultTransformer implements Transformer {
         parsedConfig.options.noEmitOnError = false;
         parsedConfig.options.outDir = buildConfig.distributionFolder;
         (parsedConfig.options as any).listEmittedFiles = true;
-        if (!buildConfig.distributionFolder.includes("Transformer"))
-            (parsedConfig.options as PluginOptions).plugins = buildConfig.transformer;
+        // if (!buildConfig.distributionFolder.includes("Transformer"))
+        //     (parsedConfig.options as PluginOptions).plugins = buildConfig.transformer;
         return new DefaultTransformer(parsedConfig, buildConfig);
     }
 

@@ -1,9 +1,11 @@
 // ##IGNORE_TRANSFORMER##
 
+import NpmPackage from "../../3_services/NpmPackage.interface.mjs";
 import ClassDescriptorInterface from "../../3_services/Thing/ClassDescriptor.interface.mjs";
 import InterfaceDescriptorInterface from "../../3_services/Thing/InterfaceDescriptor.interface.mjs";
 import { ThingStatics } from "../../3_services/Thing/Thing.interface.mjs";
 import UcpComponentDescriptorInterface from "../../3_services/Thing/UcpComponentDescriptor.interface.mjs";
+import { DefaultNpmPackage } from "../NpmPackage.class.mjs";
 
 export default class DefaultUcpComponentDescriptor implements UcpComponentDescriptorInterface {
 
@@ -18,7 +20,7 @@ export default class DefaultUcpComponentDescriptor implements UcpComponentDescri
     return `${packagePath}${packageName}[${packageVersion || 'latest'}]`;
   }
 
-  // npmPackage!: NpmPackage;
+  npmPackage!: NpmPackage;
   relativeSrcPath: string | undefined;
   identifier: string | undefined;
 
@@ -26,19 +28,23 @@ export default class DefaultUcpComponentDescriptor implements UcpComponentDescri
 
 
   get name(): string {
-    throw "not implemented"
+    if (!this.npmPackage.name) throw new Error("NPM Name is missing for " + this.name);
+    return this.npmPackage.name;
   }
 
   get version(): string {
-    throw "not implemented"
+    if (!this.npmPackage.version) throw new Error("NPM version is missing for " + this.name);
+    return this.npmPackage.version;
   }
 
   get srcPath(): string {
-    throw "not implemented"
+    if (!this.npmPackage.path) throw new Error("NPM path is missing for " + this.name);
+    return this.npmPackage.path;
   }
 
   get package(): string {
-    throw "not implemented"
+    if (!this.npmPackage.namespace) throw new Error("NPM namespace is missing for " + this.name);
+    return this.npmPackage.namespace;
   }
 
   getUnitByName(name: string, type: 'ClassDescriptor'): ClassDescriptorInterface | undefined;
@@ -72,14 +78,12 @@ export default class DefaultUcpComponentDescriptor implements UcpComponentDescri
     //this.identifier = basename(relativePath);
 
 
-    throw "not implemented"
+    //@ts-ignore
+    let npmPackage = NpmPackage.getByFolder(path);
+    if (!npmPackage) throw new Error("Could not find a NPM Package");
 
-    // //@ts-ignore
-    // let npmPackage = NpmPackage.getByFolder(path);
-    // if (!npmPackage) throw new Error("Could not find a NPM Package");
-
-    // this.npmPackage = npmPackage;
-    // // this.name = npmPackage?.name;
+    this.npmPackage = npmPackage;
+    // this.name = npmPackage?.name;
     // this.version = npmPackage?.version;
     return this;
   }
@@ -134,8 +138,7 @@ export default class DefaultUcpComponentDescriptor implements UcpComponentDescri
   }
 
   initBasics(packagePath: string, packageName: string, packageVersion: string | undefined): UcpComponentDescriptorInterface {
-    // throw "not implemented"
-    // this.npmPackage = DefaultNpmPackage.getByPackage(packagePath, packageName, packageVersion || '');
+    this.npmPackage = DefaultNpmPackage.getByPackage(packagePath, packageName, packageVersion || '');
     let name = this.myClass.getDescriptorName(packagePath, packageName, packageVersion);
     this.myClass._componentDescriptorStore[name] = this;
     return this;

@@ -7,19 +7,13 @@
     //     "transform": "/Users/phibar/EAMD/EAMD.ucp-build/Scenarios/de/wo-da/test/tla/EAM/Thinglish/Transformer/build/index.cjs"
     //   }
     // ],
-    "outDir": "dist",
-    "noEmit": false,
-    "noEmitOnError": false
+    // "outDir": "dist",
+    // "noEmit": false,
+    // "noEmitOnError": false
   },
   "include": [
     "./src/**/*.mts",
     // "../../../../../Scenarios/localhost",
     // "test",
-  ],
-  "exclude": [
-    // "**/test/**/*",
-    // "dist",
-    // "node_modules",
-    // "../../../../../Scenarios/localhost/tla/EAM/Once/dev"
   ]
 }

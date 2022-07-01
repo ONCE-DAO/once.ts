@@ -5,4 +5,5 @@ const scenarioDomain = process.env.SCENARIO_DOMAIN || EAMD_CONSTANTS.DEFAULT_SCE
 const basePath = process.env.BASE_PATH || process.cwd()
 
 const eamd = await DefaultEAMD.init(basePath)
+console.log(eamd.currentScenario);
 console.log(await eamd.scenarios);
