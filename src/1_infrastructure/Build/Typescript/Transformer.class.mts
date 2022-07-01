@@ -1,11 +1,14 @@
 import { existsSync, readFileSync, writeFileSync } from "fs";
-import path, { join, relative } from "path";
+import path, { extname, join, relative } from "path";
 import ts from "typescript";
+import DefaultUcpComponentDescriptor from "../../../2_systems/UCP/DefaultUcpComponentDescriptor.class.mjs";
+import DefaultUcpUnit from "../../../2_systems/UCP/DefaultUcpUnit.class.mjs";
 import BuildConfig from "../../../3_services/Build/BuildConfig.interface.mjs";
 import Transformer, { PluginOptions, TRANSFORMER } from "../../../3_services/Build/Typescript/Transformer.interface.mjs";
 import { TYPESCRIPT_PROJECT } from "../../../3_services/Build/Typescript/TypescriptProject.interface.mjs";
 import ClassDescriptorInterface from "../../../3_services/Thing/ClassDescriptor.interface.mjs";
 import InterfaceDescriptorInterface from "../../../3_services/Thing/InterfaceDescriptor.interface.mjs";
+import { UnitType } from "../../../3_services/UCP/UcpUnit.interface.mjs";
 export default class DefaultTransformer implements Transformer {
     config: ts.ParsedCommandLine;
     buildConfig: BuildConfig;
@@ -29,6 +32,12 @@ export default class DefaultTransformer implements Transformer {
     constructor(config: ts.ParsedCommandLine, buildConfig: BuildConfig) {
         this.config = config;
         this.buildConfig = buildConfig;
+    }
+
+    async writeComponentDescriptor(name: string, namespace: string, version: string, files: string[]): Promise<void> {
+        const descriptor = new DefaultUcpComponentDescriptor(name, namespace, version, files
+            .map(path => new DefaultUcpUnit(UnitType.File, join(".", relative(this.buildConfig.distributionFolder, path)))));
+        writeFileSync(join(this.buildConfig.distributionFolder, `${name}.component.json`), JSON.stringify(descriptor, null, 2));
     }
 
     async extendIndexFile(files: string[]): Promise<void> {
@@ -133,6 +142,7 @@ export default class DefaultTransformer implements Transformer {
     async transpile(): Promise<string[]> {
         const compilerHost = ts.createCompilerHost(this.config.options);
         compilerHost.getSourceFile = this.getSourceFile.bind(this)
+
 
         const program = ts.createProgram([...this.config.fileNames, this.ExportFileName], this.config.options, compilerHost);
         const emitResult = program.emit();

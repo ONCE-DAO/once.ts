@@ -5,6 +5,7 @@ export default interface Transformer {
     transpile(): Promise<string[]>
     writeTsConfigPaths(files: string[], name: string, namespace: string, version: string): Promise<void>
     extendIndexFile(files: string[]): Promise<void>
+    writeComponentDescriptor(name: string, namespace: string, version: string, files: string[]): Promise<void>
 }
 
 export const TRANSFORMER = {
