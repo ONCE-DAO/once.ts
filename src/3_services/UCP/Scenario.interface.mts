@@ -1,6 +1,6 @@
 export default interface Scenario {
-    domain: string;
+    namespace: string;
     scenarioPath: string;
-    
+
     init(): Promise<Scenario>;
 }
