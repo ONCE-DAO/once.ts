@@ -4,6 +4,15 @@ import DefaultFile from "./File.class.mjs";
 import { lstatSync, readdirSync } from "fs"
 import { join } from "path"
 export default class DefaultFolder extends DefaultFile implements Folder {
+    static getFilesByOnceExtentions(path: string, extensions?: string[] | undefined, recursive?: boolean | undefined): FileInterface[] {
+        return new DefaultFolder(path).getFilesByOnceExtentions(extensions, recursive)
+    }
+    getFilesByOnceExtentions(extensions?: string[] | undefined, recursive?: boolean | undefined): FileInterface[] {
+        return this.getFiles(this.getFilesByOnceExtentions, recursive)
+        .filter(x => 
+            extensions === undefined || extensions.includes(x.onceExtension))
+    }
+
     static getFilesByExtentions(path: string, extensions?: string[] | undefined, recursive?: boolean | undefined): FileInterface[] {
         return new DefaultFolder(path).getFilesByExtentions(extensions, recursive)
     }

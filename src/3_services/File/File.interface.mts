@@ -3,6 +3,7 @@ export default interface File {
     get basePath(): string
     get exists(): boolean;
     get extension(): string;
+    get onceExtension(): string;
     get filename():string;
     write(content: string): void
     read(): string

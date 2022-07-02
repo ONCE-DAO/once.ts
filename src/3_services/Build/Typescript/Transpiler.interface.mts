@@ -1,7 +1,7 @@
 import { PluginConfig } from "ts-patch"
 import ts from "typescript"
 
-export default interface Transformer {
+export default interface Transpiler {
     transpile(): Promise<string[]>
     writeTsConfigPaths(files: string[], name: string, namespace: string, version: string): Promise<void>
     extendIndexFile(files: string[]): Promise<void>

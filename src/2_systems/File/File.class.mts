@@ -8,6 +8,9 @@ export default class NodeFile implements File {
     constructor(path: string = "") {
         this.fullPath = path
     }
+    get onceExtension(): string {
+        return basename(this.fullPath).substring(basename(this.fullPath).indexOf("."))
+    }
 
     get exists() {
         return existsSync(this.fullPath)

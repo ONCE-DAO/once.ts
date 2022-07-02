@@ -3,4 +3,6 @@ export default interface Scenario {
     scenarioPath: string;
 
     init(): Promise<Scenario>;
+    get components(): Promise<string[]>
+
 }

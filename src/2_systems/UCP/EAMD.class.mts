@@ -14,7 +14,7 @@ export default class DefaultEAMD implements EAMDInterface {
     constructor(private installationDirectory: string, currentScenario: Scenario) {
         this.currentScenario = currentScenario;
     }
-
+  
     get scenarios(): Promise<Scenario[]> {
         return Async.Property<Scenario[]>(async () =>
             await Promise.all(DefaultFolder.getFilesByFileName(this.installationDirectory, ["scenario.json"], true)

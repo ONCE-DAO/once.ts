@@ -2,6 +2,8 @@ import { existsSync, mkdirSync, writeFileSync } from "fs";
 import { join, relative, sep } from "path";
 import { EAMD_CONSTANTS } from "../../3_services/UCP/EAMD.interface.mjs";
 import ScenarioInterface from "../../3_services/UCP/Scenario.interface.mjs";
+import DefaultFolder from "../File/Folder.class.mjs";
+import { Async } from "./Async.mjs";
 
 export class DefaultScenario implements ScenarioInterface {
     namespace: string = EAMD_CONSTANTS.DEFAULT_SCENARIO_DOMAIN;
@@ -36,5 +38,14 @@ export class DefaultScenario implements ScenarioInterface {
 
     private get scenarioJsonAsString(): string {
         return JSON.stringify({}, null, 2)
+    }
+
+
+    get components(): Promise<string[]> {
+        return Async.Property<string[]>(async () => {
+            return (await Promise
+                .all(DefaultFolder.getFilesByOnceExtentions(this.scenarioPath, [".component.json"], true)))
+                .map(file => relative(this.scenarioPath, file.fullPath))
+        })
     }
 }

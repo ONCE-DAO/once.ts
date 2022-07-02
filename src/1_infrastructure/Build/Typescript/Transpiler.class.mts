@@ -4,16 +4,16 @@ import ts from "typescript";
 import DefaultUcpComponentDescriptor from "../../../2_systems/UCP/DefaultUcpComponentDescriptor.class.mjs";
 import DefaultUcpUnit from "../../../2_systems/UCP/DefaultUcpUnit.class.mjs";
 import BuildConfig from "../../../3_services/Build/BuildConfig.interface.mjs";
-import Transformer, { PluginOptions, TRANSFORMER } from "../../../3_services/Build/Typescript/Transformer.interface.mjs";
+import Transpiler, { PluginOptions, TRANSFORMER } from "../../../3_services/Build/Typescript/Transpiler.interface.mjs";
 import { TYPESCRIPT_PROJECT } from "../../../3_services/Build/Typescript/TypescriptProject.interface.mjs";
 import ClassDescriptorInterface from "../../../3_services/Thing/ClassDescriptor.interface.mjs";
 import InterfaceDescriptorInterface from "../../../3_services/Thing/InterfaceDescriptor.interface.mjs";
 import { UnitType } from "../../../3_services/UCP/UcpUnit.interface.mjs";
-export default class DefaultTransformer implements Transformer {
+export default class DefaultTranspiler implements Transpiler {
     config: ts.ParsedCommandLine;
     buildConfig: BuildConfig;
 
-    static async init(baseDir: string, buildConfig: BuildConfig): Promise<Transformer> {
+    static async init(baseDir: string, buildConfig: BuildConfig): Promise<Transpiler> {
 
         const configFile = ts.findConfigFile(baseDir, ts.sys.fileExists);
         if (!configFile)
@@ -24,9 +24,10 @@ export default class DefaultTransformer implements Transformer {
         parsedConfig.options.noEmitOnError = false;
         parsedConfig.options.outDir = buildConfig.distributionFolder;
         (parsedConfig.options as any).listEmittedFiles = true;
+        // deactivated transformer
         // if (!buildConfig.distributionFolder.includes("Transformer"))
         //     (parsedConfig.options as PluginOptions).plugins = buildConfig.transformer;
-        return new DefaultTransformer(parsedConfig, buildConfig);
+        return new DefaultTranspiler(parsedConfig, buildConfig);
     }
 
     constructor(config: ts.ParsedCommandLine, buildConfig: BuildConfig) {
@@ -35,7 +36,8 @@ export default class DefaultTransformer implements Transformer {
     }
 
     async writeComponentDescriptor(name: string, namespace: string, version: string, files: string[]): Promise<void> {
-        const descriptor = new DefaultUcpComponentDescriptor(name, namespace, version, files
+        const exportFile = `${TYPESCRIPT_PROJECT.EXPORTS_FILE_NAME}.${this.ExportFileNameExtension.replace("t", "j")}`
+        const descriptor = new DefaultUcpComponentDescriptor(name, namespace, version, exportFile, files
             .map(path => new DefaultUcpUnit(UnitType.File, join(".", relative(this.buildConfig.distributionFolder, path)))));
         writeFileSync(join(this.buildConfig.distributionFolder, `${name}.component.json`), JSON.stringify(descriptor, null, 2));
     }
