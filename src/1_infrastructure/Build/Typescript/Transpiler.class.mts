@@ -34,10 +34,15 @@ export default class DefaultTranspiler implements Transpiler {
         const readConfig = ts.readConfigFile(configFile, ts.sys.readFile);
         const parsedConfig = ts.parseJsonConfigFileContent(readConfig.config, ts.sys, this.baseDir);
         parsedConfig.options.noEmit = false;
-        parsedConfig.options.noEmitOnError = false;
+      
         parsedConfig.options.outDir = buildConfig.distributionFolder;
         parsedConfig.options.preserveWatchOutput = true;
         (parsedConfig.options as any).listEmittedFiles = true;
+
+        // TODO can be removed when path linking to real .mts files
+        parsedConfig.options.noEmitOnError = false;
+        // TODO can be remove when exclude will work
+        parsedConfig.options.suppressOutputPathCheck = true;
         return parsedConfig;
     }
 
@@ -152,20 +157,50 @@ export default class DefaultTranspiler implements Transpiler {
         writeFileSync(this.tsconfigFilePath, JSON.stringify(config, null, 2))
     }
 
+    readDirectory(rootDir: string, extensions: readonly string[], excludes: readonly string[] | undefined, includes: readonly string[], depth?: number): string[] {
+        return ts.sys.readDirectory(rootDir, extensions, excludes, includes, depth);
+    }
+
+
+
     async transpile(): Promise<string[]> {
         const compilerHost = ts.createCompilerHost(this.config.options);
         compilerHost.readFile = this.readFile.bind(this)
 
-        const program = ts.createProgram([...this.config.fileNames, this.ExportFileName], this.config.options, compilerHost);
+        // const oldReadDirectory = compilerHost.readDirectory
+        compilerHost.readDirectory = this.readDirectory.bind(this)
 
-        const emitResult = program.emit();
-        const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
-        if (allDiagnostics.length) {
-            console.log(this.formatDiagnostics.bind(this)(allDiagnostics));
+        // const program = ts.createProgram([...this.config.fileNames, this.ExportFileName], this.config.options, compilerHost);
+        const program = ts.createProgram({
+            rootNames: [...this.config.fileNames, this.ExportFileName],
+            options: this.config.options,
+            projectReferences: [],
+            host: compilerHost,
+            oldProgram: undefined,
+            configFileParsingDiagnostics: this.config.errors
+        })
+        const writeFile = (path: string, data: string, writeByteOrderMark?: boolean) => {
+            try {
+                ts.sys.writeFile(path, data, writeByteOrderMark);
+            } catch (e) {
+                console.log(e);
+
+            }
         }
+        const emitResult = program.emit(undefined, writeFile);
 
-        let exitCode = emitResult.emitSkipped ? 1 : 0;
-        exitCode && console.error('\x1b[31m%s\x1b[0m',"Emit was skipped. please check errors");
+
+        if (emitResult.emitSkipped) {
+            const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
+            if (allDiagnostics.length) {
+                console.log(this.formatDiagnostics.bind(this)(allDiagnostics));
+            }
+
+            console.error('\x1b[31m%s\x1b[0m', "Emit was skipped. please check errors");
+            console.log("tsconfig", JSON.stringify(this.config.options, null, 2));
+            console.log("outdir", JSON.stringify(this.config.options.outDir, null, 2));
+            throw "Emit was skipped. please check errors"
+        }
 
         return emitResult.emittedFiles || []
     }
