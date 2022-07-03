@@ -3,7 +3,7 @@ import IOR from "../3_services/IOR.interface.mjs";
 import Loader, { LoaderStatic, loadingConfig } from "../3_services/Loader.interface.mjs";
 import BaseThing from "./BaseThing.class.mjs";
 
-abstract class BaseLoader extends BaseThing<BaseLoader> implements Loader {
+export default abstract class AbstractDefaultLoader extends BaseThing<AbstractDefaultLoader> implements Loader {
     abstract removeObjectFromStore(object: any): void;
     abstract addObject2Store(ior: IOR, object: any): void;
 
@@ -25,6 +25,4 @@ abstract class BaseLoader extends BaseThing<BaseLoader> implements Loader {
         // @ts-ignore 
         return this._instance;
     }
-
 }
-export default BaseLoader;

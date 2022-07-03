@@ -26,13 +26,13 @@ export default class DefaultEAMRepository implements EAMRepository {
 
         const gitRepository = await DefaultGitRepository.init(basePath, buildConfig.sourceComponentsPath);
 
-        //TODO@pb move to config
-        const transformer = (await this.getComponentBuilder(gitRepository, buildConfig)).find(x => x.name === "Transformer" && x.namespace === "tla.EAM.Thinglish" && x.version === "build")
-        if (transformer === undefined) throw "Without transformer once cannot be build"
-        buildConfig.distributionFolder = transformer.distributionFolder;
-        await transformer.install(buildConfig);
-        await transformer.build(buildConfig);
-        buildConfig.transformer?.push({ transform: join(transformer.distributionFolder, "index.cjs"), type:"program" })
+        // //TODO@pb move to config
+        // const transformer = (await this.getComponentBuilder(gitRepository, buildConfig)).find(x => x.name === "Transformer" && x.namespace === "tla.EAM.Thinglish" && x.version === "build")
+        // if (transformer === undefined) throw "Without transformer once cannot be build"
+        // buildConfig.distributionFolder = transformer.distributionFolder;
+        // await transformer.install(buildConfig);
+        // await transformer.build(buildConfig);
+        // buildConfig.transformer?.push({ transform: join(transformer.distributionFolder, "index.cjs"), type: "program" })
 
         return new DefaultEAMRepository(buildConfig, gitRepository);
     }
@@ -51,10 +51,22 @@ export default class DefaultEAMRepository implements EAMRepository {
             }))
     }
 
-    install = async () => await this.runBuildStep("install")
+    async install(): Promise<void> {
+        for (let componentBuilder of await this.getComponentBuilder()) {
+            await componentBuilder.install({ ...this.buildConfig, distributionFolder: componentBuilder.distributionFolder })
+        }
+    }
+
+    async build(): Promise<void> {
+        for (let componentBuilder of await this.getComponentBuilder()) {
+            await componentBuilder.build({ ...this.buildConfig, distributionFolder: componentBuilder.distributionFolder })
+        }
+    }
+
+    // install = async () => await this.runBuildStep("install")
     beforeBuild = async () => await this.runBuildStep("beforeBuild")
-    build = async () => await this.runBuildStep("build")
-    afterBuild = async () => await this.runBuildStep("afterBuild")
+    // build = async () => await this.runBuildStep("build")
+    watch = async () => await this.runBuildStep("watch")
 
     private async runBuildStep(prop: keyof Buildable) {
         (await this.getComponentBuilder()).forEach(async (component) => {

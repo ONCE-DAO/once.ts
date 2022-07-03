@@ -2,40 +2,23 @@ import IOR from "../../3_services/IOR.interface.mjs";
 import Loader, { loadingConfig } from "../../3_services/Loader.interface.mjs";
 import { urlProtocol } from "../../3_services/Url.interface.mjs";
 import UUiD from "../JSExtensions/UUiD.class.mjs";
-import ClassDescriptor from "./ClassDescriptor.class.mjs";
 import DefaultUrl, { formatType } from "./DefaultUrl.class.mjs";
 
 
 
 
-@ClassDescriptor.componentExport("namedExport")
+// TODO add annotation
+// @ClassDescriptor.componentExport("namedExport")
 export default class DefaultIOR extends DefaultUrl implements IOR {
-
     private _referencedObject: any;
     public loader: Loader | undefined;
-    // TODO@BE refactor to package
-    public namespace: string | undefined = undefined;
-    // TODO@BE refactor to versionString
-    public namespaceVersion: string | undefined = undefined;
-
+    public package: string | undefined = undefined;
+    public version: string | undefined = undefined;
     public namespaceObject: string | undefined = undefined;
-
-
-    // static async load<T extends Thing>(url: string, name: string): Promise<{ new(): T } | undefined> {
-    //     try {
-    //         const imported: any = await import(url)
-    //         return imported[name]
-    //     }
-    //     catch {
-    //         // perhaps return a more specific element with error description but not for poc
-    //         return undefined
-    //     }
-    // }
 
     static async load(iorString: string, config?: loadingConfig) {
         return new this().init(iorString).load(config);
     }
-
 
     static getIORType(urlObject: DefaultIOR | string) {
         const href = (urlObject instanceof DefaultIOR ? urlObject.href : urlObject)
@@ -48,7 +31,12 @@ export default class DefaultIOR extends DefaultUrl implements IOR {
         }
         return false;
     }
-
+    
+    static createUdeIor(): IOR {
+        //HACK Need to change that later
+        const IOR = new DefaultIOR().init('ior:ude:http://localhost:3000/UDE/' + UUiD.uuidv4());
+        return IOR;
+    }
 
     init(url: string) {
         this.href = url;
@@ -61,12 +49,10 @@ export default class DefaultIOR extends DefaultUrl implements IOR {
 
     // Extra setter to add ior Protocol 
     set href(value: string) {
-
         super.href = value;
         if (!this.protocol.includes(urlProtocol.ior)) {
             this.protocol.unshift(urlProtocol.ior);
         }
-
     }
 
     protected _parseUrl(url: string): void {
@@ -85,8 +71,8 @@ export default class DefaultIOR extends DefaultUrl implements IOR {
     private _parsePackageAndVersion(url: string): string {
         let packageMatch = url.match(/^([^:\[]+)(\[([\^\.\da-zA-Z#]+)\])?(\/(.+))?$/);
         if (packageMatch) {
-            this.namespace = packageMatch[1];
-            this.namespaceVersion = packageMatch[3];
+            this.package = packageMatch[1];
+            this.version = packageMatch[3];
             this.namespaceObject = packageMatch[5]
             url = url.substring(packageMatch[0].length)
         }
@@ -110,8 +96,8 @@ export default class DefaultIOR extends DefaultUrl implements IOR {
         }
         if (type === formatType.origin) return '';
         url += protocol.join(':') + ':/';
-        url += this.namespace;
-        if (this.namespaceVersion) url += `[${this.namespaceVersion}]`
+        url += this.package;
+        if (this.version) url += `[${this.version}]`
 
         if (this.namespaceObject) url += `/${this.namespaceObject}`
 
@@ -168,8 +154,6 @@ export default class DefaultIOR extends DefaultUrl implements IOR {
         return result;
     }
 
-
-
     clone(): IOR {
         return new DefaultIOR().init(this.href);
     }
@@ -182,9 +166,7 @@ export default class DefaultIOR extends DefaultUrl implements IOR {
         return this.loader;
     }
 
-
     async load(config?: loadingConfig) {
-        // return Promise.resolve(this.loader.load(this));
         await this.discoverLoader();
         if (!this.loader) throw new Error("No Loader found for IOR " + this.href);
 
@@ -197,9 +179,5 @@ export default class DefaultIOR extends DefaultUrl implements IOR {
         return loadingPromiseOrObject;
     }
 
-    static createUdeIor(): IOR {
-        //HACK Need to change that later
-        const IOR = new DefaultIOR().init('ior:ude:http://localhost:3000/UDE/' + UUiD.uuidv4());
-        return IOR;
-    }
+ 
 }

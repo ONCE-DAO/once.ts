@@ -1,18 +1,20 @@
-import DefaultEAMD from "../../1_infrastructure/EAMD.class.mjs";
 import { loaderReturnValue } from "../../3_services/Loader.interface.mjs";
 import Once, { OnceMode, OnceState, resolveContext, loadContext, OnceNodeImportLoader } from "../../3_services/Once.interface.mjs";
-import Scenario from "../Scenario.class.mjs";
-import DefaultIOR from "../Things/DefaultIOR.class.mjs";
-import { BaseNodeOnce } from "./BaseOnce.class.mjs";
+import { EAMD_CONSTANTS } from "../../3_services/UCP/EAMD.interface.mjs";
+import DefaultEAMD from "../UCP/EAMD.class.mjs";
+// import DefaultIOR from "../Things/DefaultIOR.class.mjs";
+import { AbstractNodeOnce } from "./AbstractNodeOnce.mjs";
 
-export default class DefaultOnceNodeImportLoader extends BaseNodeOnce implements Once, OnceNodeImportLoader {
+export default class DefaultNodeOnceImportLoader extends AbstractNodeOnce implements Once, OnceNodeImportLoader {
   mode = OnceMode.NODE_LOADER;
   state = OnceState.DISCOVER_SUCCESS;
   global: typeof globalThis = global;
 
   static async start() {
-    const eamd = await DefaultEAMD.getInstance(Scenario.Default)
-    return new DefaultOnceNodeImportLoader(eamd);
+    const scenarioDomain = process.env.SCENARIO_DOMAIN || EAMD_CONSTANTS.DEFAULT_SCENARIO_DOMAIN
+    const basePath = process.env.BASE_PATH || process.cwd()
+    const eamd = await DefaultEAMD.init(basePath, scenarioDomain)
+    return new DefaultNodeOnceImportLoader(eamd);
   }
 
   get OnceLoader() {
@@ -51,8 +53,8 @@ export default class DefaultOnceNodeImportLoader extends BaseNodeOnce implements
     defaultResolve: Function
   ): Promise<{ url: string }> {
     console.log("RESOLVE", specifier);
-    if (specifier.startsWith("ior:"))
-      specifier = await DefaultIOR.load(specifier, { returnValue: loaderReturnValue.path });
+    // if (specifier.startsWith("ior:"))
+    //   specifier = await DefaultIOR.load(specifier, { returnValue: loaderReturnValue.path });
     return defaultResolve(specifier, context, defaultResolve);
   }
 

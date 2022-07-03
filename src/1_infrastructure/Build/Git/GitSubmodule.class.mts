@@ -1,5 +1,5 @@
 import { chmodSync, writeFileSync } from "fs";
-import { dirname, relative, resolve, sep } from "path";
+import { dirname, relative, sep } from "path";
 import { basename, join } from "path";
 import { SimpleGit } from "simple-git";
 import BuildConfig from "../../../3_services/Build/BuildConfig.interface.mjs";
@@ -26,28 +26,19 @@ export default class DefaultGitSubmodule extends DefaultGitRepository implements
     protected constructor(gitRepository: GitRepository, srcComponentsDirectory: string, simpleGitRepository: SimpleGit) {
         super(gitRepository.path, gitRepository.remoteUrl, gitRepository.branch, srcComponentsDirectory, simpleGitRepository)
     }
-
+    /**
+     * Foo
+     * @override 
+     * @returns {Promise<void>}
+     * @param config 
+     * @param distributionFolder 
+     */
     async install(config: BuildConfig, distributionFolder: string): Promise<void> {
-        await super.install(config, distributionFolder)
-        this.logBuildInfo("GitSubmodule", "install")
+        console.group(`GitSubmodule install [${import.meta.url}]"`);
         this.writePostCheckoutHook()
-        console.log("done\n");
-    }
-    async beforeBuild(config: BuildConfig, distributionFolder: string): Promise<void> {
-        await super.beforeBuild(config, distributionFolder)
-        this.logBuildInfo("GitSubmodule", "beforeBuild")
-        console.log("done\n");
-    }
-    async build(config: BuildConfig, distributionFolder: string): Promise<void> {
-        await super.build(config, distributionFolder)
-        this.logBuildInfo("GitSubmodule", "build")
-        
-        console.log("done\n");
-    }
-    async afterBuild(config: BuildConfig, distributionFolder: string): Promise<void> {
-        await super.afterBuild(config, distributionFolder)
-        this.logBuildInfo("GitSubmodule", "afterBuild")
-        console.log("done\n");
+        await super.install(config, distributionFolder)
+        console.groupEnd();
+        console.log("GitSubmodule install done");
     }
 
     private writePostCheckoutHook(): void {

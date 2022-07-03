@@ -16,6 +16,7 @@ export interface Loader {
     removeObjectFromStore(object: IOR | any): void
     addObject2Store(ior: IOR, object: any | Promise<any>): void;
 }
+
 export const LoaderID = InterfaceDescriptor.lastDescriptor;
 LoaderID.componentExport = 'namedExport';
 

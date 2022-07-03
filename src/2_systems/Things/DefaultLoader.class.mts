@@ -1,19 +1,8 @@
-import BaseLoader from "../../1_infrastructure/BaseLoader.class.mjs";
+import AbstractDefaultLoader from "../../1_infrastructure/AbstractDefaultLoader.class.mjs";
 import IOR from "../../3_services/IOR.interface.mjs";
 import Loader, { LoaderID, LoaderStatic, loadingConfig } from "../../3_services/Loader.interface.mjs";
-import { OnceMode } from "../../3_services/Once.interface.mjs";
 
-
-// if (typeof ONCE !== "undefined" && ONCE.mode === OnceMode.BROWSER) {
-//     await import("../EAMD/BrowserEAMDLoader.class.mjs");
-//     await import("./BrowserUDEPersistanceManager.class.mjs");
-// } else {
-//     await import("../EAMD/ServerSideEAMDLoader.class.mjs");
-// }
-// await import("./UDELoader.class.mjs");
-
-
-export default class DefaultLoader extends BaseLoader {
+export default class DefaultLoader extends AbstractDefaultLoader {
     removeObjectFromStore(object: any): void {
         throw new Error("Method not implemented.");
     }

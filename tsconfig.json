@@ -1,19 +1,9 @@
 {
   "extends": "../../../../../tsconfig.json",
   "compilerOptions": {
-    "rootDir": "./src",
-    // "plugins": [
-    //   {
-    //     "transform": "/Users/phibar/EAMD/EAMD.ucp-build/Scenarios/de/wo-da/test/tla/EAM/Thinglish/Transformer/build/index.cjs"
-    //   }
-    // ],
-    // "outDir": "dist",
-    // "noEmit": false,
-    // "noEmitOnError": false
+    "rootDir": "./src"
   },
   "include": [
-    "./src/**/*.mts",
-    // "../../../../../Scenarios/localhost",
-    // "test",
+    "./src",
   ]
 }

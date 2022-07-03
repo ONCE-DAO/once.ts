@@ -49,29 +49,20 @@ export default class DefaultGitRepository implements GitRepository {
         await this.gitRepository.remote(["set-url", "origin", origin])
     }
 
-    async install(config: BuildConfig, distributionFolder: string): Promise<void> {
-        this.logBuildInfo("GitRepository", "install")
-        await this.updateSubmodules()
-        console.log("done\n");
+    async install(_config: BuildConfig, _distributionFolder: string): Promise<void> {
+        console.group(`GitRepository install [${import.meta.url}]"`);
+        await this.updateSubmodules();
+        console.groupEnd();
+        console.log("GitRepository install done");
     }
 
-    async beforeBuild(config: BuildConfig, distributionFolder: string): Promise<void> {
-        this.logBuildInfo("GitRepository", "beforeBuild")
-        console.log("done\n");
+    async beforeBuild(_config: BuildConfig, _distributionFolder: string): Promise<void> {
     }
 
-    async build(config: BuildConfig, distributionFolder: string): Promise<void> {
-        this.logBuildInfo("GitRepository", "build")
-        console.log("done\n");
+    async build(_config: BuildConfig, _distributionFolder: string): Promise<void> {
     }
 
-    async afterBuild(config: BuildConfig, distributionFolder: string): Promise<void> {
-        this.logBuildInfo("GitRepository", "afterBuild")
-        console.log("done\n");
-    }
-
-    protected logBuildInfo(className: string, method: keyof Buildable) {
-        console.log(`${className} [${import.meta.url}]\nrun ${method} for ${this.path}`);
+    async watch(_config: BuildConfig, _distributionFolder: string): Promise<void> {
     }
 
     async getSubmodules(submoduleInit: (path: string, srcComponentsDirectory: string) => Promise<SubmoduleInterface>): Promise<SubmoduleInterface[]> {

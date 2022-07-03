@@ -15,49 +15,52 @@ export default class DefaultNpmPackage implements NpmPackage, Buildable {
             throw new NotANpmPackage(path)
 
     }
-    async install(config: BuildConfig, distributionFolder: string): Promise<void> {
-        this.logBuildInfo("install")
-        execSync("npm i", { cwd: this.path, stdio: "inherit" })
+    async install(_config: BuildConfig, _distributionFolder: string): Promise<void> {
+        console.group(`DefaultNpmPackage install [${import.meta.url}]"`);
+
+        execSync("npm i", { cwd: this.path, stdio: "inherit" });
         console.log("npm dependencies installed");
-        console.log("done\n");
+
+        console.groupEnd();
+        console.log("DefaultNpmPackage install done");
     }
-    async beforeBuild(config: BuildConfig, distributionFolder: string): Promise<void> {
-        this.logBuildInfo("beforeBuild")
-        console.log("done\n");
+
+    async beforeBuild(_config: BuildConfig, _distributionFolder: string): Promise<void> {
     }
-    async build(config: BuildConfig, distributionFolder: string): Promise<void> {
-        this.logBuildInfo("build")
+
+    async build(_config: BuildConfig, distributionFolder: string): Promise<void> {
+        console.group(`DefaultNpmPackage build [${import.meta.url}]"`);
         this.symlinkNodeModules(this.path, distributionFolder)
-        console.log("done\n");
+        console.groupEnd();
+        console.log("DefaultNpmPackage build done");
     }
-    async afterBuild(config: BuildConfig, distributionFolder: string): Promise<void> {
-        this.logBuildInfo("afterBuild")
-        console.log("done\n");
+
+    async watch(_config: BuildConfig, _distributionFolder: string): Promise<void> {
     }
 
     private symlinkNodeModules(from: string, to: string) {
         mkdirSync(to, { recursive: true })
         from = join(from, NPM_PACKAGE_CONSTANTS.NODE_MODULES)
         to = join(to, NPM_PACKAGE_CONSTANTS.NODE_MODULES)
-        if (!existsSync(from)) return;
+        if (!existsSync(from)) {
+            console.log("node_modules folder does not exist, skipping symlink creation");
+            return;
+        }
+
         if (existsSync(to)) rmSync(to, { recursive: true })
         symlinkSync(from, to)
         console.log(`symlink created for node_module in ${to}`);
-    }
-
-    private logBuildInfo(method: keyof Buildable) {
-        console.log(`DefaultNpmPackage [${import.meta.url}]\nrun ${method} for ${this.path}`);
     }
 
     /**
      * Initialise a NpmPackage from folder path. 
      * @param path Path to a folder which contains a package.json file
      * @param fallbackName If package.json contains no definition for name it will replaced with this value
-     * @param fallbackNamespace If package.json contains no definition for namespace it will replaced with this value
+     * @param _fallbackNamespace If package.json contains no definition for namespace it will replaced with this value
      * @param version If set, this will override the version of package.json
      * @returns initialised NpmPackage (interface)
      */
-    static init(path: string, fallbackName: string, fallbackNamespace: string, version?: string): NpmPackage {
+    static init(path: string, fallbackName: string, _fallbackNamespace: string, version?: string): NpmPackage {
         const npmPackage = new this(path)
         npmPackage.setFallBackValue("name", fallbackName)
         version && npmPackage.setValue("version", version)

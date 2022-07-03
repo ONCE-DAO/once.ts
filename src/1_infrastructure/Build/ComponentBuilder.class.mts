@@ -29,10 +29,16 @@ export default class DefaultComponentBuilder implements ComponentBuilder {
         this.distributionFolder = join(buildConfig.scenario.scenarioPath, ...submodule.namespace.split("."), submodule.name, submodule.branch)
     }
 
-    install = async (config: BuildConfig) => this.buildables.forEach(async (buildable) => await buildable.install(config, this.distributionFolder))
+    async install(config: BuildConfig): Promise<void> {
+        for (let buildable of this.buildables) {
+            await buildable.install(config, this.distributionFolder)
+        }
+    }
+    
+    // install = async (config: BuildConfig) => this.buildables.forEach(async (buildable) => await buildable.install(config, this.distributionFolder))
     beforeBuild = async (config: BuildConfig) => this.buildables.forEach(async (buildable) => await buildable.beforeBuild(config, this.distributionFolder))
     build = async (config: BuildConfig) => this.buildables.forEach(async (buildable) => await buildable.build(config, this.distributionFolder))
-    afterBuild = async (config: BuildConfig) => this.buildables.forEach(async (buildable) => await buildable.afterBuild(config, this.distributionFolder))
+    watch = async (config: BuildConfig) => this.buildables.forEach(async (buildable) => await buildable.watch(config, this.distributionFolder))
 
     static async init(submodule: SubmoduleInterface, buildConfig: BuildConfig): Promise<ComponentBuilder> {
 

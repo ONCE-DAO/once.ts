@@ -5,10 +5,10 @@ import Loader, {
   loadingConfig,
 } from "../../3_services/Loader.interface.mjs";
 import { urlProtocol } from "../../3_services/Url.interface.mjs";
-import BaseLoader from "../../1_infrastructure/BaseLoader.class.mjs";
+import AbstractDefaultLoader from "../../1_infrastructure/AbstractDefaultLoader.class.mjs";
 import path from "path";
 
-class EAMDLoader extends BaseLoader implements Loader {
+class EAMDLoader extends AbstractDefaultLoader implements Loader {
   removeObjectFromStore(object: any): void {
     throw new Error("Method not implemented.");
   }
@@ -20,13 +20,15 @@ class EAMDLoader extends BaseLoader implements Loader {
   async load(ior: IOR, config: loadingConfig): Promise<any> {
     // Shortcut for once itself
 
-    if (this.canHandle(ior) !== 1 || !ior.namespace)
+    if (this.canHandle(ior) !== 1 || !ior.package)
       throw new Error("Can not load this IOR");
 
 
     if (typeof ONCE === "undefined") throw new Error("Missing ONCE");
     if (ONCE.eamd == undefined) throw new Error("Missing EAMD in ONCE");
 
+    //TODO
+    //@ts-ignore
     let eamdRepos = (await global.ONCE?.eamd?.discover());
     let iorString = ior.href;
     if (ior.namespaceObject) {
@@ -46,8 +48,12 @@ class EAMDLoader extends BaseLoader implements Loader {
     //   repoPath
     // );
 
+    //TODO
+    //@ts-ignore
     if (!ONCE.eamd.eamdDirectory) throw new Error("missing EAMD Directory")
 
+    //TODO
+    //@ts-ignore
     const modulePath = path.join(ONCE.eamd.eamdDirectory, repoPath);
 
     if (config?.returnValue === loaderReturnValue.path) {
@@ -73,7 +79,7 @@ class EAMDLoader extends BaseLoader implements Loader {
   }
 
   static canHandle(ior: IOR): number {
-    if (ior.protocol.includes(urlProtocol.esm) && ior.namespace !== undefined) {
+    if (ior.protocol.includes(urlProtocol.esm) && ior.package !== undefined) {
       return 1;
     }
     return 0;

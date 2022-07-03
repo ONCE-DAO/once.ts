@@ -3,18 +3,17 @@ import UcpUnit from "../../3_services/UCP/UcpUnit.interface.mjs";
 
 export default class DefaultUcpComponentDescriptor implements UcpComponentDescriptorInterface {
     name: string;
+    namespace: string;
     version: string;
-    relativePath: string;
     units: UcpUnit[];
     exportsFile: string;
 
 
-    constructor(name: string, version: string, relativePath: string, exportsFile:string, units: UcpUnit[]) {
+    constructor(name: string, namespace: string, version: string, exportsFile: string, units: UcpUnit[]) {
         this.name = name;
+        this.namespace = namespace;
         this.version = version;
-        this.relativePath = relativePath;
-        this.units = units;
         this.exportsFile = exportsFile;
+        this.units = units;
     }
-
 }

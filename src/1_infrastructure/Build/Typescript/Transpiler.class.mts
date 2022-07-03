@@ -1,41 +1,52 @@
 import { existsSync, readFileSync, writeFileSync } from "fs";
-import path, { extname, join, relative } from "path";
+import path, { join, relative } from "path";
 import ts from "typescript";
 import DefaultUcpComponentDescriptor from "../../../2_systems/UCP/DefaultUcpComponentDescriptor.class.mjs";
 import DefaultUcpUnit from "../../../2_systems/UCP/DefaultUcpUnit.class.mjs";
 import BuildConfig from "../../../3_services/Build/BuildConfig.interface.mjs";
-import Transpiler, { PluginOptions, TRANSFORMER } from "../../../3_services/Build/Typescript/Transpiler.interface.mjs";
+import Transpiler, { TRANSFORMER } from "../../../3_services/Build/Typescript/Transpiler.interface.mjs";
 import { TYPESCRIPT_PROJECT } from "../../../3_services/Build/Typescript/TypescriptProject.interface.mjs";
 import ClassDescriptorInterface from "../../../3_services/Thing/ClassDescriptor.interface.mjs";
 import InterfaceDescriptorInterface from "../../../3_services/Thing/InterfaceDescriptor.interface.mjs";
 import { UnitType } from "../../../3_services/UCP/UcpUnit.interface.mjs";
-export default class DefaultTranspiler implements Transpiler {
-    config: ts.ParsedCommandLine;
-    buildConfig: BuildConfig;
 
-    static async init(baseDir: string, buildConfig: BuildConfig): Promise<Transpiler> {
+export default class DefaultTranspiler implements Transpiler {
+    private config: ts.ParsedCommandLine;
+    private buildConfig: BuildConfig;
+    private incremental: boolean = false;
+
+
+    static async init(baseDir: string, buildConfig: BuildConfig, namespace: string): Promise<Transpiler> {
 
         const configFile = ts.findConfigFile(baseDir, ts.sys.fileExists);
         if (!configFile)
             throw Error(`no tsconfig file found in folder: ${baseDir}`);
+
+        return new DefaultTranspiler(buildConfig, configFile, baseDir, namespace);
+    }
+
+    constructor(buildConfig: BuildConfig, configFile: string, private baseDir: string, private namespace: string) {
+        this.buildConfig = buildConfig;
+        this.config = this.parseConfig(configFile, buildConfig);
+    }
+
+    private parseConfig(configFile: string, buildConfig: BuildConfig) {
         const readConfig = ts.readConfigFile(configFile, ts.sys.readFile);
-        const parsedConfig = ts.parseJsonConfigFileContent(readConfig.config, ts.sys, baseDir);
+        const parsedConfig = ts.parseJsonConfigFileContent(readConfig.config, ts.sys, this.baseDir);
         parsedConfig.options.noEmit = false;
         parsedConfig.options.noEmitOnError = false;
         parsedConfig.options.outDir = buildConfig.distributionFolder;
+        parsedConfig.options.preserveWatchOutput = true;
         (parsedConfig.options as any).listEmittedFiles = true;
-        // deactivated transformer
-        // if (!buildConfig.distributionFolder.includes("Transformer"))
-        //     (parsedConfig.options as PluginOptions).plugins = buildConfig.transformer;
-        return new DefaultTranspiler(parsedConfig, buildConfig);
-    }
-
-    constructor(config: ts.ParsedCommandLine, buildConfig: BuildConfig) {
-        this.config = config;
-        this.buildConfig = buildConfig;
+        return parsedConfig;
     }
 
     async writeComponentDescriptor(name: string, namespace: string, version: string, files: string[]): Promise<void> {
+        if (this.incremental) {
+            console.error("incremental descriptor not implemented yet");
+            return;
+
+        }
         const exportFile = `${TYPESCRIPT_PROJECT.EXPORTS_FILE_NAME}.${this.ExportFileNameExtension.replace("t", "j")}`
         const descriptor = new DefaultUcpComponentDescriptor(name, namespace, version, exportFile, files
             .map(path => new DefaultUcpUnit(UnitType.File, join(".", relative(this.buildConfig.distributionFolder, path)))));
@@ -135,7 +146,7 @@ export default class DefaultTranspiler implements Transpiler {
             config.compilerOptions.paths[`ior:esm:/${namespace}.${name}[${version}]`] = exportFiles
         }
         else {
-            delete config.compilerOptions.paths[`ior:esm:/${namespace}.${name}[${version}]`]
+            !this.incremental && delete config.compilerOptions.paths[`ior:esm:/${namespace}.${name}[${version}]`]
         }
 
         writeFileSync(this.tsconfigFilePath, JSON.stringify(config, null, 2))
@@ -143,33 +154,86 @@ export default class DefaultTranspiler implements Transpiler {
 
     async transpile(): Promise<string[]> {
         const compilerHost = ts.createCompilerHost(this.config.options);
-        compilerHost.getSourceFile = this.getSourceFile.bind(this)
-
+        compilerHost.readFile = this.readFile.bind(this)
 
         const program = ts.createProgram([...this.config.fileNames, this.ExportFileName], this.config.options, compilerHost);
+
         const emitResult = program.emit();
         const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
         if (allDiagnostics.length) {
-            const formatHost: ts.FormatDiagnosticsHost = {
-                getCanonicalFileName: (path) => path,
-                getCurrentDirectory: ts.sys.getCurrentDirectory,
-                getNewLine: () => ts.sys.newLine,
-            }
-
-            const message = ts.formatDiagnostics(allDiagnostics, formatHost);
-            if (emitResult.emitSkipped)
-                console.error(message);
-            else
-                console.error(message);
+            console.log(this.formatDiagnostics.bind(this)(allDiagnostics));
         }
 
         let exitCode = emitResult.emitSkipped ? 1 : 0;
-        console.log(`Process exiting with code '${exitCode}'.`);
-        exitCode && process.exit(exitCode);
+        exitCode && console.error('\x1b[31m%s\x1b[0m',"Emit was skipped. please check errors");
 
         return emitResult.emittedFiles || []
     }
 
+    async watch(changedFunction: (files: string[]) => Promise<void>): Promise<void> {
+        const createProgram = ts.createEmitAndSemanticDiagnosticsBuilderProgram;
+
+        const write = function (s: string) {
+            if (s.startsWith("TSFILE:")) return;
+            console.log(s)
+        }
+
+        const host = ts.createWatchCompilerHost([...this.config.fileNames, this.ExportFileName], this.config.options, { ...ts.sys, write }, createProgram, this.reportDiagnostic, this.reportWatchStatusChanged)
+        host.readFile = this.readFile.bind(this)
+
+        // You can technically override any given hook on the host, though you probably don't need to.
+        // Note that we're assuming `origCreateProgram` and `origPostProgramCreate` doesn't use `this` at all.
+
+        const origCreateProgram = host.createProgram;
+        host.createProgram = (rootNames, options, host, oldProgram) => {
+            console.log("** We're about to create the program! **");
+            this.incremental = oldProgram !== undefined;
+            if (this.incremental && options) {
+                options.noEmitOnError = true;
+            }
+            return origCreateProgram(rootNames, options, host, oldProgram);
+        };
+
+        const origPostProgramCreate = host.afterProgramCreate;
+        host.afterProgramCreate = program => {
+            // if (firstCreateProgram) {
+            const oldemit = program.emit
+            program.emit = (targetSourceFile, writeFile, cancellationToken, emitOnlyDtsFiles, customTransformers) => {
+                const emitResult = oldemit?.(targetSourceFile, writeFile, cancellationToken, emitOnlyDtsFiles, customTransformers);
+                if (emitResult?.emittedFiles)
+                    changedFunction(emitResult.emittedFiles)
+                return emitResult
+            }
+            // }
+            console.log("** We finished making the program! **");
+            origPostProgramCreate!(program);
+        };
+
+        // `createWatchProgram` creates an initial program, watches files, and updates the program over time.
+        ts.createWatchProgram(host);
+    }
+
+    private formatDiagnostics(diagnostics: ts.Diagnostic[] | ts.Diagnostic, formatHost = DefaultTranspiler.formatHost) {
+        return `DefaultCustomTranspiler: ${this.namespace}\n${Array.isArray(diagnostics) ?
+            ts.formatDiagnosticsWithColorAndContext(diagnostics, formatHost)
+            : ts.formatDiagnosticsWithColorAndContext([diagnostics], formatHost)}`
+    }
+
+    private reportDiagnostic(diagnostic: ts.Diagnostic) {
+        ts.sys.write(this.formatDiagnostics.bind(this)(diagnostic));
+    }
+
+    private reportWatchStatusChanged(diagnostic: ts.Diagnostic) {
+        ts.sys.write(this.formatDiagnostics.bind(this)(diagnostic));
+    }
+
+    private static get formatHost(): ts.FormatDiagnosticsHost {
+        return {
+            getCanonicalFileName: (path) => path,
+            getCurrentDirectory: ts.sys.getCurrentDirectory,
+            getNewLine: () => ts.sys.newLine,
+        }
+    }
 
     private get pathsConfig() {
         existsSync(this.tsconfigFilePath) || writeFileSync(this.tsconfigFilePath, this.defaultPathFile)
@@ -212,14 +276,7 @@ export default class DefaultTranspiler implements Transpiler {
 
     }
 
-    private getSourceFile(fileName: string, languageVersion: ts.ScriptTarget, onError?: (message: string) => void): ts.SourceFile | undefined {
-        const sourceText = this.getSourceText(fileName)
-        if (sourceText)
-            return ts.createSourceFile(fileName, sourceText, languageVersion)
-        return undefined
-    }
-
-    private getSourceText(fileName: string): string | undefined {
+    private readFile(fileName: string): string | undefined {
         return ts.sys.fileExists(fileName) ?
             ts.sys.readFile(fileName)
             : fileName === this.ExportFileName
@@ -227,19 +284,12 @@ export default class DefaultTranspiler implements Transpiler {
                 : undefined
     }
 
-
-    private createExportFileContent() {
-        if (this.buildConfig.distributionFolder.includes("Transformer")) return
-        const files = this.config.fileNames
+    private createExportFileContent(): string {
         let fileContent = "export {}\n"
-
-
 
         if (existsSync(this.DefaultExportFileName)) {
             fileContent += readFileSync(this.DefaultExportFileName).toString()
         }
-
-        console.log(fileContent);
 
         // let exportList: string[] = [];
         // let defaultExport: string = "";

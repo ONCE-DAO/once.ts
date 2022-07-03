@@ -1,6 +1,3 @@
-import { execSync } from "child_process";
-import { install } from "ts-patch";
-import Buildable from "../../../3_services/Build/Buildable.interface.mjs";
 import BuildConfig from "../../../3_services/Build/BuildConfig.interface.mjs";
 import TypescriptProject from "../../../3_services/Build/Typescript/TypescriptProject.interface.mjs";
 import DefaultTranspiler from "./Transpiler.class.mjs";
@@ -11,6 +8,8 @@ export default class DefaultTypescriptProject implements TypescriptProject {
     namespace: string;
     version: string;
 
+    private get fullQualifiedNamespace() { return `${this.namespace}.${this.name}[${this.version}]` }
+
     constructor(path: string, name: string, namespace: string, version: string) {
         this.path = path;
         this.name = name;
@@ -19,45 +18,37 @@ export default class DefaultTypescriptProject implements TypescriptProject {
     }
 
     static async init(path: string, name: string, namespace: string, version: string): Promise<TypescriptProject> {
-
-        return new DefaultTypescriptProject(path, name, namespace, version)
+        return new DefaultTypescriptProject(path, name, namespace, version);
     }
 
     async install(config: BuildConfig): Promise<void> {
-        this.logBuildInfo("install")
-        execSync("npm i -D ts-patch", { cwd: this.path, stdio: "inherit" })
-        execSync("npx ts-patch i", { cwd: this.path, stdio: "inherit" })
-        console.log("done\n");
     }
 
     async beforeBuild(config: BuildConfig): Promise<void> {
-        this.logBuildInfo("beforeBuild")
-        //TODO update tsconfig file paths, plugins
-        console.log("done\n");
     }
 
     async build(config: BuildConfig): Promise<void> {
-        this.logBuildInfo("build")
-        install({ basedir: this.path }) //ts-patch
+        console.group(`DefaultTypescriptProject build ${this.fullQualifiedNamespace} [${import.meta.url}]"`);
 
-
-        const transformer = await DefaultTranspiler.init(this.path, config)
+        const transformer = await DefaultTranspiler.init(this.path, config, this.fullQualifiedNamespace)
         const files = await transformer.transpile()
         await transformer.writeTsConfigPaths(files, this.name, this.namespace, this.version)
         await transformer.writeComponentDescriptor(this.name, this.namespace, this.version, files)
-        // await transformer.extendIndexFile(files)
 
-
-        console.log("done\n");
+        console.groupEnd();
+        console.log("DefaultTypescriptProject build done");
     }
 
-    async afterBuild(config: BuildConfig): Promise<void> {
-        this.logBuildInfo("afterBuild")
-        //TODO perhaps copy stuff
-        console.log("done\n");
-    }
+    async watch(config: BuildConfig, distributionFolder: string): Promise<void> {
+        console.group(`DefaultTypescriptProject watch ${this.fullQualifiedNamespace} [${import.meta.url}]"`);
 
-    private logBuildInfo(method: keyof Buildable) {
-        console.log(`DefaultTypescriptProject [${import.meta.url}]\nrun ${method} for ${this.path}`);
+        const transpiler = await DefaultTranspiler.init(this.path, config, `${this.namespace}.${this.name}[${this.version}]`)
+        await transpiler.watch(async (files: string[]) => {
+            await transpiler.writeTsConfigPaths(files, this.name, this.namespace, this.version)
+            await transpiler.writeComponentDescriptor(this.name, this.namespace, this.version, files)
+        })
+
+        console.groupEnd();
+        console.log("DefaultTypescriptProject watch done");
     }
 }

@@ -18,5 +18,5 @@ export default interface ComponentBuilder {
     install(config: BuildConfig): Promise<void>
     beforeBuild(config: BuildConfig): Promise<void>
     build(config: BuildConfig): Promise<void>
-    afterBuild(config: BuildConfig): Promise<void>
+    watch(config: BuildConfig): Promise<void>
 }
