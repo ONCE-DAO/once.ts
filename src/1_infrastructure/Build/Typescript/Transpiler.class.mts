@@ -1,13 +1,11 @@
-import { existsSync, readFileSync, writeFileSync } from "fs";
-import path, { join, relative } from "path";
+import { existsSync } from "fs";
+import { join, relative } from "path";
 import ts from "typescript";
 import DefaultUcpComponentDescriptor from "../../../2_systems/UCP/DefaultUcpComponentDescriptor.class.mjs";
 import DefaultUcpUnit from "../../../2_systems/UCP/DefaultUcpUnit.class.mjs";
 import BuildConfig from "../../../3_services/Build/BuildConfig.interface.mjs";
 import Transpiler, { TRANSFORMER } from "../../../3_services/Build/Typescript/Transpiler.interface.mjs";
 import { TYPESCRIPT_PROJECT } from "../../../3_services/Build/Typescript/TypescriptProject.interface.mjs";
-import ClassDescriptorInterface from "../../../3_services/Thing/ClassDescriptor.interface.mjs";
-import InterfaceDescriptorInterface from "../../../3_services/Thing/InterfaceDescriptor.interface.mjs";
 import { UnitType } from "../../../3_services/UCP/UcpUnit.interface.mjs";
 
 export default class DefaultTranspiler implements Transpiler {
@@ -17,11 +15,9 @@ export default class DefaultTranspiler implements Transpiler {
 
 
     static async init(baseDir: string, buildConfig: BuildConfig, namespace: string): Promise<Transpiler> {
-
         const configFile = ts.findConfigFile(baseDir, ts.sys.fileExists);
         if (!configFile)
             throw Error(`no tsconfig file found in folder: ${baseDir}`);
-
         return new DefaultTranspiler(buildConfig, configFile, baseDir, namespace);
     }
 
@@ -34,7 +30,7 @@ export default class DefaultTranspiler implements Transpiler {
         const readConfig = ts.readConfigFile(configFile, ts.sys.readFile);
         const parsedConfig = ts.parseJsonConfigFileContent(readConfig.config, ts.sys, this.baseDir);
         parsedConfig.options.noEmit = false;
-      
+
         parsedConfig.options.outDir = buildConfig.distributionFolder;
         parsedConfig.options.preserveWatchOutput = true;
         (parsedConfig.options as any).listEmittedFiles = true;
@@ -55,84 +51,7 @@ export default class DefaultTranspiler implements Transpiler {
         const exportFile = `${TYPESCRIPT_PROJECT.EXPORTS_FILE_NAME}.${this.ExportFileNameExtension.replace("t", "j")}`
         const descriptor = new DefaultUcpComponentDescriptor(name, namespace, version, exportFile, files
             .map(path => new DefaultUcpUnit(UnitType.File, join(".", relative(this.buildConfig.distributionFolder, path)))));
-        writeFileSync(join(this.buildConfig.distributionFolder, `${name}.component.json`), JSON.stringify(descriptor, null, 2));
-    }
-
-    async extendIndexFile(files: string[]): Promise<void> {
-        if (this.buildConfig.distributionFolder.includes("Transformer")) return;
-        let exportList: string[] = [];
-        let defaultExport: string = "";
-
-        // let myFile = import.meta.url.replace(/^file:\/\//, '');
-        for (const file of files) {
-
-            //   const fileImport = baseDirectory + file.replace(/\.mts$/, '');
-            const fileImport = file.replace(/\.mts$/, '');
-            let moduleFile = path.relative(this.buildConfig.distributionFolder, fileImport);
-
-            moduleFile = moduleFile.match(/^\./) ? moduleFile : "./" + moduleFile;
-            let importedModule;
-            try {
-                importedModule = await import(fileImport)
-            } catch (e) {
-                console.log(e)
-            }
-            if (importedModule) {
-                let exportedModuleItems = { ...importedModule };
-                for (const itemKey of Object.keys(exportedModuleItems)) {
-                    let item = exportedModuleItems[itemKey];
-                    let descriptor: InterfaceDescriptorInterface | ClassDescriptorInterface | undefined;
-                    if ("allExtendedInterfaces" in item) {
-                        descriptor = item as InterfaceDescriptorInterface;
-
-                    } else if ("classDescriptor" in item && item.classDescriptor) {
-                        descriptor = item.classDescriptor as ClassDescriptorInterface;
-                    }
-
-                    if (descriptor && descriptor.componentExport && descriptor.componentExportName) {
-
-                        let line = "import ";
-                        line += itemKey === "default" ? descriptor.componentExportName : `{ ${itemKey} } `;
-                        line += ` from "./${moduleFile}";\n`
-
-                        // fs.writeSync(fd, line);
-
-                        // Import Real Interface
-                        // if ("allExtendedInterfaces" in item) {
-                        //     let exportName = this._getInterfaceExportName(baseDirectory + file, item.name);
-
-                        //     let interfaceLine = "import ";
-                        //     interfaceLine += exportName === "default" ? item.name : `{ ${exportName} } `;
-                        //     interfaceLine += ` from "./${moduleFile}";\n`
-                        //     exportList.push(item.name);
-                        //     fs.writeSync(fd, interfaceLine);
-
-                        // }
-
-                        if (descriptor.componentExport === "defaultExport") {
-                            defaultExport = descriptor.componentExportName;
-                        } else {
-                            exportList.push(descriptor.componentExportName);
-                        }
-
-                    }
-                }
-            }
-        }
-
-
-        if (defaultExport) {
-            let line = `export default ${defaultExport};\n`
-            // fs.writeSync(fd, line);
-        }
-        if (exportList.length > 0) {
-            let line = `export {${exportList.join(', ')}};\n`
-            // fs.writeSync(fd, line);
-        }
-
-        // fs.writeSync(fd, "// ########## Generated Export END ##########\n");
-        // fs.closeSync(fd);
-
+        ts.sys.writeFile(join(this.buildConfig.distributionFolder, `${name}.component.json`), JSON.stringify(descriptor, null, 2));
     }
 
     async writeTsConfigPaths(files: string[], name: string, namespace: string, version: string): Promise<void> {
@@ -154,14 +73,12 @@ export default class DefaultTranspiler implements Transpiler {
             !this.incremental && delete config.compilerOptions.paths[`ior:esm:/${namespace}.${name}[${version}]`]
         }
 
-        writeFileSync(this.tsconfigFilePath, JSON.stringify(config, null, 2))
+        ts.sys.writeFile(this.tsconfigFilePath, JSON.stringify(config, null, 2))
     }
 
     readDirectory(rootDir: string, extensions: readonly string[], excludes: readonly string[] | undefined, includes: readonly string[], depth?: number): string[] {
         return ts.sys.readDirectory(rootDir, extensions, excludes, includes, depth);
     }
-
-
 
     async transpile(): Promise<string[]> {
         const compilerHost = ts.createCompilerHost(this.config.options);
@@ -213,7 +130,14 @@ export default class DefaultTranspiler implements Transpiler {
             console.log(s)
         }
 
-        const host = ts.createWatchCompilerHost([...this.config.fileNames, this.ExportFileName], this.config.options, { ...ts.sys, write }, createProgram, this.reportDiagnostic, this.reportWatchStatusChanged)
+        const host = ts.createWatchCompilerHost(
+            [...this.config.fileNames, this.ExportFileName],
+            this.config.options,
+            { ...ts.sys, write },
+            createProgram,
+            this.reportDiagnostic.bind(this),
+            this.reportWatchStatusChanged.bind(this)
+            )
         host.readFile = this.readFile.bind(this)
 
         // You can technically override any given hook on the host, though you probably don't need to.
@@ -255,11 +179,12 @@ export default class DefaultTranspiler implements Transpiler {
     }
 
     private reportDiagnostic(diagnostic: ts.Diagnostic) {
-        ts.sys.write(this.formatDiagnostics.bind(this)(diagnostic));
+        if (this)
+            ts.sys.write(this.formatDiagnostics.bind(this)(diagnostic));
     }
 
     private reportWatchStatusChanged(diagnostic: ts.Diagnostic) {
-        ts.sys.write(this.formatDiagnostics.bind(this)(diagnostic));
+        ts.sys.write(this.formatDiagnostics(diagnostic));
     }
 
     private static get formatHost(): ts.FormatDiagnosticsHost {
@@ -271,7 +196,7 @@ export default class DefaultTranspiler implements Transpiler {
     }
 
     private get pathsConfig() {
-        existsSync(this.tsconfigFilePath) || writeFileSync(this.tsconfigFilePath, this.defaultPathFile)
+        existsSync(this.tsconfigFilePath) || ts.sys.writeFile(this.tsconfigFilePath, this.defaultPathFile)
         let configFile = ts.findConfigFile(this.buildConfig.eamdPath, ts.sys.fileExists, TRANSFORMER.CONFIG_PATHS_FILE);
         if (!configFile) throw `${TRANSFORMER.CONFIG_PATHS_FILE} not found in ${this.buildConfig.eamdPath}`
         const readResult = ts.readConfigFile(configFile, ts.sys.readFile);
@@ -308,108 +233,23 @@ export default class DefaultTranspiler implements Transpiler {
 
     private get DefaultExportFileName() {
         return join(this.config.options.rootDir || "", `${TYPESCRIPT_PROJECT.DEFAULT_EXPORT_FILE}.${this.ExportFileNameExtension}`)
-
     }
 
     private readFile(fileName: string): string | undefined {
-        return ts.sys.fileExists(fileName) ?
-            ts.sys.readFile(fileName)
-            : fileName === this.ExportFileName
-                ? this.createExportFileContent()
-                : undefined
+        if (ts.sys.fileExists(fileName)) {
+            return ts.sys.readFile(fileName);
+        }
+        else {
+            return this.createExportFileContent();
+        }
     }
 
     private createExportFileContent(): string {
         let fileContent = "export {}\n"
 
         if (existsSync(this.DefaultExportFileName)) {
-            fileContent += readFileSync(this.DefaultExportFileName).toString()
+            fileContent += ts.sys.readFile(this.DefaultExportFileName)
         }
-
-        // let exportList: string[] = [];
-        // let defaultExport: string = "";
-
-        // let myFile = import.meta.url.replace(/^file:\/\//, '');
-        // for (const file of files) {
-
-        //     //   const fileImport = baseDirectory + file.replace(/\.mts$/, '');
-        //     const fileImport = file.replace(/\.mts$/, '');
-        //     let moduleFile = path.relative(path.parse(myFile).dir, path.join(fileImport));
-
-        //     moduleFile = moduleFile.match(/^\./) ? moduleFile : "./" + moduleFile;
-        //     let importedModule;
-        //     try {
-        //         let p = import(moduleFile)
-        //         .then(importedModule => {
-        //             console.log(importedModule);
-
-        //         })
-        //         p.catch(e => { 
-        //             console.log(e) });
-
-
-
-        //         // importedModule = await p;
-        //     } catch (e) {
-        //         console.log(e)
-        //     }
-        //       if (importedModule) {
-        //         let exportedModuleItems = { ...importedModule };
-        //         for (const itemKey of Object.keys(exportedModuleItems)) {
-        //           let item = exportedModuleItems[itemKey];
-        //           let descriptor: InterfaceDescriptorInterface | ClassDescriptorInterface | undefined;
-        //           if ("allExtendedInterfaces" in item) {
-        //             descriptor = item as InterfaceDescriptorInterface;
-
-        //           } else if ("classDescriptor" in item && item.classDescriptor) {
-        //             descriptor = item.classDescriptor as ClassDescriptorInterface;
-        //           }
-
-        //           if (descriptor && descriptor.componentExport && descriptor.componentExportName) {
-
-        //             let line = "import ";
-        //             line += itemKey === "default" ? descriptor.componentExportName : `{ ${itemKey} } `;
-        //             line += ` from "./${moduleFile}";\n`
-
-        //             fs.writeSync(fd, line);
-
-        //             // Import Real Interface
-        //             if ("allExtendedInterfaces" in item) {
-        //               let exportName = this._getInterfaceExportName(baseDirectory + file, item.name);
-
-        //               let interfaceLine = "import ";
-        //               interfaceLine += exportName === "default" ? item.name : `{ ${exportName} } `;
-        //               interfaceLine += ` from "./${moduleFile}";\n`
-        //               exportList.push(item.name);
-        //               fs.writeSync(fd, interfaceLine);
-
-        //             }
-
-        //             if (descriptor.componentExport === "defaultExport") {
-        //               defaultExport = descriptor.componentExportName;
-        //             } else {
-        //               exportList.push(descriptor.componentExportName);
-        //             }
-
-        //           }
-        //         }
-        //       }
-        // }
-
-
-        // if (defaultExport) {
-        //   let line = `export default ${defaultExport};\n`
-        //   fs.writeSync(fd, line);
-        // }
-        // if (exportList.length > 0) {
-        //   let line = `export {${exportList.join(', ')}};\n`
-        //   fs.writeSync(fd, line);
-        // }
-
-        // fs.writeSync(fd, "// ########## Generated Export END ##########\n");
-        // fs.closeSync(fd);
-
-
         return fileContent;
     }
 }

@@ -51,27 +51,33 @@ export default class DefaultEAMRepository implements EAMRepository {
             }))
     }
 
-    async install(): Promise<void> {
+    // async install(): Promise<void> {
+    //     for (let componentBuilder of await this.getComponentBuilder()) {
+    //         await componentBuilder.install({ ...this.buildConfig, distributionFolder: componentBuilder.distributionFolder })
+    //     }
+    // }
+
+    // async build(): Promise<void> {
+    //     for (let componentBuilder of await this.getComponentBuilder()) {
+    //         await componentBuilder.build({ ...this.buildConfig, distributionFolder: componentBuilder.distributionFolder })
+    //     }
+    // }
+
+    // async watch(): Promise<void> {
+    //     for (let componentBuilder of await this.getComponentBuilder()) {
+    //         await componentBuilder.watch({ ...this.buildConfig, distributionFolder: componentBuilder.distributionFolder })
+    //     }
+    // }
+
+    install = () => this.run("install");
+    beforeBuild = () => this.run("beforeBuild");
+    build = () => this.run("build");
+    watch = () => this.run("watch");
+
+    private async run(prop: keyof Buildable): Promise<void> {
         for (let componentBuilder of await this.getComponentBuilder()) {
-            await componentBuilder.install({ ...this.buildConfig, distributionFolder: componentBuilder.distributionFolder })
+            await componentBuilder[prop]({ ...this.buildConfig, distributionFolder: componentBuilder.distributionFolder })
         }
-    }
-
-    async build(): Promise<void> {
-        for (let componentBuilder of await this.getComponentBuilder()) {
-            await componentBuilder.build({ ...this.buildConfig, distributionFolder: componentBuilder.distributionFolder })
-        }
-    }
-
-    // install = async () => await this.runBuildStep("install")
-    beforeBuild = async () => await this.runBuildStep("beforeBuild")
-    // build = async () => await this.runBuildStep("build")
-    watch = async () => await this.runBuildStep("watch")
-
-    private async runBuildStep(prop: keyof Buildable) {
-        (await this.getComponentBuilder()).forEach(async (component) => {
-            await component[prop]({ ...this.buildConfig, distributionFolder: component.distributionFolder })
-        })
     }
 
     private async getComponentBuilder(): Promise<ComponentBuilder[]> {
