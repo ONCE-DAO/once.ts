@@ -34,11 +34,11 @@ export default abstract class OnceKernel {
     }
     if (this.RuntimeIs.NODE_JS()) {
       await import("../2_systems/EAMD/ServerSideEAMDLoader.class.mjs")
-      return await (
-        await import(
-          "ior:esm:/tla.EAM.Once.Server[dev]"
-        )
-      ).OnceNodeServer.start()
+      // return await (
+      //   await import(
+      //     "ior:esm:/tla.EAM.Once.Server[build]"
+      //   )
+      // ).OnceNodeServer.start()
     }
     if (this.RuntimeIs.BROWSER()) {
     }
