@@ -1,4 +1,4 @@
-import path, { dirname, join } from "path";
+import { dirname, join } from "path";
 import EAMDInterface, { EAMD_CONSTANTS } from "../../3_services/UCP/EAMD.interface.mjs";
 import Scenario from "../../3_services/UCP/Scenario.interface.mjs";
 import DefaultFolder from "../File/Folder.class.mjs";

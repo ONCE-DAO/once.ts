@@ -17,12 +17,12 @@ import { loadingConfig } from "./3_services/Loader.interface.mjs";
 import { urlProtocol } from "./3_services/Url.interface.mjs";
 import { ServerSideUcpComponentDescriptorInterface } from "./3_services/Thing/UcpComponentDescriptor.interface.mjs";
 import DefaultEAMD from "./2_systems/UCP/EAMD.class.mjs";
-
+import NodeOnce from "./2_systems/Once/NodeOnce.class.mjs";
 
 export {
     DefaultIOR, AbstractNodeOnce, Once, OnceMode, OnceState, DefaultEAMD,
     InterfaceDescriptorInterface, ClassDescriptorInterface, BaseThing, OnceKernel,
     ThingStatics, Thing, IOR, Class, UUiD, ExtendedPromise, promiseHandler, AbstractDefaultLoader,
     loadingConfig, urlProtocol, ServerSideUcpComponentDescriptorInterface,
-    ClassDescriptor, InterfaceDescriptor
+    ClassDescriptor, InterfaceDescriptor, NodeOnce
 }
