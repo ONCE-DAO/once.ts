@@ -1,7 +1,7 @@
-import AbstractDefaultLoader from "../../1_infrastructure/AbstractDefaultLoader.class.mjs";
-import IOR from "../../3_services/IOR.interface.mjs";
-import Loader, { LoaderStatic, loadingConfig } from "../../3_services/Loader.interface.mjs";
-import FileSystemLoader from "../Loader/FileSystemLoader.class.mjs";
+import AbstractDefaultLoader from "../../../1_infrastructure/AbstractDefaultLoader.class.mjs";
+import IOR from "../../../3_services/IOR.interface.mjs";
+import Loader, { LoaderStatic, loadingConfig } from "../../../3_services/Loader.interface.mjs";
+import FileSystemLoader from "./../FileSystemLoader.class.mjs";
 
 export default class DefaultLoader extends AbstractDefaultLoader {
     removeObjectFromStore(object: any): void {

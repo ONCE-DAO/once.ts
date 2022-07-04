@@ -1,4 +1,4 @@
-import DefaultIOR from "./2_systems/Things/DefaultIOR.class.mjs";
+import DefaultIOR from "./2_systems/Loader/Things/DefaultIOR.class.mjs";
 import { AbstractNodeOnce } from "./2_systems/Once/AbstractNodeOnce.mjs";
 import Once, { OnceMode, OnceState } from "./3_services/Once.interface.mjs";
 // import InterfaceDescriptor from "./2_systems/Things/InterfaceDescriptor.class.mjs";

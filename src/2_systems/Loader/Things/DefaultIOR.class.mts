@@ -1,7 +1,7 @@
-import IOR from "../../3_services/IOR.interface.mjs";
-import Loader, { loadingConfig } from "../../3_services/Loader.interface.mjs";
-import { urlProtocol } from "../../3_services/Url.interface.mjs";
-import UUiD from "../JSExtensions/UUiD.class.mjs";
+import IOR from "../../../3_services/IOR.interface.mjs";
+import Loader, { loadingConfig } from "../../../3_services/Loader.interface.mjs";
+import { urlProtocol } from "../../../3_services/Url.interface.mjs";
+import UUiD from "../../JSExtensions/UUiD.class.mjs";
 import DefaultUrl, { formatType } from "./DefaultUrl.class.mjs";
 
 // TODO add annotation

@@ -1,6 +1,6 @@
 import { loaderReturnValue } from "../../3_services/Loader.interface.mjs";
 import Once, { OnceMode, OnceState, resolveContext, loadContext, OnceNodeImportLoader } from "../../3_services/Once.interface.mjs";
-import DefaultIOR from "../Things/DefaultIOR.class.mjs";
+import DefaultIOR from "../Loader/Things/DefaultIOR.class.mjs";
 import { AbstractNodeOnce } from "./AbstractNodeOnce.mjs";
 
 export default class DefaultNodeOnceImportLoader extends AbstractNodeOnce implements Once, OnceNodeImportLoader {
