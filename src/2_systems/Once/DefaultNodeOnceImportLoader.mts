@@ -1,50 +1,20 @@
 import { loaderReturnValue } from "../../3_services/Loader.interface.mjs";
 import Once, { OnceMode, OnceState, resolveContext, loadContext, OnceNodeImportLoader } from "../../3_services/Once.interface.mjs";
-import { EAMD_CONSTANTS } from "../../3_services/UCP/EAMD.interface.mjs";
-import DefaultEAMD from "../UCP/EAMD.class.mjs";
-// import DefaultIOR from "../Things/DefaultIOR.class.mjs";
+import DefaultIOR from "../Things/DefaultIOR.class.mjs";
 import { AbstractNodeOnce } from "./AbstractNodeOnce.mjs";
 
 export default class DefaultNodeOnceImportLoader extends AbstractNodeOnce implements Once, OnceNodeImportLoader {
   mode = OnceMode.NODE_LOADER;
   state = OnceState.DISCOVER_SUCCESS;
-  global: typeof globalThis = global;
 
-  static async start() {
-    const scenarioDomain = process.env.SCENARIO_DOMAIN || EAMD_CONSTANTS.DEFAULT_SCENARIO_DOMAIN
-    const basePath = process.env.BASE_PATH || process.cwd()
-    const eamd = await DefaultEAMD.init(basePath, scenarioDomain)
-    return new DefaultNodeOnceImportLoader(eamd);
-  }
-
-  get OnceLoader() {
-    return this;
-  }
-
+  // static async start() {
+  //   const scenarioDomain = process.env.SCENARIO_DOMAIN || EAMD_CONSTANTS.DEFAULT_SCENARIO_DOMAIN
+  //   const basePath = process.env.BASE_PATH || process.cwd()
+  //   const eamd = await DefaultEAMD.init(basePath, scenarioDomain)
+  //   return new DefaultNodeOnceImportLoader(eamd);
+  // }
 
   async start(): Promise<void> {
-    console.log("ONCE WILL START AS NODE_LOADER");
-
-    // const asyncStartProcess = new Promise((resolve, reject) => {
-
-    //   setTimeout(() => {
-    //     console.log("e.g. Once is Installed")
-    //   }, 1000);
-
-    //   setTimeout(() => {
-    //     console.log("or eamd is discovered")
-    //   }, 2000);
-    //   setTimeout(() => {
-    //     console.log("or something else")
-    //     resolve(undefined);
-    //   }, 3000);
-    // });
-
-    console.log(new Date())
-    // await asyncStartProcess
-    console.log(new Date())
-
-    console.log("ONCE STARTED AS NODE_LOADER");
   }
 
   async resolve(
@@ -52,9 +22,8 @@ export default class DefaultNodeOnceImportLoader extends AbstractNodeOnce implem
     context: resolveContext,
     defaultResolve: Function
   ): Promise<{ url: string }> {
-    console.log("RESOLVE", specifier);
-    // if (specifier.startsWith("ior:"))
-    //   specifier = await DefaultIOR.load(specifier, { returnValue: loaderReturnValue.path });
+    if (specifier.startsWith("ior:"))
+      specifier = await DefaultIOR.load(specifier, { returnValue: loaderReturnValue.PATH });
     return defaultResolve(specifier, context, defaultResolve);
   }
 
@@ -72,15 +41,11 @@ export default class DefaultNodeOnceImportLoader extends AbstractNodeOnce implem
   /**
  * This example has the application context send a message to the loader
  * and sends the message back to the application context
- * @param {{
-     port: MessagePort,
-   }} utilities Things that preload code might find useful
  * @returns {string} Code to run before application startup
  */
   globalPreload() {
-    console.log("GLOBAL_PRELOAD")
     global.NODE_JS = true;
-    return "console.log('GLOBAL RELOAD RETURN LOG');"
+    return ""
   }
 }
 

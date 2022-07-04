@@ -1,14 +1,19 @@
-import { existsSync, mkdirSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { join, relative, sep } from "path";
 import { EAMD_CONSTANTS } from "../../3_services/UCP/EAMD.interface.mjs";
 import ScenarioInterface from "../../3_services/UCP/Scenario.interface.mjs";
+import UcpComponentDescriptorExportInterface, { UcpComponentDescriptorInterface } from "../../3_services/UCP/UcpComponentDescriptor.interface.mjs";
 import DefaultFolder from "../File/Folder.class.mjs";
 import { Async } from "./Async.mjs";
+import DefaultUcpComponentDescriptor from "./DefaultUcpComponentDescriptor.class.mjs";
 
 export class DefaultScenario implements ScenarioInterface {
     namespace: string = EAMD_CONSTANTS.DEFAULT_SCENARIO_DOMAIN;
 
     private constructor(private eamdInstallationDirectory: string) { }
+    get webRoot(): string {
+        return this.scenarioPath;
+    }
 
     static async init(domain: string = EAMD_CONSTANTS.DEFAULT_SCENARIO_DOMAIN, eamdInstallationDirectory: string = process.cwd()): Promise<ScenarioInterface> {
         const instance = new DefaultScenario(eamdInstallationDirectory)
@@ -40,12 +45,16 @@ export class DefaultScenario implements ScenarioInterface {
         return JSON.stringify({}, null, 2)
     }
 
-
-    get components(): Promise<string[]> {
-        return Async.Property<string[]>(async () => {
-            return (await Promise
+    get componentDescriptors(): Promise<UcpComponentDescriptorInterface[]> {
+        return Async.Property<UcpComponentDescriptorInterface[]>(async () =>
+            Promise.all((await Promise
                 .all(DefaultFolder.getFilesByOnceExtentions(this.scenarioPath, [".component.json"], true)))
-                .map(file => relative(this.scenarioPath, file.fullPath))
-        })
+                .map(file => file.fullPath)
+                .map(path => ({ jsonString: readFileSync(path).toString(), path: relative(this.scenarioPath, path) }))
+                .map(async ({ jsonString, path }) => {
+                    let descriptor = (JSON.parse(jsonString) as UcpComponentDescriptorExportInterface)
+                    return await new DefaultUcpComponentDescriptor(descriptor, path) as UcpComponentDescriptorInterface
+                }))
+        );
     }
 }

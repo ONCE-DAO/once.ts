@@ -1,4 +1,3 @@
-// import { LoaderID } from "../3_services/Loader.interface.mjs";
 import Once, { OnceRuntimeResolver } from "../3_services/Once.interface.mjs"
 
 export default abstract class OnceKernel {
@@ -6,18 +5,17 @@ export default abstract class OnceKernel {
     const once: Once = await this.discover();
     await once.start();
     console.log(`
-    ----------------------------------
+    -------------------------------------------------------------------------
     ONCE started
-    created:\t${once.creationDate.toISOString()}
-    mode:\t${once.mode}
-    state:\t${once.state}
-    ----------------------------------
+    created:\t\t${once.creationDate.toISOString()}
+    mode:\t\t${once.mode}
+    state:\t\t${once.state}
+    scenario:\t\t${once.eamd.currentScenario.namespace}
+    scenarioPath:\t${once.eamd.currentScenario.scenarioPath}
+    -------------------------------------------------------------------------
     `);
-    // if (once.global.ONCE !== undefined && "resolve" in once.global.ONCE) {
-    //   once.OnceLoader = once.global.ONCE;
-    // }
+
     once.global.ONCE = once;
-    // console.log("LoaderID Implementations:" + LoaderID.implementations.map(x => x.name).join(","));
     return once;
   }
 
@@ -25,7 +23,6 @@ export default abstract class OnceKernel {
     console.log("Try to discover runtime");
 
     if (this.RuntimeIs.NODE_LOADER()) {
-      // await import("../2_systems/EAMD/ServerSideEAMDLoader.class.mjs")
       return (
         await import(
           "../2_systems/Once/DefaultNodeOnceImportLoader.mjs"
@@ -33,12 +30,7 @@ export default abstract class OnceKernel {
       ).default.start();
     }
     if (this.RuntimeIs.NODE_JS()) {
-      // await import("../2_systems/EAMD/ServerSideEAMDLoader.class.mjs")
-      // return await (
-      //   await import(
-      //     "ior:esm:/tla.EAM.Once.Server[build]"
-      //   )
-      // ).OnceNodeServer.start()
+      return await (await import("ior:esm:/tla.EAM.Once.Server[build]")).OnceNodeServer.start()
     }
     if (this.RuntimeIs.BROWSER()) {
     }

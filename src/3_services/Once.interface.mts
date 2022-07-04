@@ -15,7 +15,7 @@ export default interface Once {
   eamd: EAMD;
 }
 
-export interface OnceNodeImportLoader {
+export interface OnceNodeImportLoader extends Once {
   resolve: resolveType
   load: loadType
   globalPreload(): string

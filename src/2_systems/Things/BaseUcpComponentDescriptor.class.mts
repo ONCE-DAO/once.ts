@@ -3,13 +3,13 @@ import UcpComponentDescriptorInterface, { UcpComponentDescriptorStatics } from "
 
 let ActiveUcpComponentDescriptor: UcpComponentDescriptorStatics;
 
-if (typeof window === "undefined") {
-  let moduleItem = await import("./ServerSideUcpComponentDescriptor.class.mjs")
-  ActiveUcpComponentDescriptor = moduleItem.default;
-} else {
-  ActiveUcpComponentDescriptor = (await import("./DefaultUcpComponentDescriptor.class.mjs")).default;
+// if (typeof window === "undefined") {
+//   // let moduleItem = await import("./ServerSideUcpComponentDescriptor.class.mjs")
+//   ActiveUcpComponentDescriptor = moduleItem.default;
+// } else {
+//   ActiveUcpComponentDescriptor = (await import("./DefaultUcpComponentDescriptor.class.mjs")).default;
 
-}
+// }
 
 export default class UcpComponentDescriptor {
 

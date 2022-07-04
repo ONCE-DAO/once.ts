@@ -1,4 +1,3 @@
-import InterfaceDescriptor from "../2_systems/Things/InterfaceDescriptor.class.mjs";
 
 import { JSONProvider } from "./JSON.interface.mjs";
 
@@ -44,7 +43,8 @@ export interface Url extends JSONProvider {
   clone(): Url;
 }
 
-export const UrlID = InterfaceDescriptor.lastDescriptor;
+// TODO
+// export const UrlID = InterfaceDescriptor.lastDescriptor;
 
 
 export default Url;

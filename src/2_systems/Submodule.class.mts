@@ -9,9 +9,6 @@ import GitRepository, {
   GitRepositoryParameter,
   NotAGitRepositoryError,
 } from "../3_services/GitRepository.interface.mjs";
-import UcpComponentDescriptor from "./Things/BaseUcpComponentDescriptor.class.mjs";
-import ServerSideUcpComponentDescriptor from "./Things/ServerSideUcpComponentDescriptor.class.mjs";
-// import * as ts from "typescript"
 export default class DefaultSubmodule
   extends DefaultGitRepository
   implements Submodule, GitRepository {

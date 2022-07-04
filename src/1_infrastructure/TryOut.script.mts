@@ -17,5 +17,5 @@ console.log(await Promise.all(
         .map(async scenario => ({
             ...scenario,
             scenarioPath: relative(basePath, scenario.scenarioPath),
-            components: (await scenario.components)
+            components: (await scenario.componentDescriptors)
         }))));

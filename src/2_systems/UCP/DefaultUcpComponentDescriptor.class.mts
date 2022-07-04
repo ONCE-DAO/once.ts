@@ -1,19 +1,11 @@
-import UcpComponentDescriptorInterface from "../../3_services/UCP/UcpComponentDescriptor.interface.mjs";
-import UcpUnit from "../../3_services/UCP/UcpUnit.interface.mjs";
+import UcpComponentDescriptorExportInterface, { UcpComponentDescriptorInterface } from "../../3_services/UCP/UcpComponentDescriptor.interface.mjs";
+import ExportUcpComponentDescriptor from "./ExportUcpComponentDescriptor.mjs";
 
-export default class DefaultUcpComponentDescriptor implements UcpComponentDescriptorInterface {
-    name: string;
-    namespace: string;
-    version: string;
-    units: UcpUnit[];
-    exportsFile: string;
+export default class DefaultUcpComponentDescriptor extends ExportUcpComponentDescriptor implements UcpComponentDescriptorInterface {
+    path: string;
 
-
-    constructor(name: string, namespace: string, version: string, exportsFile: string, units: UcpUnit[]) {
-        this.name = name;
-        this.namespace = namespace;
-        this.version = version;
-        this.exportsFile = exportsFile;
-        this.units = units;
+    constructor(descriptor: UcpComponentDescriptorExportInterface, path: string) {
+        super(descriptor);
+        this.path = path;
     }
 }

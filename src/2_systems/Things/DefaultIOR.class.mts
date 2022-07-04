@@ -4,9 +4,6 @@ import { urlProtocol } from "../../3_services/Url.interface.mjs";
 import UUiD from "../JSExtensions/UUiD.class.mjs";
 import DefaultUrl, { formatType } from "./DefaultUrl.class.mjs";
 
-
-
-
 // TODO add annotation
 // @ClassDescriptor.componentExport("namedExport")
 export default class DefaultIOR extends DefaultUrl implements IOR {

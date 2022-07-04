@@ -3,6 +3,7 @@ import { join, relative } from "path";
 import ts from "typescript";
 import DefaultUcpComponentDescriptor from "../../../2_systems/UCP/DefaultUcpComponentDescriptor.class.mjs";
 import DefaultUcpUnit from "../../../2_systems/UCP/DefaultUcpUnit.class.mjs";
+import ExportUcpComponentDescriptor from "../../../2_systems/UCP/ExportUcpComponentDescriptor.mjs";
 import BuildConfig from "../../../3_services/Build/BuildConfig.interface.mjs";
 import Transpiler, { TRANSFORMER } from "../../../3_services/Build/Typescript/Transpiler.interface.mjs";
 import { TYPESCRIPT_PROJECT } from "../../../3_services/Build/Typescript/TypescriptProject.interface.mjs";
@@ -48,9 +49,13 @@ export default class DefaultTranspiler implements Transpiler {
             return;
 
         }
-        const exportFile = `${TYPESCRIPT_PROJECT.EXPORTS_FILE_NAME}.${this.ExportFileNameExtension.replace("t", "j")}`
-        const descriptor = new DefaultUcpComponentDescriptor(name, namespace, version, exportFile, files
-            .map(path => new DefaultUcpUnit(UnitType.File, join(".", relative(this.buildConfig.distributionFolder, path)))));
+        const exportsFile = `${TYPESCRIPT_PROJECT.EXPORTS_FILE_NAME}.${this.ExportFileNameExtension.replace("t", "j")}`
+        const descriptor = new ExportUcpComponentDescriptor(
+            {
+                name, namespace, version, exportsFile, units: files
+                    .map(path => new DefaultUcpUnit(UnitType.File, join(".", relative(this.buildConfig.distributionFolder, path))))
+            }
+        );
         ts.sys.writeFile(join(this.buildConfig.distributionFolder, `${name}.component.json`), JSON.stringify(descriptor, null, 2));
     }
 
@@ -137,7 +142,7 @@ export default class DefaultTranspiler implements Transpiler {
             createProgram,
             this.reportDiagnostic.bind(this),
             this.reportWatchStatusChanged.bind(this)
-            )
+        )
         host.readFile = this.readFile.bind(this)
 
         // You can technically override any given hook on the host, though you probably don't need to.

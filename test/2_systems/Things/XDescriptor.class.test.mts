@@ -26,7 +26,7 @@ interface MyUrl extends MyString {
 const MyUrlID = InterfaceDescriptor.lastDescriptor;
 
 
-@ClassDescriptor.componentExport('defaultExport')
+// @ClassDescriptor.componentExport('defaultExport')
 //@ts-ignore
 class TestClass1 extends DefaultUrl implements MyUrl, MyString, MyString2 {
   myUrl: string = "";

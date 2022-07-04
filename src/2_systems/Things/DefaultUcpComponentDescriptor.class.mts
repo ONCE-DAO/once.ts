@@ -93,7 +93,8 @@ export default class DefaultUcpComponentDescriptor implements UcpComponentDescri
   get defaultExportObject(): ThingStatics<any> | InterfaceDescriptorInterface | undefined {
     let result = this.units.filter(unit => {
       if ("classDescriptor" in unit) {
-        return unit.classDescriptor.componentExport === "defaultExport"
+        // TODO add again
+        // return unit.classDescriptor.componentExport === "defaultExport"
       } else if ("allExtendedInterfaces" in unit) {
         return unit.componentExport === "defaultExport"
       }
@@ -108,7 +109,8 @@ export default class DefaultUcpComponentDescriptor implements UcpComponentDescri
     if ("classDescriptor" in object) {
       this.units.push(object);
 
-      object.classDescriptor.add(this);
+      // TODO add again
+      // object.classDescriptor.add(this);
 
     } else if ("implementedInterfaces" in object) {
       const existingInterfaceDescriptors = this.getUnitByName(object.name, "InterfaceDescriptor");

@@ -2,7 +2,7 @@ import Thing, { ThingObjectState } from "../3_services/Thing/Thing.interface.mjs
 import EventService from "../3_services/Thing/EventService.interface.mjs";
 import { Metaclass, TSClass } from '../3_services/Thing/TypeDescriptor.interface.mjs';
 import ClassDescriptorInterface from "../3_services/Thing/ClassDescriptor.interface.mjs";
-import ClassDescriptor from "../2_systems/Things/ClassDescriptor.class.mjs";
+// import ClassDescriptor from "../2_systems/Things/ClassDescriptor.class.mjs";
 
 export enum emptyEventList { }
 

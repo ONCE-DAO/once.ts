@@ -56,7 +56,7 @@ class EAMDLoader extends AbstractDefaultLoader implements Loader {
     //@ts-ignore
     const modulePath = path.join(ONCE.eamd.eamdDirectory, repoPath);
 
-    if (config?.returnValue === loaderReturnValue.path) {
+    if (config?.returnValue === loaderReturnValue.PATH) {
       return modulePath;
     } else {
       const result = await import(modulePath);
