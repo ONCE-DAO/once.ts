@@ -1,8 +1,8 @@
 import { existsSync, mkdirSync } from "fs";
 import { join } from "path";
-import { DEFAULT_SCENARIO, SCENARIOS_FOLDER } from "../1_infrastructure/Constants.mjs";
-import { EAMD_FOLDERS } from "../3_services/EAMD.interface.mjs";
-import Scenario from "../3_services/Scenario.interface.mjs";
+import { DEFAULT_SCENARIO, SCENARIOS_FOLDER } from "../../1_infrastructure/Constants.mjs";
+import { EAMD_FOLDERS } from "../../3_services/EAMD.interface.mjs";
+import Scenario from "../../3_services/Scenario.interface.mjs";
 
 export default class DefaultScenario implements Scenario {
     eamdPath: string;
@@ -23,6 +23,6 @@ export default class DefaultScenario implements Scenario {
     }
     
     get webRoot(): string {
-        return join(this.scenarioPath, EAMD_FOLDERS.WEB_ROOT)
+        return join(this.scenarioPath/*, EAMD_FOLDERS.WEB_ROOT*/)
     }
 }

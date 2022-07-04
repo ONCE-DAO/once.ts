@@ -1,9 +1,8 @@
-import AbstractDefaultLoader from "../../../1_infrastructure/AbstractDefaultLoader.class.mjs";
-import IOR from "../../../3_services/IOR.interface.mjs";
-import Loader, { LoaderStatic, loadingConfig } from "../../../3_services/Loader.interface.mjs";
-import FileSystemLoader from "./../FileSystemLoader.class.mjs";
+import BaseLoader from "../../1_infrastructure/AbstractDefaultLoader.class.mjs";
+import IOR from "../../3_services/IOR.interface.mjs";
+import Loader, { LoaderID, LoaderStatic, loadingConfig } from "../../3_services/Loader.interface.mjs";
 
-export default class DefaultLoader extends AbstractDefaultLoader {
+export default class DefaultLoader extends BaseLoader {
     removeObjectFromStore(object: any): void {
         throw new Error("Method not implemented.");
     }
@@ -18,14 +17,12 @@ export default class DefaultLoader extends AbstractDefaultLoader {
     }
 
     static discover(): LoaderStatic[] {
-        // TODO again find by implemeantations
-        return [FileSystemLoader]
-        // return LoaderID.implementations.map(d => d.class)
+        return LoaderID.implementations.map(d => d.class)
     }
 
     static findLoader(ior: IOR): Loader | undefined {
-        const loaderList = this.discover();
 
+        const loaderList = this.discover();
         let ratedLoader = loaderList.map(loader => {
             return { rating: loader.canHandle(ior), loader }
         })
@@ -35,5 +32,7 @@ export default class DefaultLoader extends AbstractDefaultLoader {
         if (ratedLoader.length > 0) {
             return ratedLoader[0].loader.factory(ior);
         }
+
     }
+
 }

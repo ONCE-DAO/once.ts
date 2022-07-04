@@ -1,7 +1,7 @@
-import IOR from "../../../3_services/IOR.interface.mjs";
-import Loader, { loadingConfig } from "../../../3_services/Loader.interface.mjs";
-import { urlProtocol } from "../../../3_services/Url.interface.mjs";
-import UUiD from "../../JSExtensions/UUiD.class.mjs";
+import IOR from "../../3_services/IOR.interface.mjs";
+import Loader, { loadingConfig } from "../../3_services/Loader.interface.mjs";
+import { urlProtocol } from "../../3_services/Url.interface.mjs";
+import UUiD from "../JSExtensions/UUiD.class.mjs";
 import DefaultUrl, { formatType } from "./DefaultUrl.class.mjs";
 
 // TODO add annotation
@@ -157,7 +157,7 @@ export default class DefaultIOR extends DefaultUrl implements IOR {
 
     async discoverLoader(): Promise<Loader | undefined> {
         if (this.loader === undefined) {
-            const DefaultLoader = (await import("./DefaultLoader.class.mjs")).default;
+            const DefaultLoader = (await import("../Loader/DefaultLoader.class.mjs")).default;
             this.loader = DefaultLoader.findLoader(this);
         }
         return this.loader;

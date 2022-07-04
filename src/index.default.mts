@@ -1,8 +1,8 @@
-import DefaultIOR from "./2_systems/Loader/Things/DefaultIOR.class.mjs";
+import DefaultIOR from "./2_systems/NewThings/DefaultIOR.class.mjs";
 import { AbstractNodeOnce } from "./2_systems/Once/AbstractNodeOnce.mjs";
 import Once, { OnceMode, OnceState } from "./3_services/Once.interface.mjs";
-// import InterfaceDescriptor from "./2_systems/Things/InterfaceDescriptor.class.mjs";
-// import ClassDescriptor from "./2_systems/Things/ClassDescriptor.class.mjs";
+import InterfaceDescriptor from "./2_systems/Things/InterfaceDescriptor.class.mjs";
+import ClassDescriptor from "./2_systems/Things/ClassDescriptor.class.mjs";
 import InterfaceDescriptorInterface from "./3_services/Thing/InterfaceDescriptor.interface.mjs";
 import ClassDescriptorInterface from "./3_services/Thing/ClassDescriptor.interface.mjs";
 import BaseThing from "./1_infrastructure/BaseThing.class.mjs";
@@ -24,4 +24,5 @@ export {
     InterfaceDescriptorInterface, ClassDescriptorInterface, BaseThing, OnceKernel,
     ThingStatics, Thing, IOR, Class, UUiD, ExtendedPromise, promiseHandler, AbstractDefaultLoader,
     loadingConfig, urlProtocol, ServerSideUcpComponentDescriptorInterface,
+    ClassDescriptor, InterfaceDescriptor
 }

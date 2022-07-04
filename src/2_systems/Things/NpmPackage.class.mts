@@ -2,8 +2,8 @@
 
 import { existsSync, readFileSync } from "fs";
 import { join } from "path";
-import { EMPTY_NAME, EMPTY_NAMESPACE } from "../1_infrastructure/Constants.mjs";
-import NpmPackage from "../3_services/NpmPackage.interface.mjs";
+import { EMPTY_NAME, EMPTY_NAMESPACE } from "../../1_infrastructure/Constants.mjs";
+import NpmPackage from "../../3_services/NpmPackage.interface.mjs";
 
 export class DefaultNpmPackage implements NpmPackage {
   protected static _store: { [index: string]: NpmPackage } = {};

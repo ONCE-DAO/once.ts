@@ -1,3 +1,4 @@
+import OldEAMD from "../1_infrastructure/EAMD.class.mjs";
 import EAMD from "./UCP/EAMD.interface.mjs";
 
 declare global {
@@ -13,6 +14,10 @@ export default interface Once {
   start(): Promise<void>;
   global: typeof globalThis;
   eamd: EAMD;
+  /**
+   * @deprecated
+   */
+  oldEamd: OldEAMD
 }
 
 export interface OnceNodeImportLoader extends Once {

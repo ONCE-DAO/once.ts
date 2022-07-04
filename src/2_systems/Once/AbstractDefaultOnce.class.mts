@@ -1,3 +1,4 @@
+import OLD_EAMD from "../../1_infrastructure/EAMD.class.mjs";
 import Once, { OnceMode, OnceState } from "../../3_services/Once.interface.mjs";
 import EAMD from "../../3_services/UCP/EAMD.interface.mjs";
 
@@ -7,6 +8,7 @@ export default abstract class AbstractDefaultOnce implements Once {
     abstract start(): Promise<void>;
     abstract global: typeof globalThis;
     abstract eamd: EAMD;
+    abstract oldEamd: OLD_EAMD;
 
     creationDate: Date;
     state: OnceState = OnceState.DISCOVER;

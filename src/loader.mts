@@ -85,7 +85,7 @@ class OnceSmallNodeImportLoader {
         // console.log("RESOLVE:", specifier, context.parentURL);
         if (specifier.startsWith("ior:")) {
             if (DefaultIORClass === undefined) {
-                DefaultIORClass = (await import("./2_systems/Loader/Things/DefaultIOR.class.mjs")).default
+                DefaultIORClass = (await import("./2_systems/NewThings/DefaultIOR.class.mjs")).default
             }
             specifier = await DefaultIORClass.load(specifier, { returnValue: loaderReturnValue.path }) as string;
         }

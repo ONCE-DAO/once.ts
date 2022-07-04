@@ -1,5 +1,5 @@
-import BaseThing from "../../../1_infrastructure/BaseThing.class.mjs";
-import Url, { urlProtocol } from "../../../3_services/Url.interface.mjs";
+import BaseThing from "../../1_infrastructure/BaseThing.class.mjs";
+import Url, { urlProtocol } from "../../3_services/Url.interface.mjs";
 
 export enum formatType { "normal", "origin", "originPath", "normalizedHref", "path" }
 

@@ -3,8 +3,8 @@ import simpleGit, { SimpleGit } from "simple-git";
 import GitRepository, {
   GitRepositoryParameter,
   NotAGitRepositoryError,
-} from "../3_services/GitRepository.interface.mjs";
-import Submodule from "../3_services/Submodule.interface.mjs";
+} from "../../3_services/GitRepository.interface.mjs";
+import Submodule from "../../3_services/Submodule.interface.mjs";
 // import DefaultSubmodule from "./Submodule.class.mjs";
 
 export class DefaultGitRepository implements GitRepository {

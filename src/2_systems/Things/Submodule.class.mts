@@ -1,14 +1,14 @@
 import { DefaultGitRepository } from "./GitRepository.class.mjs";
 import { join, relative } from "path";
 import { execSync, spawn } from "child_process";
-import Submodule from "../3_services/Submodule.interface.mjs";
+import Submodule from "../../3_services/Submodule.interface.mjs";
 import { DefaultNpmPackage } from "./NpmPackage.class.mjs";
 import { cpSync, existsSync, mkdirSync, rmdirSync, rmSync, symlinkSync, unlink, unlinkSync, writeFileSync, readFileSync, readdirSync, statSync } from 'fs';
 import simpleGit, { SimpleGit } from "simple-git";
 import GitRepository, {
   GitRepositoryParameter,
   NotAGitRepositoryError,
-} from "../3_services/GitRepository.interface.mjs";
+} from "../../3_services/GitRepository.interface.mjs";
 export default class DefaultSubmodule
   extends DefaultGitRepository
   implements Submodule, GitRepository {

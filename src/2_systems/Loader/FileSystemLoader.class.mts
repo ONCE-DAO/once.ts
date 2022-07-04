@@ -38,7 +38,7 @@ export default class FileSystemLoader extends AbstractDefaultLoader implements L
       );
     }
 
-    if (config?.returnValue === loaderReturnValue.PATH) {
+    if (config?.returnValue === loaderReturnValue.path) {
       return modulePath;
     } else {
       const result = await import(modulePath);

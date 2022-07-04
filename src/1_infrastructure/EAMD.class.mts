@@ -1,9 +1,9 @@
 import { existsSync, readFileSync, rmSync, writeFileSync } from "fs";
 import { join } from "path";
 import simpleGit, { SimpleGit } from "simple-git";
-import { DefaultGitRepository } from "../2_systems/GitRepository.class.mjs";
-import DefaultScenario from "../2_systems/Scenario.class.mjs";
-import DefaultSubmodule from "../2_systems/Submodule.class.mjs";
+import { DefaultGitRepository } from "../2_systems/Things/GitRepository.class.mjs";
+import DefaultScenario from "../2_systems/Things/Scenario.class.mjs";
+import DefaultSubmodule from "../2_systems/Things/Submodule.class.mjs";
 import EAMD, { EAMD_FOLDERS } from "../3_services/EAMD.interface.mjs";
 import GitRepository from "../3_services/GitRepository.interface.mjs";
 import Scenario from "../3_services/Scenario.interface.mjs";

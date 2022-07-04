@@ -1,6 +1,6 @@
 import { loaderReturnValue } from "../../3_services/Loader.interface.mjs";
 import Once, { OnceMode, OnceState, resolveContext, loadContext, OnceNodeImportLoader } from "../../3_services/Once.interface.mjs";
-import DefaultIOR from "../Loader/Things/DefaultIOR.class.mjs";
+import DefaultIOR from "../NewThings/DefaultIOR.class.mjs";
 import { AbstractNodeOnce } from "./AbstractNodeOnce.mjs";
 
 export default class DefaultNodeOnceImportLoader extends AbstractNodeOnce implements Once, OnceNodeImportLoader {
@@ -15,6 +15,7 @@ export default class DefaultNodeOnceImportLoader extends AbstractNodeOnce implem
   // }
 
   async start(): Promise<void> {
+    await import("../Loader/FileSystemLoader.class.mjs")
   }
 
   async resolve(
@@ -23,7 +24,7 @@ export default class DefaultNodeOnceImportLoader extends AbstractNodeOnce implem
     defaultResolve: Function
   ): Promise<{ url: string }> {
     if (specifier.startsWith("ior:"))
-      specifier = await DefaultIOR.load(specifier, { returnValue: loaderReturnValue.PATH });
+      specifier = await DefaultIOR.load(specifier, { returnValue: loaderReturnValue.path });
     return defaultResolve(specifier, context, defaultResolve);
   }
 
