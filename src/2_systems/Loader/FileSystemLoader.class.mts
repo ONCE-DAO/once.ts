@@ -24,7 +24,7 @@ export default class FileSystemLoader extends AbstractDefaultLoader implements L
     if (this.canHandle(ior) !== 1 || !ior.package)
       throw new Error("Can not load this IOR");
     if (typeof ONCE === "undefined") throw new Error("global ONCE is not defined");
- 
+
     let eamdRepos = await ONCE.eamd.discover()
     let iorString = ior.href;
     if (ior.namespaceObject) {

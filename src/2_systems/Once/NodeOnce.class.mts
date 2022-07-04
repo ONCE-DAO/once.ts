@@ -7,5 +7,8 @@ export default class NodeOnce extends AbstractNodeOnce {
   creationDate = new Date();
   mode = OnceMode.NODE_JS;
   state = OnceState.STARTED;
-  async start(): Promise<void> { }
+
+  async start(): Promise<void> {
+    await import("../Loader/FileSystemLoader.class.mjs")
+  }
 }

@@ -2,8 +2,9 @@ import { loaderReturnValue } from "../../3_services/Loader.interface.mjs";
 import Once, { OnceMode, OnceState, resolveContext, loadContext, OnceNodeImportLoader } from "../../3_services/Once.interface.mjs";
 import DefaultIOR from "../NewThings/DefaultIOR.class.mjs";
 import { AbstractNodeOnce } from "./AbstractNodeOnce.mjs";
+import NodeOnce from "./NodeOnce.class.mjs";
 
-export default class DefaultNodeOnceImportLoader extends AbstractNodeOnce implements Once, OnceNodeImportLoader {
+export default class DefaultNodeOnceImportLoader extends NodeOnce implements Once, OnceNodeImportLoader {
   mode = OnceMode.NODE_LOADER;
   state = OnceState.DISCOVER_SUCCESS;
 
@@ -13,10 +14,6 @@ export default class DefaultNodeOnceImportLoader extends AbstractNodeOnce implem
   //   const eamd = await DefaultEAMD.init(basePath, scenarioDomain)
   //   return new DefaultNodeOnceImportLoader(eamd);
   // }
-
-  async start(): Promise<void> {
-    await import("../Loader/FileSystemLoader.class.mjs")
-  }
 
   async resolve(
     specifier: string,

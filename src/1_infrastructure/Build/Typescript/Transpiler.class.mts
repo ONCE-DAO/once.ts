@@ -36,8 +36,9 @@ export default class DefaultTranspiler implements Transpiler {
         parsedConfig.options.preserveWatchOutput = true;
         (parsedConfig.options as any).listEmittedFiles = true;
 
+        
         // TODO can be removed when path linking to real .mts files
-        parsedConfig.options.noEmitOnError = false;
+        parsedConfig.options.noEmitOnError = false
         // TODO can be remove when exclude will work
         parsedConfig.options.suppressOutputPathCheck = true;
         return parsedConfig;
@@ -74,9 +75,9 @@ export default class DefaultTranspiler implements Transpiler {
         if (exportFiles.length) {
             config.compilerOptions.paths[`ior:esm:/${namespace}.${name}[${version}]`] = exportFiles
         }
-        else {
-            !this.incremental && delete config.compilerOptions.paths[`ior:esm:/${namespace}.${name}[${version}]`]
-        }
+        // else {
+        //     !this.incremental && delete config.compilerOptions.paths[`ior:esm:/${namespace}.${name}[${version}]`]
+        // }
 
         ts.sys.writeFile(this.tsconfigFilePath, JSON.stringify(config, null, 2))
     }
@@ -111,17 +112,16 @@ export default class DefaultTranspiler implements Transpiler {
         }
         const emitResult = program.emit(undefined, writeFile);
 
-
+        const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
         if (emitResult.emitSkipped) {
-            const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
-            if (allDiagnostics.length) {
-                console.log(this.formatDiagnostics.bind(this)(allDiagnostics));
-            }
-
-            console.error('\x1b[31m%s\x1b[0m', "Emit was skipped. please check errors");
             console.log("tsconfig", JSON.stringify(this.config.options, null, 2));
-            console.log("outdir", JSON.stringify(this.config.options.outDir, null, 2));
+            console.log(this.formatDiagnostics.bind(this)(allDiagnostics));
+            console.error('\x1b[31m%s\x1b[0m', "Emit was skipped. please check errors");
             throw "Emit was skipped. please check errors"
+        }
+        else {
+            console.debug(this.formatDiagnostics.bind(this)(allDiagnostics));
+            console.debug('\x1b[33m%s\x1b[0m');
         }
 
         return emitResult.emittedFiles || []

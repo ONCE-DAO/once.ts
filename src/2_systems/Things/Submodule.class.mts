@@ -106,8 +106,6 @@ export default class DefaultSubmodule
   async updateBranchToCheckoutVersion(): Promise<void> {
     const checkoutBranch = DefaultGitRepository.getBranch(this.gitRepository)
     console.log(this.name, await (await this.gitRepository.getConfig("remote.origin.url")).value, this.path, this.branch, checkoutBranch)
-
-    debugger;
   }
 
   private get rootDir() { return "./src" }

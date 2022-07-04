@@ -30,7 +30,13 @@ export default abstract class OnceKernel {
       ).default.start();
     }
     if (this.RuntimeIs.NODE_JS()) {
-      return await (await import("ior:esm:/tla.EAM.Once.Server[build]")).OnceNodeServer.start()
+
+      const server = await (await import("ior:esm:/tla.EAM.Once.Server[build]")).OnceNodeServer
+      const once =  await server.start()
+      //@ts-ignore
+      return once;
+
+      // return await (await import("ior:esm:/tla.EAM.Once.Server[build]")).OnceNodeServer.start()
     }
     if (this.RuntimeIs.BROWSER()) {
     }
