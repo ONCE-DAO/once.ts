@@ -4,6 +4,7 @@ export default interface EAMD {
     currentScenario: Scenario
     get scenarios(): Promise<Scenario[]>
     discover(): Promise<{ [i: string]: string }>;
+    discoverScenario(path: string): Promise<Scenario|undefined>
 }
 
 export enum EAMD_CONSTANTS {

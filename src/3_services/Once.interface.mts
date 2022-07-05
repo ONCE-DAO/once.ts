@@ -1,4 +1,5 @@
-import OldEAMD from "../1_infrastructure/EAMD.class.mjs";
+import OldEAMD from "../3_services/EAMD.interface.mjs";
+import EAMRepository from "./Build/EAMRepository.interface.mjs";
 import EAMD from "./UCP/EAMD.interface.mjs";
 
 declare global {
@@ -25,6 +26,10 @@ export interface OnceNodeImportLoader extends Once {
   resolve: resolveType
   load: loadType
   globalPreload(): string
+}
+
+export interface JestOnce extends OnceNodeImportLoader {
+  srcEamd: EAMRepository
 }
 
 export type preloadType = {
@@ -76,6 +81,7 @@ export enum OnceMode {
   SERVICE_WORKER = "SERVICE_WORKER",
   I_FRAME = "I_FRAME",
   NOT_DISCOVERED = "NOT_DISCOVERED",
+  TEST_ENVIRONMENT = "TEST_ENVIRONMENT",
 }
 
 type OnceRuntime =
@@ -83,7 +89,8 @@ type OnceRuntime =
   | OnceMode.NODE_JS
   | OnceMode.NODE_LOADER
   | OnceMode.WEB_WORKER
-  | OnceMode.SERVICE_WORKER;
+  | OnceMode.SERVICE_WORKER
+  | OnceMode.TEST_ENVIRONMENT
 
 export type OnceRuntimeResolver = {
   [key in OnceRuntime]: () => boolean;

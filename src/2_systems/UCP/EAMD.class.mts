@@ -25,6 +25,11 @@ export default class DefaultEAMD implements EAMDInterface {
         return result;
     }
 
+    async discoverScenario(path: string): Promise<Scenario | undefined> {
+        let file = DefaultFolder.getFilesByFileName(this.installationDirectory, ["scenario.json"], true).find(x => x)
+        return file ? await DefaultScenario.fromScenarioFolder(file.basePath, this.installationDirectory) : undefined
+    }
+
     get scenarios(): Promise<Scenario[]> {
         return Async.Property<Scenario[]>(async () =>
             await Promise.all(DefaultFolder.getFilesByFileName(this.installationDirectory, ["scenario.json"], true)

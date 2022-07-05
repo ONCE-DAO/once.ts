@@ -22,6 +22,13 @@ export default abstract class OnceKernel {
   static async discover(): Promise<Once> {
     console.log("Try to discover runtime");
 
+    if (this.RuntimeIs.TEST_ENVIRONMENT()) {
+      return (
+        await import(
+          "../2_systems/Once/JestOnce.class.mjs"
+        )
+      ).default.start();
+    }
     if (this.RuntimeIs.NODE_LOADER()) {
       return (
         await import(
@@ -32,7 +39,7 @@ export default abstract class OnceKernel {
     if (this.RuntimeIs.NODE_JS()) {
 
       const server = await (await import("ior:esm:/tla.EAM.Once.Server[build]")).OnceNodeServer
-      const once =  await server.start()
+      const once = await server.start()
       //@ts-ignore
       return once;
 
@@ -50,6 +57,11 @@ export default abstract class OnceKernel {
 
   static get RuntimeIs(): OnceRuntimeResolver {
     return {
+      TEST_ENVIRONMENT: () =>
+        typeof process !== "undefined" &&
+        process.versions != null &&
+        process.versions.node != null &&
+        process.env.NODE_ENV === "test",
       BROWSER: () =>
         typeof window !== "undefined" && typeof window.document !== "undefined",
       NODE_JS: () =>

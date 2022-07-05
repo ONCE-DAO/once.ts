@@ -1,6 +1,7 @@
-import OLD_EAMD from "../../1_infrastructure/EAMD.class.mjs";
+import OLD_EAMD from "../../3_services/EAMD.interface.mjs";
 import Once, { OnceMode, OnceState } from "../../3_services/Once.interface.mjs";
 import EAMD from "../../3_services/UCP/EAMD.interface.mjs";
+import EAMDLoader from "../Loader/ServerSideEAMDLoader.class.mjs";
 
 export default abstract class AbstractDefaultOnce implements Once {
     abstract ENV: NodeJS.ProcessEnv;

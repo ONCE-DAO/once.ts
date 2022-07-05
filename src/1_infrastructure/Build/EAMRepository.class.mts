@@ -80,7 +80,7 @@ export default class DefaultEAMRepository implements EAMRepository {
         }
     }
 
-    private async getComponentBuilder(): Promise<ComponentBuilder[]> {
+    async getComponentBuilder(): Promise<ComponentBuilder[]> {
         return await DefaultEAMRepository.getComponentBuilder(this.gitRepository, this.buildConfig)
     }
 }

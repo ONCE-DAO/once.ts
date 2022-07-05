@@ -32,11 +32,11 @@ export default class DefaultTranspiler implements Transpiler {
         const parsedConfig = ts.parseJsonConfigFileContent(readConfig.config, ts.sys, this.baseDir);
         parsedConfig.options.noEmit = false;
 
-        parsedConfig.options.outDir = buildConfig.distributionFolder;
+        parsedConfig.options.outDir = parsedConfig.options.outDir ?? buildConfig.distributionFolder;
         parsedConfig.options.preserveWatchOutput = true;
         (parsedConfig.options as any).listEmittedFiles = true;
 
-        
+
         // TODO can be removed when path linking to real .mts files
         parsedConfig.options.noEmitOnError = false
         // TODO can be remove when exclude will work
