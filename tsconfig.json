@@ -4,6 +4,6 @@
     "rootDir": "./src"
   },
   "include": [
-    "./src",
+    "./src", "../../Components/tla/EAM/Once/once@build/src/2_systems/Once/SourceFile.class.mts",
   ]
 }

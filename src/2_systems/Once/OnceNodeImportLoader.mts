@@ -4,6 +4,7 @@ import Once, { OnceMode, OnceState, resolveContext, loadContext, OnceNodeImportL
 import Scenario from "../Scenario.class.mjs";
 import DefaultIOR from "../Things/DefaultIOR.class.mjs";
 import { BaseNodeOnce } from "./BaseOnce.class.mjs";
+import SourceFile from "../../../../../Components/tla/EAM/Once/once@build/src/2_systems/Once/SourceFile.class.mjs";
 
 export default class DefaultOnceNodeImportLoader extends BaseNodeOnce implements Once, OnceNodeImportLoader {
   mode = OnceMode.NODE_LOADER;
@@ -45,6 +46,7 @@ export default class DefaultOnceNodeImportLoader extends BaseNodeOnce implements
     console.log("ONCE STARTED AS NODE_LOADER");
   }
 
+
   async resolve(
     specifier: string,
     context: resolveContext,
@@ -53,7 +55,18 @@ export default class DefaultOnceNodeImportLoader extends BaseNodeOnce implements
     console.log("RESOLVE", specifier);
     if (specifier.startsWith("ior:"))
       specifier = await DefaultIOR.load(specifier, { returnValue: loaderReturnValue.path });
-    return defaultResolve(specifier, context, defaultResolve);
+
+
+
+    const result = defaultResolve(specifier, context, defaultResolve);
+
+    if (context.parentURL) {
+      let parent = SourceFile.getSourceFile(context.parentURL)
+      let child = parent.addLoadedFile(result.url)
+      child.check4Loop();
+      console.log("PUML:", `"${this.normalizePath4Url(parent.path)}" =up=> "${this.normalizePath4Url(child.path)}"`);
+    }
+    return result
   }
 
   async load(
