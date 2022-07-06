@@ -37,7 +37,6 @@ export default abstract class OnceKernel {
       ).default.start();
     }
     if (this.RuntimeIs.NODE_JS()) {
-
       const server = await (await import("ior:esm:/tla.EAM.Once.Server[build]")).OnceNodeServer
       const once = await server.start()
       //@ts-ignore

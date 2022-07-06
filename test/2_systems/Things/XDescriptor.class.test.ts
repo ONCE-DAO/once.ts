@@ -1,6 +1,6 @@
-import DefaultIOR from "../../../src/2_systems/Things/DefaultIOR.class.mjs"
+import DefaultIOR from "../../../src/2_systems/NewThings/DefaultIOR.class.mjs"
 import BaseThing from "../../../src/1_infrastructure/BaseThing.class.mjs";
-import Url, { UrlID } from "../../../src/3_services/Url.interface.mjs";
+import Url from "../../../src/3_services/Url.interface.mjs";
 import DefaultUrl from "../../../src/2_systems/Things/DefaultUrl.class.mjs";
 import InterfaceDescriptor from "../../../src/2_systems/Things/InterfaceDescriptor.class.mjs";
 import ClassDescriptor from "../../../src/2_systems/Things/ClassDescriptor.class.mjs";
@@ -26,7 +26,7 @@ interface MyUrl extends MyString {
 const MyUrlID = InterfaceDescriptor.lastDescriptor;
 
 
-// @ClassDescriptor.componentExport('defaultExport')
+@ClassDescriptor.componentExport('defaultExport')
 //@ts-ignore
 class TestClass1 extends DefaultUrl implements MyUrl, MyString, MyString2 {
   myUrl: string = "";
@@ -85,7 +85,6 @@ describe(" Descriptor", () => {
 
       let x = new TestClass1();
 
-      UrlID
 
       let allInterfaces = x.classDescriptor.implementedInterfaces;
       let interfaceNameList = allInterfaces.map(x => x.name);

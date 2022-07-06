@@ -1,4 +1,4 @@
-import { existsSync } from "fs";
+import { existsSync, rmSync, symlinkSync } from "fs";
 import { join, relative } from "path";
 import ts from "typescript";
 import DefaultUcpComponentDescriptor from "../../../2_systems/UCP/DefaultUcpComponentDescriptor.class.mjs";
@@ -25,6 +25,13 @@ export default class DefaultTranspiler implements Transpiler {
     constructor(buildConfig: BuildConfig, configFile: string, private baseDir: string, private namespace: string) {
         this.buildConfig = buildConfig;
         this.config = this.parseConfig(configFile, buildConfig);
+    }
+    symLinkDistributionFolder(): void {
+        const path = join(this.buildConfig.srcPath, "dist");
+        if (existsSync(path)) rmSync(path, { recursive: true });
+
+        if (existsSync(this.buildConfig.distributionFolder))
+            symlinkSync(this.buildConfig.distributionFolder,'/Users/phibar/EAMD/EAMD.ucp-build/Components/tla/EAM/Thinglish/Transformer/Transformer@build/dist')
     }
 
     private parseConfig(configFile: string, buildConfig: BuildConfig) {
@@ -121,7 +128,7 @@ export default class DefaultTranspiler implements Transpiler {
         }
         else {
             console.debug(this.formatDiagnostics.bind(this)(allDiagnostics));
-            console.debug('\x1b[33m%s\x1b[0m');
+            // console.debug('\x1b[33m%s\x1b[0m');
         }
 
         return emitResult.emittedFiles || []

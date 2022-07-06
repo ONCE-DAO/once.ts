@@ -21,4 +21,5 @@ export default interface BuildConfig {
 
     distributionFolder: string;
 
+    srcPath:string
 }

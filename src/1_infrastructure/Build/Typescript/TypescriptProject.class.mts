@@ -1,3 +1,4 @@
+import { execSync } from "child_process";
 import BuildConfig from "../../../3_services/Build/BuildConfig.interface.mjs";
 import TypescriptProject from "../../../3_services/Build/Typescript/TypescriptProject.interface.mjs";
 import DefaultTranspiler from "./Transpiler.class.mjs";
@@ -25,15 +26,17 @@ export default class DefaultTypescriptProject implements TypescriptProject {
     }
 
     async beforeBuild(config: BuildConfig): Promise<void> {
+        execSync("npx ts-patch i", { cwd: this.path, stdio: "inherit" });
     }
 
     async build(config: BuildConfig): Promise<void> {
         console.group(`DefaultTypescriptProject build ${this.fullQualifiedNamespace} [${import.meta.url}]"`);
 
-        const transformer = await DefaultTranspiler.init(this.path, config, this.fullQualifiedNamespace)
-        const files = await transformer.transpile()
-        await transformer.writeTsConfigPaths(files, this.name, this.namespace, this.version)
-        await transformer.writeComponentDescriptor(this.name, this.namespace, this.version, files)
+        const transpiler = await DefaultTranspiler.init(this.path, config, this.fullQualifiedNamespace)
+        const files = await transpiler.transpile()
+        await transpiler.writeTsConfigPaths(files, this.name, this.namespace, this.version)
+        await transpiler.writeComponentDescriptor(this.name, this.namespace, this.version, files)
+        transpiler.symLinkDistributionFolder()
 
         console.groupEnd();
         console.log("DefaultTypescriptProject build done");
@@ -47,6 +50,8 @@ export default class DefaultTypescriptProject implements TypescriptProject {
             await transpiler.writeTsConfigPaths(files, this.name, this.namespace, this.version)
             await transpiler.writeComponentDescriptor(this.name, this.namespace, this.version, files)
         })
+        transpiler.symLinkDistributionFolder()
+
 
         console.groupEnd();
         console.log("DefaultTypescriptProject watch done");

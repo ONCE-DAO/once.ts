@@ -1,4 +1,4 @@
-import DefaultIOR from "../../../src/2_systems/Things/DefaultIOR.class.mjs";
+import DefaultIOR from "../../../src/2_systems/NewThings/DefaultIOR.class.mjs";
 
 describe("IOR Class", () => {
 
