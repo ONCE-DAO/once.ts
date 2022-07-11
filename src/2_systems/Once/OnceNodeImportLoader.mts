@@ -1,9 +1,9 @@
+import BaseNodeOnce from "../../1_infrastructure/BaseNodeOnce.class.mjs";
 import DefaultEAMD from "../../1_infrastructure/EAMD.class.mjs";
 import { loaderReturnValue } from "../../3_services/Loader.interface.mjs";
 import Once, { OnceMode, OnceState, resolveContext, loadContext, OnceNodeImportLoader } from "../../3_services/Once.interface.mjs";
 import Scenario from "../Scenario.class.mjs";
 import DefaultIOR from "../Things/DefaultIOR.class.mjs";
-import { BaseNodeOnce } from "./BaseOnce.class.mjs";
 
 export default class DefaultOnceNodeImportLoader extends BaseNodeOnce implements Once, OnceNodeImportLoader {
   mode = OnceMode.NODE_LOADER;
