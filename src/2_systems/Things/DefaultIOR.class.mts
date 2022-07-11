@@ -70,7 +70,7 @@ export default class DefaultIOR extends DefaultUrl implements IOR {
     }
 
     protected _parseUrl(url: string): void {
-        if (!url.includes("esm")) {
+        if (!url.includes(":esm:")) {
             super._parseUrl(url);
             return;
         }

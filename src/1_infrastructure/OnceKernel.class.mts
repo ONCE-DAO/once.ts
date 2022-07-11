@@ -1,4 +1,3 @@
-import { LoaderID } from "../3_services/Loader.interface.mjs";
 import Once, { OnceRuntimeResolver } from "../3_services/Once.interface.mjs"
 export default abstract class OnceKernel {
   static async start(): Promise<Once> {
@@ -41,6 +40,8 @@ export default abstract class OnceKernel {
       ).OnceNodeServer.start()
     }
     if (this.RuntimeIs.BROWSER()) {
+      let BrowserOnce = (await import("ior:esm:/tla.EAM.Once.Browser[dev]")).default;
+      return BrowserOnce.start();
     }
     if (this.RuntimeIs.SERVICE_WORKER()) {
     }

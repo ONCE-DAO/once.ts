@@ -9,7 +9,7 @@ const resolverForTSJest = require("ts-jest-resolver");
 
 class JestResolver {
     async async(specifier: string, options: import("ts-jest-resolver").ResolverOptions) {
-        if (specifier.startsWith("ior:")) {
+        if (specifier.startsWith("ior:") || specifier.startsWith("/ior:")) {
             try {
                 if (ONCE.OnceLoader == undefined) throw new Error("ONCE.OnceLoader is missing")
                 let result = await ONCE.OnceLoader.resolve(specifier, { conditions: [], importAssertions: {}, parentURL: undefined }, (path: string) => { return { url: path } });

@@ -51,7 +51,7 @@ export default class DefaultOnceNodeImportLoader extends BaseNodeOnce implements
     defaultResolve: Function
   ): Promise<{ url: string }> {
     console.log("RESOLVE", specifier);
-    if (specifier.startsWith("ior:"))
+    if (specifier.startsWith("ior:") || specifier.startsWith("/ior:"))
       specifier = await DefaultIOR.load(specifier, { returnValue: loaderReturnValue.path });
     return defaultResolve(specifier, context, defaultResolve);
   }

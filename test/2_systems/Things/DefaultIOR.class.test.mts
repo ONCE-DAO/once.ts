@@ -160,6 +160,20 @@ describe("IOR Class", () => {
     },
   });
 
+  validate.push({
+    url: "/ior:esm:/tla.EAM.Once[latest]",
+    result: {
+      protocol: ["ior", "esm"],
+      hostName: undefined,
+      pathName: undefined,
+      origin: undefined,
+      isLoaded: false,
+      namespace: "tla.EAM.Once",
+      namespaceVersion: "latest",
+      href: "ior:esm:/tla.EAM.Once[latest]"
+    },
+  });
+
 
   // validate.push({
   //   url: "ior:esm:github:tla.EAM.OnceService.Once.express#/ONCE-DAO/Once.express",

@@ -3,7 +3,7 @@
 import fs from 'fs';
 import path from 'path';
 import DefaultUcpComponentDescriptor, { UcpComponentDescriptorInitParameters } from "./DefaultUcpComponentDescriptor.class.mjs";
-import { ServerSideUcpComponentDescriptorInterface, UcpComponentDescriptorDataStructure, UcpComponentDescriptorStatics } from "../../3_services/Thing/UcpComponentDescriptor.interface.mjs";
+import UcpComponentDescriptorInterface, { ServerSideUcpComponentDescriptorInterface, UcpComponentDescriptorDataStructure, UcpComponentDescriptorStatics } from "../../3_services/Thing/UcpComponentDescriptor.interface.mjs";
 import ClassDescriptorInterface from "../../3_services/Thing/ClassDescriptor.interface.mjs";
 import { ThingStatics } from '../../3_services/Thing/Thing.interface.mjs';
 import NpmPackage from '../../3_services/NpmPackage.interface.mjs';
@@ -226,6 +226,13 @@ const NewServerSideUcpComponentDescriptor = class ServerSideUcpComponentDescript
     return `${this.name}.${this.version
       ?.replace(/\./g, "_")
       .replace("/", "-")}.component.xml`;
+  }
+
+  initBasics(packagePath: string, packageName: string, packageVersion: string | undefined): UcpComponentDescriptorInterface {
+    this.npmPackage = DefaultNpmPackage.getByPackage(packagePath, packageName, packageVersion || '');
+    let name = this.myClass.getDescriptorName(packagePath, packageName, packageVersion);
+    this.myClass._componentDescriptorStore[name] = this;
+    return this;
   }
 
 
