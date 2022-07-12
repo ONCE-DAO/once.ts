@@ -20,6 +20,10 @@ import { urlProtocol } from "./3_services/Url.interface.mjs";
 import { ServerSideUcpComponentDescriptorInterface } from "./3_services/Thing/UcpComponentDescriptor.interface.mjs";
 import EAMDInterface from "./3_services/EAMD.interface.mjs";
 import BaseNodeOnceI from "./1_infrastructure/BaseNodeOnce.class.mjs";
+import Client, { ClientID, ClientStatic, ClientStaticID } from "./3_services/Client.interface.mjs";
+import CRUD_Client from "./3_services/CRUDClient.interface.mjs";
+import REST_Client, { REST_ClientID } from "./3_services/RestClient.interface.mjs";
+import DefaultClient from "./2_systems/Things/DefaultClient.class.mjs";
 
 
 export let BaseNodeOnce: typeof BaseNodeOnceI | undefined;
@@ -35,5 +39,6 @@ export {
     InterfaceDescriptor, ClassDescriptor, InterfaceDescriptorInterface,
     ClassDescriptorInterface, BaseThing, OnceKernel, ThingStatics, Thing, IOR, Class, UUiD,
     ExtendedPromise, promiseHandler, BaseLoader, loadingConfig, urlProtocol, LoaderID,
-    ServerSideUcpComponentDescriptorInterface, BaseOnce, EAMDInterface, loaderReturnValue
+    ServerSideUcpComponentDescriptorInterface, BaseOnce, EAMDInterface, loaderReturnValue,
+    Client, ClientID, CRUD_Client, ClientStatic, ClientStaticID, REST_Client, REST_ClientID, DefaultClient
 }

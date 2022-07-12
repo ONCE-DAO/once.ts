@@ -1,6 +1,5 @@
 import Thing, { ThingObjectState } from "../3_services/Thing/Thing.interface.mjs";
 import EventService from "../3_services/Thing/EventService.interface.mjs";
-import { Metaclass, TSClass } from '../3_services/Thing/TypeDescriptor.interface.mjs';
 import ClassDescriptorInterface from "../3_services/Thing/ClassDescriptor.interface.mjs";
 import ClassDescriptor from "../2_systems/Things/ClassDescriptor.class.mjs";
 
@@ -39,24 +38,24 @@ export default abstract class BaseThing<ClassInterface> implements Thing<ClassIn
 
   //static get type(): Metaclass {
 
-  static get type(): TSClass {
-    return Metaclass.getClass(this);
-    // let result = this._typeDescriptorStore.get(this);
-    // if (!result) {
-    //   // @ts-ignore
-    //   // It is abstract, but TS does not understand that
-    //   result = new DefaultClassDescriptor().init(this);
-    //   this._typeDescriptorStore.set(this, result);
-    // }
-    // return result;
-  }
+  // static get type(): TSClass {
+  //   return Metaclass.getClass(this);
+  //   // let result = this._typeDescriptorStore.get(this);
+  //   // if (!result) {
+  //   //   // @ts-ignore
+  //   //   // It is abstract, but TS does not understand that
+  //   //   result = new DefaultClassDescriptor().init(this);
+  //   //   this._typeDescriptorStore.set(this, result);
+  //   // }
+  //   // return result;
+  // }
 
-  get type(): Metaclass {
-    //TODO@MD Check how to do it better
-    // HACK
-    // @ts-ignore
-    return (this.constructor as Metaclass).type.metaclass;
-  }
+  // get type(): Metaclass {
+  //   //TODO@MD Check how to do it better
+  //   // HACK
+  //   // @ts-ignore
+  //   return (this.constructor as Metaclass).type.metaclass;
+  // }
 
   // TODO@MERGE check with Marcel
   // get tsClass(): TSClass {

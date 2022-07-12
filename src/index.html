@@ -2,14 +2,19 @@
 
 <head>
     <link rel="icon" href="data:,">
-    <script src="https://127.0.0.1:3000/tla/EAM/Once/dev/2_systems/Once/Once.class.mjs" type="module"></script>
-    <script type="module">
-        import { SomeExampleUcpComponent } from "/ior:esm:/tla.EAM.UcpComponent[main]";
-        var x = new SomeExampleUcpComponent();
-        // x.persistanceManager.create();
-    </script>
+
+    <!--script blocking src="https://127.0.0.1:3000/tla/EAM/Once/dev/2_systems/Once/Once.class.mjs" type=module></script-->
+
 </head>
 
-<body></body>
+<body>
+
+</body>
+<script defer type=module async>
+    await import("https://127.0.0.1:3000/tla/EAM/Once/dev/2_systems/Once/Once.class.mjs");
+    let SomeExampleUcpComponent = (await import("/ior:esm:/tla.EAM.UcpComponent[main]")).SomeExampleUcpComponent;
+    var x = new SomeExampleUcpComponent();
+    x.persistanceManager.create();
+</script>
 
 </html>
