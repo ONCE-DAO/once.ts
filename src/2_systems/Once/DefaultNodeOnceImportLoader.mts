@@ -9,6 +9,7 @@ export default class DefaultNodeOnceImportLoader extends AbstractNodeOnce implem
   state = OnceState.DISCOVER_SUCCESS;
 
   async start(): Promise<void> {
+    console.log("Load FileSystemLoader into store")
     await import("../Loader/FileSystemLoader.class.mjs")
   }
 

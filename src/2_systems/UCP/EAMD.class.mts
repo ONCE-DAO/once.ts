@@ -18,6 +18,9 @@ export default class DefaultEAMD implements EAMDInterface {
 
     async discover(): Promise<{ [i: string]: string; }> {
         let result: { [i: string]: string } = {};
+        
+        const cds = await this.currentScenario.componentDescriptors;
+
         (await this.currentScenario.componentDescriptors).forEach(componentDescriptor => {
             const exportFilePath = join(this.currentScenario.scenarioPath, dirname(componentDescriptor.path), componentDescriptor.exportsFile)
             result[`ior:esm:/${componentDescriptor.namespace}.${componentDescriptor.name}[${componentDescriptor.version}]`] = exportFilePath

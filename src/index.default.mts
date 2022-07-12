@@ -13,7 +13,7 @@ import Class from "./3_services/Class.interface.mjs";
 import UUiD from "./2_systems/JSExtensions/UUiD.class.mjs";
 import ExtendedPromise, { promiseHandler } from "./2_systems/Promise.class.mjs";
 import AbstractDefaultLoader from "./1_infrastructure/AbstractDefaultLoader.class.mjs";
-import { loadingConfig } from "./3_services/Loader.interface.mjs";
+import { loadingConfig, LoaderID } from "./3_services/Loader.interface.mjs";
 import { urlProtocol } from "./3_services/Url.interface.mjs";
 import { ServerSideUcpComponentDescriptorInterface } from "./3_services/Thing/UcpComponentDescriptor.interface.mjs";
 import DefaultEAMD from "./2_systems/UCP/EAMD.class.mjs";
@@ -26,5 +26,5 @@ export {
     InterfaceDescriptorInterface, ClassDescriptorInterface, BaseThing, OnceKernel,
     ThingStatics, Thing, IOR, Class, UUiD, ExtendedPromise, promiseHandler, AbstractDefaultLoader,
     loadingConfig, urlProtocol, ServerSideUcpComponentDescriptorInterface,
-    ClassDescriptor, InterfaceDescriptor, OnceNodeImportLoader, JestOnce
+    ClassDescriptor, InterfaceDescriptor, OnceNodeImportLoader, JestOnce, LoaderID
 }

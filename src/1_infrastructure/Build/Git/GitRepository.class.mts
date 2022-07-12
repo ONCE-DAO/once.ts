@@ -28,8 +28,11 @@ export default class DefaultGitRepository implements GitRepository {
     }
 
     private static async getRemoteUrl(gitRepository: SimpleGit): Promise<string> {
-        const config = await gitRepository.getConfig("remote.origin.url");
-        return config.value || "";
+        const list = await gitRepository.listConfig()
+        const configKey = "remote.origin.url";
+        if (Object.keys(list.all).some(x => x === configKey))
+            return await (await gitRepository.getConfig("remote.origin.url")).value || "";
+        return "";
     }
 
     private static async getBranch(gitRepository: SimpleGit): Promise<string> {
@@ -81,8 +84,9 @@ export default class DefaultGitRepository implements GitRepository {
 
             const submodule = await submoduleInit(join(this.path, relativeSubmodulePath), this.srcComponentsDirectory);
             if (remoteUrl !== submodule.remoteUrl) {
-                await submodule.setOrigin(remoteUrl)
-                console.warn(`mismatch between .gitmodules remote-url and gitRepository remote-url
+                try {
+                    await submodule.setOrigin(remoteUrl)
+                    console.warn(`mismatch between .gitmodules remote-url and gitRepository remote-url
                 .gitmodules\t${submodule.remoteUrl}
                 repository\t${remoteUrl}
                 
@@ -92,16 +96,23 @@ export default class DefaultGitRepository implements GitRepository {
 
                 and run build again
                 `)
+                }
+                catch (e) {
+                    console.log(e);
+                }
             }
-            await submodule.checkout(branch)
+
+            await submodule.checkout(branch);
             submodules.push(submodule);
+
         }
         return submodules;
     }
 
     async checkout(branch: string): Promise<void> {
-        if (branch !== this.branch)
+        if (branch !== this.branch && branch !== "") {
             await this.gitRepository.checkout([branch])
+        }
     }
 
     async updateSubmodules(): Promise<void> {

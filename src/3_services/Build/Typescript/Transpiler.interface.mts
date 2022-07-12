@@ -1,5 +1,4 @@
-import { PluginConfig } from "ts-patch"
-import ts from "typescript"
+import ts, { PluginConfig } from "typescript"
 
 export default interface Transpiler {
     watch(changedFunction: (files: string[]) => Promise<void>): Promise<void>
@@ -14,7 +13,7 @@ export const TRANSFORMER = {
     CONFIG_PATHS_FILE: "tsconfig.paths.json",
 }
 
-export type PluginOptions = ts.CompilerOptions & {
+export type ExtendedOptions = ts.CompilerOptions & {
     plugins?: PluginConfig[],
     onceIOR?: string,
 }

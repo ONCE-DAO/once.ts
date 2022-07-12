@@ -47,3 +47,5 @@ jspm_packages/
 *.d.cts
 *.cjs
 *.cjs.map
+
+dist

@@ -101,6 +101,8 @@ export class ClassDescription extends Constructor {
 }
 
 export class Metaclass extends ClassDescription {
+  // @ts-ignore
+  //  error TS2612: Property '_jsClass' will overwrite the base property in 'ClassDescription'. If this is intentional, add an initializer. Otherwise, add a 'declare' modifier or remove the redundant declaration.
   protected _jsClass: Constructor;
   static store: Map<Constructor, TSClass> = new Map();
 
@@ -143,7 +145,9 @@ export class Metaclass extends ClassDescription {
 // REFACTOR make sure TSClass comes form the TS framework
 export class TSClass extends ClassDescription implements TypeDescriptor {
   metaclass: Metaclass
-  extends: TSClass;
+  // @ts-ignore
+  // error TS2612: Property 'extends' will overwrite the base property in 'ClassDescription'. If this is intentional, add an initializer. Otherwise, add a 'declare' modifier or remove the redundant declaration.
+    extends: TSClass;
   //implements: Set<Interface>;
 
   constructor(c: Constructor) {

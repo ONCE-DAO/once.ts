@@ -1,5 +1,4 @@
 import { join } from "path";
-import { SimpleGit } from "simple-git";
 import { DefaultScenario } from "../../2_systems/UCP/Scenario.class.mjs";
 import Buildable from "../../3_services/Build/Buildable.interface.mjs";
 import ComponentBuilder from "../../3_services/Build/BuildComponent.interface.mjs";
@@ -25,16 +24,7 @@ export default class DefaultEAMRepository implements EAMRepository {
             sourceComponentsPath,
             transformer: [],
             distributionFolder: "",
-            srcPath: gitRepository.path
         }
-
-        // //TODO@pb move to config
-        // const transformer = (await this.getComponentBuilder(gitRepository, buildConfig)).find(x => x.name === "Transformer" && x.namespace === "tla.EAM.Thinglish" && x.version === "build")
-        // if (transformer === undefined) throw "Without transformer once cannot be build"
-        // buildConfig.distributionFolder = transformer.distributionFolder;
-        // await transformer.install(buildConfig);
-        // await transformer.build(buildConfig);
-        // buildConfig.transformer?.push({ transform: join(transformer.distributionFolder, "index.cjs"), type: "program" })
 
         return new DefaultEAMRepository(buildConfig, gitRepository);
     }
@@ -45,12 +35,16 @@ export default class DefaultEAMRepository implements EAMRepository {
     }
 
     private static async getComponentBuilder(gitRepository: GitRepository, buildConfig: BuildConfig): Promise<ComponentBuilder[]> {
-        return await Promise.all((await gitRepository
+        const componentBuilders = (await Promise.all((await gitRepository
             .getSubmodules(DefaultGitSubmodule.init))
             .map(async (submodule) => {
-                buildConfig.srcPath = submodule.path;
+                // buildConfig.srcPath = submodule.path;
                 return await DefaultComponentBuilder.init(submodule, buildConfig)
-            }))
+            })))
+        return [
+            ...componentBuilders.filter(x => `${x.namespace}.${x.name}` === "tla.EAM.Thinglish.Transformer"),
+            ...componentBuilders.filter(x => `${x.namespace}.${x.name}` !== "tla.EAM.Thinglish.Transformer")
+        ]
     }
 
     install = () => this.run("install");

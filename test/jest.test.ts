@@ -1,6 +1,5 @@
 import { join } from "path";
 import { myResult as staticImportSuccess } from "./MyResolveResult.mjs";
-// import { DefaultIOR } from "ior:esm:/tla.EAM.Once[build]"
 test("process environment is set to test by jest", () => {
     expect(process.env.NODE_ENV).toBe('test');
 })
@@ -47,26 +46,26 @@ test("Test Resolver is added and working", async () => {
 });
 
 test("Test Resolver can load over IOR string", async () => {
-    const imported = (await import("ior:esm:/tla.EAM.Once.Server[build]"))
+    const imported = (await import("ior:esm:/tla.EAM.Once[build]"))
     expect(imported).not.toBeUndefined()
     expect(imported).not.toBeNull()
 });
 
 
 test("Test Resolver can async import module", async () => {
-    const imported = (await import("../../../../../../Scenarios/localhost/tla/EAM/Once/Server/build/index.mjs"))
+    const imported = (await import("../../../../../../Scenarios/localhost/tla/EAM/Once/Server/build/index.export.mjs"))
     expect(imported).not.toBeUndefined()
     expect(imported).not.toBeNull()
 });
 
 test("Test Resolver can async import module absolute path", async () => {
-    const imported = (await import("/Users/phibar/EAMD/EAMD.ucp-build/Scenarios/localhost/tla/EAM/Once/Server/build/index.mjs"))
+    const imported = (await import("/Users/phibar/EAMD/EAMD.ucp-build/Scenarios/localhost/tla/EAM/Once/Server/build/index.export.mjs"))
     expect(imported).not.toBeUndefined()
     expect(imported).not.toBeNull()
 });
 
 test("When .mts files from Components folder are loaded, the .mjs from Scenario will be returned", async () => {
-    const Test = new (await import("../src/Test.class.mjs")).default()
+    const Test = new (await import("../../../../../tla/EAM/Once/once@build/src/Test.class.mjs")).default()
     const expected = `file://${join(global.ONCE.eamd.currentScenario.scenarioPath, "tla", "EAM", "Once", "build", "Test.class.mjs")}`
     expect(Test.importPath).toBe(expected)
 });

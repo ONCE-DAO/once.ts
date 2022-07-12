@@ -1,11 +1,11 @@
 import { existsSync, rmSync, symlinkSync } from "fs";
 import { join, relative } from "path";
-import ts from "typescript";
-import DefaultUcpComponentDescriptor from "../../../2_systems/UCP/DefaultUcpComponentDescriptor.class.mjs";
+import ts, { PluginConfig } from "typescript";
+import { } from "ts-patch"
 import DefaultUcpUnit from "../../../2_systems/UCP/DefaultUcpUnit.class.mjs";
 import ExportUcpComponentDescriptor from "../../../2_systems/UCP/ExportUcpComponentDescriptor.mjs";
 import BuildConfig from "../../../3_services/Build/BuildConfig.interface.mjs";
-import Transpiler, { TRANSFORMER } from "../../../3_services/Build/Typescript/Transpiler.interface.mjs";
+import Transpiler, { ExtendedOptions, TRANSFORMER } from "../../../3_services/Build/Typescript/Transpiler.interface.mjs";
 import { TYPESCRIPT_PROJECT } from "../../../3_services/Build/Typescript/TypescriptProject.interface.mjs";
 import { UnitType } from "../../../3_services/UCP/UcpUnit.interface.mjs";
 
@@ -26,28 +26,39 @@ export default class DefaultTranspiler implements Transpiler {
         this.buildConfig = buildConfig;
         this.config = this.parseConfig(configFile, buildConfig);
     }
+
     symLinkDistributionFolder(): void {
-        const path = join(this.buildConfig.srcPath, "dist");
+        const path = join(this.baseDir, "dist");
         if (existsSync(path)) rmSync(path, { recursive: true });
 
-        if (existsSync(this.buildConfig.distributionFolder))
-            symlinkSync(this.buildConfig.distributionFolder,'/Users/phibar/EAMD/EAMD.ucp-build/Components/tla/EAM/Thinglish/Transformer/Transformer@build/dist')
+        if (existsSync(this.buildConfig.distributionFolder)) {
+            symlinkSync(this.buildConfig.distributionFolder, path);
+        }
     }
 
     private parseConfig(configFile: string, buildConfig: BuildConfig) {
         const readConfig = ts.readConfigFile(configFile, ts.sys.readFile);
         const parsedConfig = ts.parseJsonConfigFileContent(readConfig.config, ts.sys, this.baseDir);
-        parsedConfig.options.noEmit = false;
 
-        parsedConfig.options.outDir = parsedConfig.options.outDir ?? buildConfig.distributionFolder;
-        parsedConfig.options.preserveWatchOutput = true;
-        (parsedConfig.options as any).listEmittedFiles = true;
+        const options = parsedConfig.options as ExtendedOptions;
+        options.noEmit = false;
+        options.outDir = parsedConfig.options.outDir ?? buildConfig.distributionFolder;
+        options.preserveWatchOutput = true;
+        options.listEmittedFiles = true;
 
+        options.plugins = options.plugins?.map(plugin => {
+            const pluginConfig: PluginConfig = {
+                ...plugin,
+                transform: join(buildConfig.eamdPath, plugin.transform || "")
+            }
+            return pluginConfig
+        })
 
         // TODO can be removed when path linking to real .mts files
-        parsedConfig.options.noEmitOnError = false
+        options.noEmitOnError = false
         // TODO can be remove when exclude will work
-        parsedConfig.options.suppressOutputPathCheck = true;
+        options.suppressOutputPathCheck = true;
+        parsedConfig.options = options;
         return parsedConfig;
     }
 
