@@ -13,10 +13,10 @@ export default abstract class BaseThing<ClassInterface> implements Thing<ClassIn
   protected _eventSupport!: EventService<any>;
 
   static get classDescriptor() {
-    if (this === BaseThing) {
-      // @ts-ignore This should never happen
-      return undefined;
-    }
+    // if (this === BaseThing) {
+    //   // @ts-ignore This should never happen
+    //   //return undefined;
+    // }
     // TODO@MERGE 
     // @ts-ignore
     return ClassDescriptor.getClassDescriptor4Class(this) as ClassDescriptorInterface<typeof this>;

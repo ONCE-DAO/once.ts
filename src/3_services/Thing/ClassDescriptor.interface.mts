@@ -1,4 +1,4 @@
-import Class from "./Class.interface.mjs";
+import Class from "../Class.interface.mjs";
 import InterfaceDescriptorInterface from "./InterfaceDescriptor.interface.mjs";
 import UcpComponentDescriptorInterface from "./UcpComponentDescriptor.interface.mjs";
 export default interface ClassDescriptorInterface<ClassType extends Class<any>> {

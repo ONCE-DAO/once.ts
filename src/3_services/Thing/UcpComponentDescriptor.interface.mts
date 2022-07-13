@@ -1,8 +1,7 @@
+import Class from "../Class.interface.mjs";
 import NpmPackage from "../NpmPackage.interface.mjs";
-import Class from "./Class.interface.mjs";
 import ClassDescriptorInterface from "./ClassDescriptor.interface.mjs";
 import InterfaceDescriptorInterface from "./InterfaceDescriptor.interface.mjs";
-import { ThingStatics } from "./Thing.interface.mjs";
 
 export default interface UcpComponentDescriptorInterface {
 

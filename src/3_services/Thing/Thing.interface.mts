@@ -1,4 +1,4 @@
-import Class from "./Class.interface.mjs";
+import Class from "../Class.interface.mjs";
 import ClassDescriptorInterface from "./ClassDescriptor.interface.mjs";
 
 export default interface Thing<ClassInterface> {
