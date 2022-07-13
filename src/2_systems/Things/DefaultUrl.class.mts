@@ -180,15 +180,12 @@ export default class DefaultUrl extends BaseThing<DefaultUrl> implements Url {
     //get localFileOrigin() { return ONCE.mode == Once.MODE_NODE_SERVER ? "file://" + ONCE.repositoryRootPath : ONCE.repositoryRootPath }
     get searchParameters(): { [index: string]: string } { return this._searchParameters }
 
-
-
     set protocol(value: urlProtocol[]) {
         value = value || [];
 
-        // TODO@BE Make it unique
-        this._protocol = value;
-
+        this._protocol = [...new Set(value)];
     }
+
     set hostName(value: string | undefined) {
         if (!value) {
             delete this.hostNames[0];

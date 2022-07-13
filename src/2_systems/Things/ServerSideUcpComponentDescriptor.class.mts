@@ -1,7 +1,7 @@
 // ##IGNORE_TRANSFORMER##
 
 import fs from 'fs';
-import path from 'path';
+import path, { basename } from 'path';
 import DefaultUcpComponentDescriptor, { UcpComponentDescriptorInitParameters } from "./DefaultUcpComponentDescriptor.class.mjs";
 import UcpComponentDescriptorInterface, { ServerSideUcpComponentDescriptorInterface, UcpComponentDescriptorDataStructure, UcpComponentDescriptorStatics } from "../../3_services/Thing/UcpComponentDescriptor.interface.mjs";
 import ClassDescriptorInterface from "../../3_services/Thing/ClassDescriptor.interface.mjs";
@@ -11,32 +11,23 @@ import InterfaceDescriptorInterface from '../../3_services/Thing/InterfaceDescri
 import { DefaultNpmPackage } from '../NpmPackage.class.mjs';
 import GitRepository from '../../3_services/GitRepository.interface.mjs';
 import Submodule from '../../3_services/Submodule.interface.mjs';
+import Class from '../../3_services/Class.interface.mjs';
 
 
 const NewServerSideUcpComponentDescriptor = class ServerSideUcpComponentDescriptor extends DefaultUcpComponentDescriptor implements ServerSideUcpComponentDescriptorInterface {
 
   exportFile: string = "index.ts";
 
-  protected myClass = ServerSideUcpComponentDescriptor;
-
-
-  // HACK Keine ahnung warum er das ! nicht akzeptiert
-  // @ts-ignore
-  npmPackage!: NpmPackage;
 
   init({ path, relativePath }: UcpComponentDescriptorInitParameters) {
     (this.relativeSrcPath = relativePath);
 
-    // TODO Deaktiviert wegen Browser
-    //this.identifier = basename(relativePath);
-
+    this.identifier = basename(relativePath);
 
     let npmPackage = DefaultNpmPackage.getByFolder(path) as NpmPackage;
     if (!npmPackage) throw new Error("Could not find a NPM Package");
 
     this.npmPackage = npmPackage;
-    // this.name = npmPackage?.name;
-    // this.version = npmPackage?.version;
     return this;
   }
 
@@ -89,10 +80,10 @@ const NewServerSideUcpComponentDescriptor = class ServerSideUcpComponentDescript
     // );
   }
 
-  get defaultExportObject(): ThingStatics<any> | InterfaceDescriptorInterface | undefined {
+  get defaultExportObject(): ClassDescriptorInterface<Class<any>> | InterfaceDescriptorInterface | undefined {
     let result = this.units.filter(unit => {
-      if ("classDescriptor" in unit) {
-        return unit.classDescriptor.componentExport === "defaultExport"
+      if ("class" in unit) {
+        return unit.componentExport === "defaultExport"
       } else if (unit) {
         return unit.componentExport === "defaultExport"
       }
@@ -164,12 +155,12 @@ const NewServerSideUcpComponentDescriptor = class ServerSideUcpComponentDescript
         let exportedModuleItems = { ...importedModule };
         for (const itemKey of Object.keys(exportedModuleItems)) {
           let item = exportedModuleItems[itemKey];
-          let descriptor: InterfaceDescriptorInterface | ClassDescriptorInterface | undefined;
+          let descriptor: InterfaceDescriptorInterface | ClassDescriptorInterface<Class<any>> | undefined;
           if ("allExtendedInterfaces" in item) {
             descriptor = item as InterfaceDescriptorInterface;
 
           } else if ("classDescriptor" in item && item.classDescriptor) {
-            descriptor = item.classDescriptor as ClassDescriptorInterface;
+            descriptor = item.classDescriptor as ClassDescriptorInterface<Class<any>>;
           }
 
           if (descriptor && descriptor.componentExport && descriptor.componentExportName) {
@@ -230,24 +221,12 @@ const NewServerSideUcpComponentDescriptor = class ServerSideUcpComponentDescript
 
   initBasics(packagePath: string, packageName: string, packageVersion: string | undefined): UcpComponentDescriptorInterface {
     this.npmPackage = DefaultNpmPackage.getByPackage(packagePath, packageName, packageVersion || '');
-    let name = this.myClass.getDescriptorName(packagePath, packageName, packageVersion);
-    this.myClass._componentDescriptorStore[name] = this;
+    this.myClass.registerDescriptor(this, packagePath, packageName, packageVersion);
     return this;
   }
 
-
 }
 
-
 let ServerSideUcpComponentDescriptor: UcpComponentDescriptorStatics = NewServerSideUcpComponentDescriptor;
-// declare global {
-//   var CashServerSideUcpComponentDescriptor: UcpComponentDescriptorStatics | undefined;
-// }
-
-// if (typeof global.CashServerSideUcpComponentDescriptor === "undefined") {
-//   global.CashServerSideUcpComponentDescriptor = NewServerSideUcpComponentDescriptor;
-// } else {
-//   ServerSideUcpComponentDescriptor = global.CashServerSideUcpComponentDescriptor;
-// }
 
 export default ServerSideUcpComponentDescriptor;

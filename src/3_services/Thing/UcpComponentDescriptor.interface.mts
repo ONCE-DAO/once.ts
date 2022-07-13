@@ -1,11 +1,13 @@
 import NpmPackage from "../NpmPackage.interface.mjs";
+import Class from "./Class.interface.mjs";
+import ClassDescriptorInterface from "./ClassDescriptor.interface.mjs";
 import InterfaceDescriptorInterface from "./InterfaceDescriptor.interface.mjs";
 import { ThingStatics } from "./Thing.interface.mjs";
 
 export default interface UcpComponentDescriptorInterface {
 
     // TODO: specify better
-    units: (ThingStatics<any> | InterfaceDescriptorInterface)[];
+    units: (ClassDescriptorInterface<Class<any>> | InterfaceDescriptorInterface)[];
     npmPackage: NpmPackage;
     relativeSrcPath: string | undefined;
     identifier: string | undefined;
@@ -13,9 +15,12 @@ export default interface UcpComponentDescriptorInterface {
     get name(): string
     get version(): string
     get srcPath(): string
-    defaultExportObject: ThingStatics<any> | InterfaceDescriptorInterface | undefined
-    getUnitByName(name: string, type: 'InterfaceDescriptor' | 'ClassDescriptor'): any
-    register(object: ThingStatics<any> | InterfaceDescriptorInterface): void
+    defaultExportObject: ClassDescriptorInterface<Class<any>> | InterfaceDescriptorInterface | undefined
+
+    getUnitByName(name: string, type: 'ClassDescriptor'): ClassDescriptorInterface<Class<any>> | undefined;
+    getUnitByName(name: string, type: 'InterfaceDescriptor'): InterfaceDescriptorInterface | undefined;
+
+    register(object: InterfaceDescriptorInterface | ClassDescriptorInterface<Class<any>>): void
 
     initBasics(packagePath: string, packageName: string, packageVersion: string | undefined): UcpComponentDescriptorInterface
 }
@@ -23,12 +28,14 @@ export default interface UcpComponentDescriptorInterface {
 export interface ServerSideUcpComponentDescriptorInterface extends UcpComponentDescriptorInterface {
     get scenarioDirectory(): string;
     writeToPath(writePath: string): void;
-    get defaultExportObject(): ThingStatics<any> | InterfaceDescriptorInterface | undefined
+    get defaultExportObject(): ClassDescriptorInterface<Class<any>> | InterfaceDescriptorInterface | undefined
 }
 
 export interface UcpComponentDescriptorStatics {
     register(packagePath: string, packageName: string, packageVersion: string | undefined): Function
-    getDescriptor(packagePath: string, packageName: string, packageVersion: string | undefined): UcpComponentDescriptorInterface
+    getDescriptor(packagePath: string, packageName: string, packageVersion: string | undefined): UcpComponentDescriptorInterface;
+    getDescriptorName(packagePath: string, packageName: string, packageVersion: string | undefined): string
+    registerDescriptor(object: UcpComponentDescriptorInterface, packagePath: string, packageName: string, packageVersion: string | undefined): void
 }
 
 export type UcpComponentDescriptorDataStructure = {

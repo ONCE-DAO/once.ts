@@ -8,9 +8,9 @@ import InterfaceDescriptor from "./InterfaceDescriptor.class.mjs";
 
 const UcpComponentDescriptor = (await import("./BaseUcpComponentDescriptor.class.mjs")).default;
 
-const NewClassDescriptor = class ClassDescriptor implements ClassDescriptorInterface {
+const NewClassDescriptor = class ClassDescriptor<ClassType extends Class<any>> implements ClassDescriptorInterface<ClassType> {
 
-    private static _classDescriptorStore = new WeakMap<Class<any>, ClassDescriptorInterface>();
+    private static _classDescriptorStore = new WeakMap<Class<any>, ClassDescriptorInterface<Class<any>>>();
     ucpComponentDescriptor!: UcpComponentDescriptorInterface;
     filename: string | undefined;
 
@@ -38,12 +38,14 @@ const NewClassDescriptor = class ClassDescriptor implements ClassDescriptorInter
 
     get name(): string | undefined { return this._class?.name }
 
-    static getClassDescriptor4Class(aClass: Class<any>): ClassDescriptorInterface {
+    static getClassDescriptor4Class<T extends Class<any>>(aClass: T): ClassDescriptorInterface<T> {
         let descriptor = this._classDescriptorStore.get(aClass);
         if (descriptor === undefined) {
-            descriptor = new ClassDescriptor().init(aClass);
+            descriptor = new ClassDescriptor<T>().init(aClass);
             this._classDescriptorStore.set(aClass, descriptor);
         }
+        // HACK Keine Ahnung, wie man das interface mit dem Classentypen zusammen bringt
+        //@ts-ignore
         return descriptor;
     }
 
@@ -78,7 +80,7 @@ const NewClassDescriptor = class ClassDescriptor implements ClassDescriptorInter
         return `${this.packagePath}.${this.packageName}[${this.packageVersion}]/${this.className}`
     }
 
-    private _class: Class<any> | undefined;
+    private _class!: ClassType;
     private _interfaces: InterfaceDescriptorInterface[] = [];
     private _extends: Class<any>[] = [];
     get extends(): Class<any>[] {
@@ -104,21 +106,20 @@ const NewClassDescriptor = class ClassDescriptor implements ClassDescriptorInter
         return this._extends;
     };
 
-    get class(): any { // TODO Missing Type
+    get class(): ClassType { // TODO Missing Type
         return this._class
     }
 
     get className(): string {
-        if (!this._class) throw new Error("Missing class in Descriptor")
         return this._class.name;
     }
 
-    init(aClass: Class<any>): this {
+    init(aClass: ClassType): ClassDescriptorInterface<ClassType> {
         this._class = aClass;
         return this;
     }
 
-    add(object: InterfaceDescriptorInterface | UcpComponentDescriptorInterface): ClassDescriptorInterface {
+    add(object: InterfaceDescriptorInterface | UcpComponentDescriptorInterface): ClassDescriptorInterface<ClassType> {
         if ("extends" in object) {
             this._interfaces.push(object);
             object.addImplementation(this);
@@ -131,7 +132,7 @@ const NewClassDescriptor = class ClassDescriptor implements ClassDescriptorInter
 
     static register(packagePath: string, packageName: string, packageVersion: string | undefined): Function {
         return (aClass: any, name: string, x: any): void => {
-            let classDescriptor = aClass.classDescriptor as ClassDescriptorInterface | undefined;
+            let classDescriptor = aClass.classDescriptor as ClassDescriptorInterface<typeof aClass> | undefined;
             if (classDescriptor !== undefined) {
                 classDescriptor.register(packagePath, packageName, packageVersion);
             }
@@ -140,7 +141,7 @@ const NewClassDescriptor = class ClassDescriptor implements ClassDescriptorInter
 
     register(packagePath: string, packageName: string, packageVersion: string | undefined): void {
         let ucpComponentDescriptor = UcpComponentDescriptor.getDescriptor(packagePath, packageName, packageVersion);
-        ucpComponentDescriptor.register(this.class);
+        ucpComponentDescriptor.register(this);
         this.registerAllInterfaces();
     }
 
@@ -185,7 +186,7 @@ const NewClassDescriptor = class ClassDescriptor implements ClassDescriptorInter
 
     static addInterfaces(packagePath: string, packageName: string, packageVersion: string | undefined, interfaceName: string): Function {
         return (aClass: any, name: string, x: any): void => {
-            let classDescriptor = aClass.classDescriptor as ClassDescriptorInterface | undefined;
+            let classDescriptor = aClass.classDescriptor as ClassDescriptorInterface<typeof aClass> | undefined;
             if (classDescriptor !== undefined) {
                 classDescriptor.addInterfaces(packagePath, packageName, packageVersion, interfaceName);
             }
@@ -200,7 +201,7 @@ const NewClassDescriptor = class ClassDescriptor implements ClassDescriptorInter
 
     static setFilePath(filename: string): Function {
         return (aClass: any, name: string, x: any): void => {
-            let classDescriptor = aClass.classDescriptor as ClassDescriptorInterface | undefined;
+            let classDescriptor = aClass.classDescriptor as ClassDescriptorInterface<typeof aClass> | undefined;
             if (classDescriptor !== undefined) {
                 classDescriptor.setFilePath(filename);
             }
@@ -215,7 +216,7 @@ const NewClassDescriptor = class ClassDescriptor implements ClassDescriptorInter
     // Adds Object to export list
     static componentExport(exportType: 'defaultExport' | 'namedExport'): Function {
         return (aClass: any, name: string, x: any): void => {
-            (aClass.classDescriptor as ClassDescriptorInterface).componentExport = exportType;
+            (aClass.classDescriptor as ClassDescriptorInterface<typeof aClass>).componentExport = exportType;
         }
     }
 

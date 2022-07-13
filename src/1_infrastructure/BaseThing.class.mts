@@ -2,6 +2,7 @@ import Thing, { ThingObjectState } from "../3_services/Thing/Thing.interface.mjs
 import EventService from "../3_services/Thing/EventService.interface.mjs";
 import ClassDescriptorInterface from "../3_services/Thing/ClassDescriptor.interface.mjs";
 import ClassDescriptor from "../2_systems/Things/ClassDescriptor.class.mjs";
+import Class from "../3_services/Class.interface.mjs";
 
 export enum emptyEventList { }
 
@@ -11,17 +12,17 @@ export default abstract class BaseThing<ClassInterface> implements Thing<ClassIn
   EVENT_NAMES = emptyEventList;
   protected _eventSupport!: EventService<any>;
 
-  static get classDescriptor(): ClassDescriptorInterface {
+  static get classDescriptor() {
     if (this === BaseThing) {
       // @ts-ignore This should never happen
       return undefined;
     }
     // TODO@MERGE 
     // @ts-ignore
-    return ClassDescriptor.getClassDescriptor4Class(this);
+    return ClassDescriptor.getClassDescriptor4Class(this) as ClassDescriptorInterface<typeof this>;
   }
 
-  get classDescriptor(): ClassDescriptorInterface {
+  get classDescriptor(): ClassDescriptorInterface<Class<any>> {
     //TODO@MD Check how to do it better
     // HACK
     // @ts-ignore
@@ -84,7 +85,8 @@ export default abstract class BaseThing<ClassInterface> implements Thing<ClassIn
     this.objectState = ThingObjectState.DESTROYED;
   }
 
-  get class(): any {
+  get class(): Class<this> {
+    //@ts-ignore
     return this.constructor
   }
 

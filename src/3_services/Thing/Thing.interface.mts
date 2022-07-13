@@ -6,12 +6,12 @@ export default interface Thing<ClassInterface> {
   init(...a: any[]): any;
   name: string;
 
-  classDescriptor: ClassDescriptorInterface
+  classDescriptor: ClassDescriptorInterface<any>
   destroy(): void;
-  objectState: ThingObjectState
+  objectState: ThingObjectState;
 }
 
 export enum ThingObjectState { 'ACTIVE' = 'active', 'DESTROYED' = 'destroyed' }
-export interface ThingStatics<StaticClassInterface> extends Class<any> {
-  classDescriptor: ClassDescriptorInterface
+export interface ThingStatics<StaticClassInterface extends Class<any>> extends Class<any> {
+  classDescriptor: ClassDescriptorInterface<StaticClassInterface>
 }

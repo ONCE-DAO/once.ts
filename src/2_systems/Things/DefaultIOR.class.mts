@@ -160,8 +160,7 @@ export default class DefaultIOR extends DefaultUrl implements IOR {
         let result = 'ior:';
 
         if (!this.protocol.includes(urlProtocol.ude)) {
-            //TODO@BE hack
-            //@ts-ignore
+            //TODO ENV Handling
             result += this.origin || global.ONCE?.ENV?.ONCE_DEFAULT_URL;
         }
         result += this.pathName;

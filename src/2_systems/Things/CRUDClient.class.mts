@@ -14,7 +14,7 @@ type Response = import("node-fetch/@types/index").Response;
 
 let internalFetch: (url: RequestInfo, init?: RequestInit | undefined) => Promise<Response>;
 
-//HACK ONCE mode
+//HACK ONCE mode on Import
 if (typeof window == "undefined" && (typeof ONCE == 'undefined' || ONCE.mode !== OnceMode.BROWSER)) {
     internalFetch = (await import('node-fetch')).default;
 } else {
