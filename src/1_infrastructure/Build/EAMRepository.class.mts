@@ -26,7 +26,15 @@ export default class DefaultEAMRepository implements EAMRepository {
             distributionFolder: "",
         }
 
-        return new DefaultEAMRepository(buildConfig, gitRepository);
+        const eamr = new DefaultEAMRepository(buildConfig, gitRepository);
+
+        // TODO remove transformer build
+        const transformer = await eamr.getTransformerBuilder();
+        const config = { ...buildConfig, distributionFolder: transformer.distributionFolder }
+        await transformer.install(config)
+        await transformer.beforeBuild(config)
+        await transformer.build(config)
+        return eamr;
     }
 
     private constructor(buildConfig: BuildConfig, gitRepository: GitRepository) {
@@ -34,15 +42,26 @@ export default class DefaultEAMRepository implements EAMRepository {
         this.gitRepository = gitRepository;
     }
 
-    private static async getComponentBuilder(gitRepository: GitRepository, buildConfig: BuildConfig): Promise<ComponentBuilder[]> {
-        const componentBuilders = (await Promise.all((await gitRepository
+
+    private static async getAllComponentBuilder(gitRepository: GitRepository, buildConfig: BuildConfig): Promise<ComponentBuilder[]> {
+        return (await Promise.all((await gitRepository
             .getSubmodules(DefaultGitSubmodule.init))
             .map(async (submodule) => {
-                // buildConfig.srcPath = submodule.path;
                 return await DefaultComponentBuilder.init(submodule, buildConfig)
             })))
+    }
+
+
+    private static async getTransformerBuilder(gitRepository: GitRepository, buildConfig: BuildConfig): Promise<ComponentBuilder[]> {
+        const componentBuilders = await this.getAllComponentBuilder(gitRepository, buildConfig);
         return [
             ...componentBuilders.filter(x => `${x.namespace}.${x.name}` === "tla.EAM.Thinglish.Transformer"),
+        ]
+    }
+
+    private static async getComponentBuilder(gitRepository: GitRepository, buildConfig: BuildConfig): Promise<ComponentBuilder[]> {
+        const componentBuilders = await this.getAllComponentBuilder(gitRepository, buildConfig);
+        return [
             ...componentBuilders.filter(x => `${x.namespace}.${x.name}` !== "tla.EAM.Thinglish.Transformer")
         ]
     }
@@ -60,5 +79,16 @@ export default class DefaultEAMRepository implements EAMRepository {
 
     async getComponentBuilder(): Promise<ComponentBuilder[]> {
         return await DefaultEAMRepository.getComponentBuilder(this.gitRepository, this.buildConfig)
+    }
+
+    async getTransformerBuilder(): Promise<ComponentBuilder> {
+        const transformers = await DefaultEAMRepository.getTransformerBuilder(this.gitRepository, this.buildConfig)
+        if (transformers.length > 1) {
+            throw new Error("More than one transformer found")
+        }
+        if (transformers.length === 0) {
+            throw new Error("No transformer found")
+        }
+        return transformers[0]
     }
 }
