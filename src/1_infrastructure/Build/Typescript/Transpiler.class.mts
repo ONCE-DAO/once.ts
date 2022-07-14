@@ -1,6 +1,6 @@
 import { existsSync, rmSync, symlinkSync } from "fs";
 import { join, relative } from "path";
-import ts, { PluginConfig } from "typescript";
+import ts from "typescript";
 import { } from "ts-patch"
 import DefaultUcpUnit from "../../../2_systems/UCP/DefaultUcpUnit.class.mjs";
 import ExportUcpComponentDescriptor from "../../../2_systems/UCP/ExportUcpComponentDescriptor.mjs";
@@ -48,7 +48,7 @@ export default class DefaultTranspiler implements Transpiler {
         options.listEmittedFiles = true;
 
         options.plugins = options.plugins?.map(plugin => {
-            const pluginConfig: PluginConfig = {
+            const pluginConfig: ts.PluginConfig = {
                 ...plugin,
                 transform: join(buildConfig.eamdPath, plugin.transform || "")
             }
