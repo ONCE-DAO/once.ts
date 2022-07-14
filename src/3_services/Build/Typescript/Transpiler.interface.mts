@@ -1,4 +1,4 @@
-import ts, { PluginConfig } from "typescript"
+import ts from "typescript"
 
 export default interface Transpiler {
     watch(changedFunction: (files: string[]) => Promise<void>): Promise<void>
