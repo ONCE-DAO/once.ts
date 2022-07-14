@@ -5,7 +5,7 @@ import { } from "ts-patch"
 import DefaultUcpUnit from "../../../2_systems/UCP/DefaultUcpUnit.class.mjs";
 import ExportUcpComponentDescriptor from "../../../2_systems/UCP/ExportUcpComponentDescriptor.mjs";
 import BuildConfig from "../../../3_services/Build/BuildConfig.interface.mjs";
-import Transpiler, { ExtendedOptions, TRANSFORMER } from "../../../3_services/Build/Typescript/Transpiler.interface.mjs";
+import Transpiler, { ExtendedOptions, PluginConfig, TRANSFORMER } from "../../../3_services/Build/Typescript/Transpiler.interface.mjs";
 import { TYPESCRIPT_PROJECT } from "../../../3_services/Build/Typescript/TypescriptProject.interface.mjs";
 import { UnitType } from "../../../3_services/UCP/UcpUnit.interface.mjs";
 
@@ -48,7 +48,7 @@ export default class DefaultTranspiler implements Transpiler {
         options.listEmittedFiles = true;
 
         options.plugins = options.plugins?.map(plugin => {
-            const pluginConfig: ts.PluginConfig = {
+            const pluginConfig: PluginConfig = {
                 ...plugin,
                 transform: join(buildConfig.eamdPath, plugin.transform || "")
             }

@@ -17,3 +17,16 @@ export type ExtendedOptions = ts.CompilerOptions & {
     plugins?: PluginConfig[],
     onceIOR?: string,
 }
+
+export interface PluginConfig {
+    [x: string]: any;
+    name?: string;
+    transform?: string;
+    tsConfig?: string;
+    import?: string;
+    type?: 'ls' | 'program' | 'config' | 'checker' | 'raw' | 'compilerOptions';
+    after?: boolean;
+    afterDeclarations?: boolean;
+    transformProgram?: boolean;
+    beforeEmit?: boolean;
+}
