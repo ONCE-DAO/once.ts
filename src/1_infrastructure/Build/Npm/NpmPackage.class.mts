@@ -63,7 +63,7 @@ export default class DefaultNpmPackage implements NpmPackage, Buildable {
     static init(path: string, fallbackName: string, _fallbackNamespace: string, version?: string): NpmPackage {
         const npmPackage = new this(path)
         npmPackage.setFallBackValue("name", fallbackName)
-        version && npmPackage.setValue("version", version)
+        version && version !== "HEAD" && npmPackage.setValue("version", version)
 
         return npmPackage;
     }
