@@ -41,6 +41,7 @@ export default class DefaultTranspiler implements Transpiler {
         const parsedConfig = ts.parseJsonConfigFileContent(readConfig.config, ts.sys, this.baseDir);
 
         const options = parsedConfig.options as ExtendedOptions;
+        if (!options.rootDir) throw "root dir is not set in " + configFile
         options.noEmit = false;
         options.outDir = parsedConfig.options.outDir ?? buildConfig.distributionFolder;
         options.preserveWatchOutput = true;
@@ -54,8 +55,12 @@ export default class DefaultTranspiler implements Transpiler {
             return pluginConfig
         })
 
+
         // TODO can be removed when path linking to real .mts files
-        options.noEmitOnError = false
+        // options.noEmitOnError = false
+        options.tsBuildInfoFile = buildConfig.distributionFolder + "/.tsbuildinfo";
+        options.noEmitOnError = existsSync(options.tsBuildInfoFile)
+
         // TODO can be remove when exclude will work
         options.suppressOutputPathCheck = true;
         parsedConfig.options = options;
@@ -108,10 +113,8 @@ export default class DefaultTranspiler implements Transpiler {
         const compilerHost = ts.createCompilerHost(this.config.options);
         compilerHost.readFile = this.readFile.bind(this)
 
-        // const oldReadDirectory = compilerHost.readDirectory
         compilerHost.readDirectory = this.readDirectory.bind(this)
 
-        // const program = ts.createProgram([...this.config.fileNames, this.ExportFileName], this.config.options, compilerHost);
         const program = ts.createProgram({
             rootNames: [...this.config.fileNames, this.ExportFileName],
             options: this.config.options,
@@ -132,14 +135,9 @@ export default class DefaultTranspiler implements Transpiler {
 
         const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
         if (emitResult.emitSkipped) {
-            console.log("tsconfig", JSON.stringify(this.config.options, null, 2));
             console.log(this.formatDiagnostics.bind(this)(allDiagnostics));
             console.error('\x1b[31m%s\x1b[0m', "Emit was skipped. please check errors");
             throw "Emit was skipped. please check errors"
-        }
-        else {
-            console.debug(this.formatDiagnostics.bind(this)(allDiagnostics));
-            // console.debug('\x1b[33m%s\x1b[0m');
         }
 
         return emitResult.emittedFiles || []
