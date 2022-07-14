@@ -15,7 +15,7 @@ export default class DefaultTranspiler implements Transpiler {
 
 
     static async init(baseDir: string, buildConfig: BuildConfig, namespace: string): Promise<Transpiler> {
-        const configFile = ts.findConfigFile(baseDir, ts.sys.fileExists);
+        const configFile = ts.findConfigFile(baseDir, ts.sys.fileExists, "tsconfig.build.json");
         if (!configFile)
             throw Error(`no tsconfig file found in folder: ${baseDir}`);
         return new DefaultTranspiler(buildConfig, configFile, baseDir, namespace);
