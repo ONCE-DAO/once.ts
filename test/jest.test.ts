@@ -1,5 +1,5 @@
-import { join } from "path";
-import { myResult as staticImportSuccess } from "./MyResolveResult.mjs";
+import path, { join } from "path";
+// import { myResult as staticImportSuccess } from "./MyResolveResult.mjs";
 test("process environment is set to test by jest", () => {
     expect(process.env.NODE_ENV).toBe('test');
 })
@@ -27,9 +27,9 @@ test("TS code getting compiled", () => {
     expect(new MyClass(MyEnum.Banana).stuff).toBe(MyEnum.Banana);
 })
 
-test("can import esm modules", async () => {
-    expect(staticImportSuccess).toBe(42)
-})
+// test("can import esm modules", async () => {
+//     expect(staticImportSuccess).toBe(42)
+// })
 
 test("Once is running in Test Mode", () => {
     // @ts-ignore cannot redeclare once here without getting in trouble with global definition of Once
@@ -39,11 +39,11 @@ test("Once is running in Test Mode", () => {
     expect(once.mode).toBe("TEST_ENVIRONMENT")
 });
 
-test("Test Resolver is added and working", async () => {
-    //@ts-ignore
-    const { myResult } = (await import("./TEST_RESOLVE.mjs"))
-    expect(myResult).toBe(42)
-});
+// test("Test Resolver is added and working", async () => {
+//     //@ts-ignore
+//     const { myResult } = (await import("./TEST_RESOLVE.mjs"))
+//     expect(myResult).toBe(42)
+// });
 
 test("Test Resolver can load over IOR string", async () => {
     const imported = (await import("ior:esm:/tla.EAM.Once[build]"))
@@ -59,7 +59,8 @@ test("Test Resolver can async import module", async () => {
 });
 
 test("Test Resolver can async import module absolute path", async () => {
-    const imported = (await import("/Users/phibar/EAMD/EAMD.ucp-build/Scenarios/localhost/tla/EAM/Once/Server/build/index.export.mjs"))
+    ONCE.eamd.currentScenario.scenarioPath
+    const imported = (await import(path.join(ONCE.eamd.currentScenario.scenarioPath, "/tla/EAM/Once/Server/build/index.export.mjs")))
     expect(imported).not.toBeUndefined()
     expect(imported).not.toBeNull()
 });
