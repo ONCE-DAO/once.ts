@@ -27,7 +27,7 @@ export default class DefaultNodeOnceImportLoader extends AbstractNodeOnce implem
 
 
 
-    const result = defaultResolve(specifier, context, defaultResolve);
+    const result = await defaultResolve(specifier, context, defaultResolve);
     console.log("RESOLVER IS CALLED");
 
     if (context.parentURL) {
