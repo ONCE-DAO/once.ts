@@ -1,5 +1,5 @@
-export interface Class<T> {
-  new(...args: any[]): T;
+export interface Class<ClassInstance> {
+  new(...args: any[]): ClassInstance;
 }
 
 export default Class;

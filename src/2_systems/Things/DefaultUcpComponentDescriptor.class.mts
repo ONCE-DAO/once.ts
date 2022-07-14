@@ -1,20 +1,21 @@
 // ##IGNORE_TRANSFORMER##
 
+import Class from "../../3_services/Class.interface.mjs";
 import NpmPackage from "../../3_services/NpmPackage.interface.mjs";
 import ClassDescriptorInterface from "../../3_services/Thing/ClassDescriptor.interface.mjs";
 import InterfaceDescriptorInterface from "../../3_services/Thing/InterfaceDescriptor.interface.mjs";
 import { ThingStatics } from "../../3_services/Thing/Thing.interface.mjs";
-import UcpComponentDescriptorInterface from "../../3_services/Thing/UcpComponentDescriptor.interface.mjs";
+import UcpComponentDescriptorInterface, { UcpComponentDescriptorStatics } from "../../3_services/Thing/UcpComponentDescriptor.interface.mjs";
 import { DefaultNpmPackage } from "./NpmPackage.class.mjs";
 
 export default class DefaultUcpComponentDescriptor implements UcpComponentDescriptorInterface {
 
   exportFile: string = "index.ts";
 
-  protected static readonly _componentDescriptorStore: { [i: string]: DefaultUcpComponentDescriptor } = {};
+  protected static readonly _componentDescriptorStore: { [i: string]: UcpComponentDescriptorInterface } = {};
 
   // TODO: specify better
-  units: (ThingStatics<any> | InterfaceDescriptorInterface)[] = [];
+  units: (ClassDescriptorInterface<Class<any>> | InterfaceDescriptorInterface)[] = [];
 
   static getDescriptorName(packagePath: string, packageName: string, packageVersion: string | undefined) {
     return `${packagePath}${packageName}[${packageVersion || 'latest'}]`;
@@ -24,7 +25,10 @@ export default class DefaultUcpComponentDescriptor implements UcpComponentDescri
   relativeSrcPath: string | undefined;
   identifier: string | undefined;
 
-  protected myClass = DefaultUcpComponentDescriptor;
+  protected get myClass(): UcpComponentDescriptorStatics {
+    //@ts-ignore
+    return this.constructor;
+  };
 
 
   get name(): string {
@@ -47,13 +51,13 @@ export default class DefaultUcpComponentDescriptor implements UcpComponentDescri
     return this.npmPackage.namespace;
   }
 
-  getUnitByName(name: string, type: 'ClassDescriptor'): ClassDescriptorInterface | undefined;
+  getUnitByName(name: string, type: 'ClassDescriptor'): ClassDescriptorInterface<Class<any>> | undefined;
   getUnitByName(name: string, type: 'InterfaceDescriptor'): InterfaceDescriptorInterface | undefined;
-  getUnitByName(name: string, type: 'InterfaceDescriptor' | 'ClassDescriptor'): any {
+  getUnitByName(name: string, type: 'InterfaceDescriptor' | 'ClassDescriptor'): unknown {
 
     if (type === 'ClassDescriptor') {
       return this.units.filter(u => {
-        if (u.name === name) {
+        if (u.name === name && "class" in u) {
           return u;
         }
       })?.[0]
@@ -90,10 +94,10 @@ export default class DefaultUcpComponentDescriptor implements UcpComponentDescri
 
 
 
-  get defaultExportObject(): ThingStatics<any> | InterfaceDescriptorInterface | undefined {
+  get defaultExportObject(): ClassDescriptorInterface<Class<any>> | InterfaceDescriptorInterface | undefined {
     let result = this.units.filter(unit => {
-      if ("classDescriptor" in unit) {
-        return unit.classDescriptor.componentExport === "defaultExport"
+      if ("class" in unit) {
+        return unit.componentExport === "defaultExport"
       } else if ("allExtendedInterfaces" in unit) {
         return unit.componentExport === "defaultExport"
       }
@@ -103,12 +107,11 @@ export default class DefaultUcpComponentDescriptor implements UcpComponentDescri
 
 
 
-  register(object: ThingStatics<any> | InterfaceDescriptorInterface): void {
+  register(object: ClassDescriptorInterface<Class<any>> | InterfaceDescriptorInterface): void {
 
-    if ("classDescriptor" in object) {
+    if ("class" in object) {
       this.units.push(object);
-
-      object.classDescriptor.add(this);
+      object.add(this);
 
     } else if ("implementedInterfaces" in object) {
       const existingInterfaceDescriptors = this.getUnitByName(object.name, "InterfaceDescriptor");
@@ -130,6 +133,8 @@ export default class DefaultUcpComponentDescriptor implements UcpComponentDescri
     }
   }
 
+
+
   static getDescriptor(packagePath: string, packageName: string, packageVersion: string | undefined): UcpComponentDescriptorInterface {
     let name = this.getDescriptorName(packagePath, packageName, packageVersion);
     if (this._componentDescriptorStore[name]) return this._componentDescriptorStore[name];
@@ -137,10 +142,14 @@ export default class DefaultUcpComponentDescriptor implements UcpComponentDescri
     return new this().initBasics(packagePath, packageName, packageVersion)
   }
 
+  static registerDescriptor(object: UcpComponentDescriptorInterface, packagePath: string, packageName: string, packageVersion: string | undefined): void {
+    let name = this.getDescriptorName(packagePath, packageName, packageVersion);
+    this._componentDescriptorStore[name] = object;
+  }
+
   initBasics(packagePath: string, packageName: string, packageVersion: string | undefined): UcpComponentDescriptorInterface {
-    this.npmPackage = DefaultNpmPackage.getByPackage(packagePath, packageName, packageVersion || '');
-    let name = this.myClass.getDescriptorName(packagePath, packageName, packageVersion);
-    this.myClass._componentDescriptorStore[name] = this;
+    this.npmPackage = { namespace: packagePath, path: packagePath, name: packageName, version: packageVersion }
+    this.myClass.registerDescriptor(this, packagePath, packageName, packageVersion);
     return this;
   }
 }

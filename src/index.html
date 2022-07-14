@@ -1,0 +1,18 @@
+<html>
+
+<head>
+    <link rel="icon" href="data:,">
+    <script type=module>
+        await import("/tla/EAM/Once/build/2_systems/Once/Once.class.mjs");
+        let SomeExampleUcpComponent = (await import("/ior:esm:/tla.EAM.UcpComponent[build]")).SomeExampleUcpComponent;
+        var x = new SomeExampleUcpComponent();
+        x.persistanceManager.create();
+    </script>
+</head>
+
+<body>
+
+</body>
+
+
+</html>

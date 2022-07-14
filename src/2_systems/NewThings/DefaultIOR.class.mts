@@ -53,7 +53,7 @@ export default class DefaultIOR extends DefaultUrl implements IOR {
     }
 
     protected _parseUrl(url: string): void {
-        if (!url.includes("esm")) {
+        if (!url.includes(":esm:")) {
             super._parseUrl(url);
             return;
         }
@@ -66,7 +66,7 @@ export default class DefaultIOR extends DefaultUrl implements IOR {
     }
 
     private _parsePackageAndVersion(url: string): string {
-        let packageMatch = url.match(/^([^:\[]+)(\[([\^\.\da-zA-Z#]+)\])?(\/(.+))?$/);
+        let packageMatch = url.match(/^([^:\[]+)(\[([\^\.\d\-_a-zA-Z#]+)\])?(\/(.+))?$/);
         if (packageMatch) {
             this.package = packageMatch[1];
             this.version = packageMatch[3];
@@ -143,6 +143,7 @@ export default class DefaultIOR extends DefaultUrl implements IOR {
         let result = 'ior:';
 
         if (!this.protocol.includes(urlProtocol.ude)) {
+            //TODO ENV Handling
             result += this.origin || global.ONCE?.ENV?.ONCE_DEFAULT_URL;
         }
         result += this.pathName;
@@ -175,6 +176,5 @@ export default class DefaultIOR extends DefaultUrl implements IOR {
         }).catch(error => { });
         return loadingPromiseOrObject;
     }
-
 
 }

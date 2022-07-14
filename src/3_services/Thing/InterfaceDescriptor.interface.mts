@@ -1,4 +1,4 @@
-import Class from "./Class.interface.mjs";
+import Class from "../Class.interface.mjs";
 import ClassDescriptorInterface from "./ClassDescriptor.interface.mjs";
 import UcpComponentDescriptorInterface from "./UcpComponentDescriptor.interface.mjs";
 
@@ -13,11 +13,11 @@ export default interface InterfaceDescriptorInterface {
     packageVersion: string;
     allExtendedInterfaces: InterfaceDescriptorInterface[];
     implementedInterfaces: InterfaceDescriptorInterface[];
-    addImplementation(classDescriptor: ClassDescriptorInterface): InterfaceDescriptorInterface;
+    addImplementation(classDescriptor: ClassDescriptorInterface<any>): InterfaceDescriptorInterface;
     addExtension(packagePath: string, packageName: string, packageVersion: string | undefined, interfaceName: string): InterfaceDescriptorInterface;
     add(object: InterfaceDescriptorInterface | UcpComponentDescriptorInterface): InterfaceDescriptorInterface;
     _getImplementedInterfaces(input: InterfaceDescriptorInterface[]): InterfaceDescriptorInterface[];
-    implementations: ClassDescriptorInterface[];
+    implementations: ClassDescriptorInterface<any>[];
 }
 
 export interface InterfaceDescriptorStatics extends Class<InterfaceDescriptorInterface> {

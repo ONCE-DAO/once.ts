@@ -86,4 +86,7 @@ class EAMDLoader extends AbstractDefaultLoader implements Loader {
   }
 }
 
-export default EAMDLoader as LoaderStatic;
+// TODO Check the Problem with the Static interface
+//export default EAMDLoader as LoaderStatic;
+
+export default EAMDLoader

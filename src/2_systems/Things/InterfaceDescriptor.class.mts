@@ -10,7 +10,7 @@ let NewInterfaceDescriptor = class InterfaceDescriptor implements InterfaceDescr
     id: string = Math.round(Math.random() * 10000000) + '';
 
     readonly extends: InterfaceDescriptorInterface[] = [];
-    readonly implementations: ClassDescriptorInterface[] = [];
+    readonly implementations: ClassDescriptorInterface<any>[] = [];
     private static _lastDescriptor: InterfaceDescriptorInterface;
     public ucpComponentDescriptor!: UcpComponentDescriptorInterface;
     public filename: string = "Missing";
@@ -66,7 +66,7 @@ let NewInterfaceDescriptor = class InterfaceDescriptor implements InterfaceDescr
         return interfaceList;
     }
 
-    addImplementation(classDescriptor: ClassDescriptorInterface): this {
+    addImplementation(classDescriptor: ClassDescriptorInterface<any>): this {
         this.implementations.push(classDescriptor);
         return this
     }

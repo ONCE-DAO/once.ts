@@ -1,3 +1,4 @@
+import { existsSync } from "fs";
 import { loaderReturnValue } from "../../3_services/Loader.interface.mjs";
 import Once, { OnceMode, OnceState, resolveContext, loadContext, OnceNodeImportLoader } from "../../3_services/Once.interface.mjs";
 import DefaultIOR from "../NewThings/DefaultIOR.class.mjs";
@@ -22,12 +23,19 @@ export default class DefaultNodeOnceImportLoader extends AbstractNodeOnce implem
     context: resolveContext,
     defaultResolve: Function
   ): Promise<{ url: string }> {
-    if (specifier.startsWith("ior:"))
+    if (specifier.startsWith("ior:") || specifier.startsWith("/ior:"))
       specifier = await DefaultIOR.load(specifier, { returnValue: loaderReturnValue.path });
 
+    let result: { url: string };
 
+    try {
+      result = await defaultResolve(specifier, context, defaultResolve);
+    } catch (e) {
+      //HACK standard resolver need to handle that case
+      result = await defaultResolve(specifier + '.js', context, defaultResolve);
 
-    const result = await defaultResolve(specifier, context, defaultResolve);
+    }
+
     console.log("RESOLVER IS CALLED");
 
     if (context.parentURL) {

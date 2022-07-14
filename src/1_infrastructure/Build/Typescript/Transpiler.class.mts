@@ -59,6 +59,7 @@ export default class DefaultTranspiler implements Transpiler {
         // options.noEmitOnError = false
         options.tsBuildInfoFile = buildConfig.distributionFolder + "/.tsbuildinfo";
         options.noEmitOnError = existsSync(options.tsBuildInfoFile)
+        // options.noEmitOnError = false;
 
         // TODO can be remove when exclude will work
         options.suppressOutputPathCheck = true;

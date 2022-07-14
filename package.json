@@ -34,5 +34,8 @@
   },
   "scripts": {
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest"
+  },
+  "dependencies": {
+    "node-fetch": "^3.2.7"
   }
 }
