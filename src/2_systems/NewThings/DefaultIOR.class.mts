@@ -28,7 +28,7 @@ export default class DefaultIOR extends DefaultUrl implements IOR {
         }
         return false;
     }
-    
+
     static createUdeIor(): IOR {
         //HACK Need to change that later
         const IOR = new DefaultIOR().init('ior:ude:http://localhost:3000/UDE/' + UUiD.uuidv4());
@@ -143,8 +143,6 @@ export default class DefaultIOR extends DefaultUrl implements IOR {
         let result = 'ior:';
 
         if (!this.protocol.includes(urlProtocol.ude)) {
-            //TODO@BE hack
-            //@ts-ignore
             result += this.origin || global.ONCE?.ENV?.ONCE_DEFAULT_URL;
         }
         result += this.pathName;
@@ -165,7 +163,9 @@ export default class DefaultIOR extends DefaultUrl implements IOR {
 
     async load(config?: loadingConfig) {
         await this.discoverLoader();
-        if (!this.loader) throw new Error("No Loader found for IOR " + this.href);
+        if (!this.loader) {
+            throw new Error("No Loader found for IOR " + this.href);
+        }
 
         let loadingPromiseOrObject = this.loader.load(this, config);
         loadingPromiseOrObject.then(object => {
@@ -176,5 +176,5 @@ export default class DefaultIOR extends DefaultUrl implements IOR {
         return loadingPromiseOrObject;
     }
 
- 
+
 }

@@ -17,4 +17,8 @@ export default abstract class AbstractDefaultOnce implements Once {
     constructor() {
         this.creationDate = new Date();
     }
+
+    get isNodeJSEnvironment(): boolean {
+        return this.mode === OnceMode.NODE_LOADER || this.mode === OnceMode.TEST_ENVIRONMENT || this.mode === OnceMode.NODE_JS
+    }
 }

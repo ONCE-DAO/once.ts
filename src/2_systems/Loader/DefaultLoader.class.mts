@@ -3,6 +3,7 @@ import IOR from "../../3_services/IOR.interface.mjs";
 import Loader, { LoaderID, LoaderStatic, loadingConfig } from "../../3_services/Loader.interface.mjs";
 import FileSystemLoader from "./FileSystemLoader.class.mjs";
 
+FileSystemLoader
 export default class DefaultLoader extends AbstractDefaultLoader {
     removeObjectFromStore(object: any): void {
         throw new Error("Method not implemented.");
@@ -18,8 +19,6 @@ export default class DefaultLoader extends AbstractDefaultLoader {
     }
 
     static discover(): LoaderStatic[] {
-        // TODO again find by implemeantations
-        // return [FileSystemLoader]
         return LoaderID.implementations.map(d => d.class)
     }
 

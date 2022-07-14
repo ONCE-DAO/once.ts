@@ -1,4 +1,5 @@
 import DefaultUrl from "../../../src/2_systems/Things/DefaultUrl.class.mjs";
+import Url, { urlProtocol } from "../../../src/3_services/Url.interface.mjs";
 
 
 describe("Url Class", () => {
@@ -35,11 +36,11 @@ describe("Url Class", () => {
   })
 
 
-  var validate: any[] = [];
+  var validate: { url: string, result: Partial<Url> }[] = [];
   validate.push({
     url: "ior:ude:rest:http://localhost:8080/ior/131cac9f-ceb3-401f-a866-73f7a691fed7",
     result: {
-      protocol: ["ior", "ude", "rest", "http"],
+      protocol: [urlProtocol.ior, urlProtocol.ude, urlProtocol.rest, urlProtocol.http],
       hostName: "localhost",
       port: 8080,
       pathName: "/ior/131cac9f-ceb3-401f-a866-73f7a691fed7",
@@ -50,7 +51,7 @@ describe("Url Class", () => {
   validate.push({
     url: "ior:ude:rest:http://test.wo-da.de/ior/131cac9f-ceb3-401f-a866-73f7a691fed7",
     result: {
-      protocol: ["ior", "ude", "rest", "http"],
+      protocol: [urlProtocol.ior, urlProtocol.ude, urlProtocol.rest, urlProtocol.http],
       hostName: "test.wo-da.de",
       pathName: "/ior/131cac9f-ceb3-401f-a866-73f7a691fed7",
       origin: "http://test.wo-da.de",
@@ -61,15 +62,14 @@ describe("Url Class", () => {
     url: "/ior/131cac9f-ceb3-401f-a866-73f7a691fed7",
     result: {
       protocol: [],
-      pathName: "/ior/131cac9f-ceb3-401f-a866-73f7a691fed7",
-      isIOR: false,
+      pathName: "/ior/131cac9f-ceb3-401f-a866-73f7a691fed7"
     },
   });
 
   validate.push({
     url: "ior:ude:rest:http://localhost:8080/testdir/testfile.txt?test=foo#ActionDo=run",
     result: {
-      protocol: ["ior", "ude", "rest", "http"],
+      protocol: [urlProtocol.ior, urlProtocol.ude, urlProtocol.rest, urlProtocol.http],
       pathName: "/testdir/testfile.txt",
       fileName: "testfile.txt",
       fileType: "txt",
@@ -82,15 +82,14 @@ describe("Url Class", () => {
       normalizedHref: "http://localhost:8080/testdir/testfile.txt?test=foo#ActionDo=run",
       origin: "http://localhost:8080",
       hostName: "localhost",
-      href: "ior:ude:rest:http://localhost:8080/testdir/testfile.txt?test=foo#ActionDo=run",
-      isIOR: true,
+      href: "ior:ude:rest:http://localhost:8080/testdir/testfile.txt?test=foo#ActionDo=run"
     },
   });
 
   validate.push({
     url: "https://localhost:8443/EAMD.ucp/Components/org/shift/EAM/5_ux/ShifterNetwork/4.3.0/src/html/ShifterNetwork.html#",
     result: {
-      protocol: ["https"],
+      protocol: [urlProtocol.https],
       pathName:
         "/EAMD.ucp/Components/org/shift/EAM/5_ux/ShifterNetwork/4.3.0/src/html/ShifterNetwork.html",
       fileName: "ShifterNetwork.html",
@@ -111,7 +110,7 @@ describe("Url Class", () => {
   validate.push({
     url: "https://shifter.staging.shiftphones.com:30484/",
     result: {
-      protocol: ["https"],
+      protocol: [urlProtocol.https],
       pathName: "/",
       fileName: undefined,
       fileType: undefined,
@@ -132,7 +131,7 @@ describe("Url Class", () => {
   validate.push({
     url: "ior:http://some.host.name:1234,failoverhost:2345/route/tla.EAM.OnceService.Once.express#/ONCE-DAO/Once.express",
     result: {
-      protocol: ["ior", "http"],
+      protocol: [urlProtocol.ior, urlProtocol.http],
       host: "some.host.name:1234",
       port: 1234,
       hostName: "some.host.name",
@@ -151,8 +150,6 @@ describe("Url Class", () => {
       ports: [1234, 2345],
 
       origin: "http://some.host.name:1234",
-      namespace: undefined,
-      namespaceVersion: undefined,
       href: "ior:http://some.host.name:1234,failoverhost:2345/route/tla.EAM.OnceService.Once.express#/ONCE-DAO/Once.express",
       normalizedHref: "http://some.host.name:1234/route/tla.EAM.OnceService.Once.express#/ONCE-DAO/Once.express"
     },
@@ -161,7 +158,7 @@ describe("Url Class", () => {
   validate.push({
     url: "ior:http://some.host.name:1234,failoverhost:2345/route/some.package.file.template.html#anchorRef?param=value&param1=value1",
     result: {
-      protocol: ["ior", "http"],
+      protocol: [urlProtocol.ior, urlProtocol.http],
       host: "some.host.name:1234",
       port: 1234,
       hostName: "some.host.name",
@@ -181,8 +178,6 @@ describe("Url Class", () => {
       ports: [1234, 2345],
 
       origin: "http://some.host.name:1234",
-      namespace: undefined,
-      namespaceVersion: undefined,
       href: "ior:http://some.host.name:1234,failoverhost:2345/route/some.package.file.template.html?param=value&param1=value1#anchorRef",
 
       search: "param=value&param1=value1",
@@ -193,8 +188,8 @@ describe("Url Class", () => {
   for (let testConfig of validate) {
     test("Test Parser URL: " + testConfig.url, () => {
       let url = new DefaultUrl().init(testConfig.url);
-      for (const [key, value] of Object.entries(testConfig.result)) {
-        // @ts-ignore
+      for (const [keyString, value] of Object.entries(testConfig.result)) {
+        const key = keyString as keyof Url;
         expect(url[key], `${key} : ${value} => ${url[key]}`).toEqual(value);
       }
     });

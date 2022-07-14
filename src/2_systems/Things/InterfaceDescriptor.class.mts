@@ -109,7 +109,7 @@ let NewInterfaceDescriptor = class InterfaceDescriptor implements InterfaceDescr
     constructor(ucpComponentDescriptor: UcpComponentDescriptorInterface, interfaceName: string) {
         this.name = interfaceName;
         ucpComponentDescriptor.register(this);
-        console.log(`New InterfaceDescriptor: ${this.name} ${this.id}`);
+        //console.log(`New InterfaceDescriptor: ${this.name} ${this.id}`);
         return this;
     }
 }

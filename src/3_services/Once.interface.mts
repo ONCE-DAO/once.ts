@@ -20,6 +20,7 @@ export default interface Once {
   oldEamd: OldEAMD
 
   start(): Promise<void>;
+  get isNodeJSEnvironment(): boolean;
 }
 
 export interface OnceNodeImportLoader extends Once {

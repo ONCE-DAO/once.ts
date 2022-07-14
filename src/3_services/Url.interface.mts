@@ -26,6 +26,7 @@ export interface Url extends JSONProvider {
   hostName: string | undefined;
   host: string | undefined;
   pathName: string | undefined;
+  path: string | undefined;
   hash: string | undefined;
   anchor: string | undefined;
   origin: string | undefined;
