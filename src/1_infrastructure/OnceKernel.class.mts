@@ -1,3 +1,4 @@
+import DefaultIOR from "../2_systems/NewThings/DefaultIOR.class.mjs";
 import Once, { OnceRuntimeResolver } from "../3_services/Once.interface.mjs"
 
 export default abstract class OnceKernel {
@@ -37,7 +38,7 @@ export default abstract class OnceKernel {
       ).default.start();
     }
     if (this.RuntimeIs.NODE_JS()) {
-      const server = await (await import("ior:esm:/tla.EAM.Once.Server[build]")).OnceNodeServer
+      const server = await DefaultIOR.load("ior:esm:/tla.EAM.Once.Server[build]/OnceNodeServer");
       const once = await server.start()
       //@ts-ignore
       return once;
