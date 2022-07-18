@@ -27,16 +27,18 @@ export default class SourceFile {
     }
 
     check4Loop(hitFiles: SourceFile[] = []): boolean {
+        if (this.path.endsWith("FileSystemLoader.class.mjs")) return false; // This is the loader
         hitFiles.push(this);
         for (const file of this.importedFiles) {
             // console.log(`${sourceFile.path} =>  ${file.path} ${file.importedFiles.length}`);
             if (hitFiles.includes(file)) {
-                let message = `Detect possible loop relationship!
-####### CODE LOOP ############
-${hitFiles.map(x => x.path).join(' =>\n')}
-##############################`
-                let key = hitFiles.map(x => x.path).sort().join('');
+                let loopList: SourceFile[] = hitFiles.slice(hitFiles.indexOf(file))
+                let key = loopList.map(x => x.path).sort().join('');
                 if (!SourceFile.foundErrors[key]) {
+                    let message = `Detect possible loop relationship!
+    ####### CODE LOOP ############
+    ${[...loopList, file].map(x => x.path).join(' =>\n    ')}
+    ##############################`
                     SourceFile.foundErrors[key] = message;
                     console.warn(message)
                 }

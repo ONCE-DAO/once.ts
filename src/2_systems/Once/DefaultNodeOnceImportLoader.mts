@@ -19,10 +19,11 @@ export default class DefaultNodeOnceImportLoader extends AbstractNodeOnce implem
   }
 
   async resolve(
-    specifier: string,
+    originalSpecifier: string,
     context: resolveContext,
     defaultResolve: Function
   ): Promise<{ url: string }> {
+    let specifier: string = originalSpecifier;
     if (specifier.startsWith("ior:") || specifier.startsWith("/ior:"))
       specifier = await DefaultIOR.load(specifier, { returnValue: loaderReturnValue.path });
 
@@ -36,13 +37,15 @@ export default class DefaultNodeOnceImportLoader extends AbstractNodeOnce implem
 
     }
 
-    console.log("RESOLVER IS CALLED");
+
+
+    //console.log("RESOLVER: " + originalSpecifier + ' ' + specifier);
 
     if (context.parentURL) {
       let parent = SourceFile.getSourceFile(context.parentURL)
       let child = parent.addLoadedFile(result.url)
       child.check4Loop();
-      console.log("PUML:", `"${this.normalizePath4Url(parent.path)}" =up=> "${this.normalizePath4Url(child.path)}"`);
+      //console.log("PUML:", `"${this.normalizePath4Url(parent.path)}" =up=> "${this.normalizePath4Url(child.path)}"`);
     }
     return result
   }
