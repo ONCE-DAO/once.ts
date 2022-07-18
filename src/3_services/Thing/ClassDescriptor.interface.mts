@@ -3,12 +3,13 @@ import InterfaceDescriptorInterface from "./InterfaceDescriptor.interface.mjs";
 import UcpComponentDescriptorInterface from "./UcpComponentDescriptor.interface.mjs";
 export default interface ClassDescriptorInterface<ClassType extends Class<any>> {
     ucpComponentDescriptor: UcpComponentDescriptorInterface;
-    filename: string | undefined;
     componentExportName: string
     componentExport: 'defaultExport' | 'namedExport' | undefined;
     packagePath: string
     packageName: string
     packageVersion: string
+    location: string | undefined
+    get uniqueName(): string;
     name: string | undefined
     implements(interfaceObject: InterfaceDescriptorInterface): boolean
     packageFilename: string
@@ -19,17 +20,15 @@ export default interface ClassDescriptorInterface<ClassType extends Class<any>> 
     className: string;
     init(aClass: ClassType): ClassDescriptorInterface<ClassType>
     add(object: InterfaceDescriptorInterface | UcpComponentDescriptorInterface): ClassDescriptorInterface<ClassType>
-    register(packagePath: string, packageName: string, packageVersion: string | undefined): void
+    register(packagePath: string, packageName: string, packageVersion: string | undefined, location: string): void
     implementedInterfaces: InterfaceDescriptorInterface[];
-    addInterfaces(packagePath: string, packageName: string, packageVersion: string | undefined, interfaceName: string): this
-    setFilePath(filename: string): void
+    addInterfaces(packagePath: string, packageName: string, packageVersion: string | undefined, location: string, interfaceName: string): this
     _getImplementedInterfaces(input: InterfaceDescriptorInterface[]): InterfaceDescriptorInterface[];
 }
 
 export interface ClassDescriptorStatics extends Class<ClassDescriptorInterface<any>> {
     componentExport(exportType: 'defaultExport' | 'namedExport'): Function
     getClassDescriptor4Class<T extends Class<any>>(aClass: T): ClassDescriptorInterface<T>
-    setFilePath(filename: string): Function
-    register(packagePath: string, packageName: string, packageVersion: string | undefined): Function
-    addInterfaces(packagePath: string, packageName: string, packageVersion: string | undefined, interfaceName: string): Function
+    register(packagePath: string, packageName: string, packageVersion: string | undefined, location: string): Function
+    addInterfaces(packagePath: string, packageName: string, packageVersion: string | undefined, location: string, interfaceName: string): Function
 }

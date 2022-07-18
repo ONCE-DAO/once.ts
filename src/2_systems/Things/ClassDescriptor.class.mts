@@ -9,7 +9,17 @@ import InterfaceDescriptor from "./InterfaceDescriptor.class.mjs";
 const UcpComponentDescriptor = (await import("./BaseUcpComponentDescriptor.class.mjs")).default;
 
 const NewClassDescriptor = class ClassDescriptor<ClassType extends Class<any>> implements ClassDescriptorInterface<ClassType> {
+    public location: string | undefined;
 
+    get uniqueName(): string {
+        if (this.location == undefined) throw new Error("Missing location")
+        if (this.name == undefined) throw new Error("Missing location")
+
+        return ClassDescriptor.uniqueName(this.location, this.name);
+    }
+    static uniqueName(location: string, name: string): string {
+        return `${location}:${name}`;
+    }
     private static _classDescriptorStore = new WeakMap<Class<any>, ClassDescriptorInterface<Class<any>>>();
     ucpComponentDescriptor!: UcpComponentDescriptorInterface;
     filename: string | undefined;
@@ -130,16 +140,17 @@ const NewClassDescriptor = class ClassDescriptor<ClassType extends Class<any>> i
         return this;
     }
 
-    static register(packagePath: string, packageName: string, packageVersion: string | undefined): Function {
+    static register(packagePath: string, packageName: string, packageVersion: string | undefined, location: string): Function {
         return (aClass: any, name: string, x: any): void => {
             let classDescriptor = aClass.classDescriptor as ClassDescriptorInterface<typeof aClass> | undefined;
             if (classDescriptor !== undefined) {
-                classDescriptor.register(packagePath, packageName, packageVersion);
+                classDescriptor.register(packagePath, packageName, packageVersion, location);
             }
         }
     }
 
-    register(packagePath: string, packageName: string, packageVersion: string | undefined): void {
+    register(packagePath: string, packageName: string, packageVersion: string | undefined, location: string): void {
+        this.location = location;
         let ucpComponentDescriptor = UcpComponentDescriptor.getDescriptor(packagePath, packageName, packageVersion);
         ucpComponentDescriptor.register(this);
         this.registerAllInterfaces();
@@ -184,33 +195,19 @@ const NewClassDescriptor = class ClassDescriptor<ClassType extends Class<any>> i
 
 
 
-    static addInterfaces(packagePath: string, packageName: string, packageVersion: string | undefined, interfaceName: string): Function {
+    static addInterfaces(packagePath: string, packageName: string, packageVersion: string | undefined, location: string, interfaceName: string): Function {
         return (aClass: any, name: string, x: any): void => {
             let classDescriptor = aClass.classDescriptor as ClassDescriptorInterface<typeof aClass> | undefined;
             if (classDescriptor !== undefined) {
-                classDescriptor.addInterfaces(packagePath, packageName, packageVersion, interfaceName);
+                classDescriptor.addInterfaces(packagePath, packageName, packageVersion, location, interfaceName);
             }
         }
     }
 
-    addInterfaces(packagePath: string, packageName: string, packageVersion: string | undefined, interfaceName: string): this {
-        let interfaceDescriptor = InterfaceDescriptor.register(packagePath, packageName, packageVersion, interfaceName);
+    addInterfaces(packagePath: string, packageName: string, packageVersion: string | undefined, location: string, interfaceName: string): this {
+        let interfaceDescriptor = InterfaceDescriptor.register(packagePath, packageName, packageVersion, location, interfaceName);
         this.add(interfaceDescriptor);
         return this;
-    }
-
-    static setFilePath(filename: string): Function {
-        return (aClass: any, name: string, x: any): void => {
-            let classDescriptor = aClass.classDescriptor as ClassDescriptorInterface<typeof aClass> | undefined;
-            if (classDescriptor !== undefined) {
-                classDescriptor.setFilePath(filename);
-            }
-        }
-
-    }
-
-    setFilePath(filename: string) {
-        this.filename = filename;
     }
 
     // Adds Object to export list

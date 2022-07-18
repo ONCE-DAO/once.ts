@@ -6,6 +6,8 @@ export default interface InterfaceDescriptorInterface {
     ucpComponentDescriptor: UcpComponentDescriptorInterface;
     extends: InterfaceDescriptorInterface[];
     name: string;
+    get uniqueName(): string;
+    location: string;
     componentExport: 'namedExport' | 'defaultExport' | undefined;
     componentExportName: string;
     packagePath: string;
@@ -14,7 +16,7 @@ export default interface InterfaceDescriptorInterface {
     allExtendedInterfaces: InterfaceDescriptorInterface[];
     implementedInterfaces: InterfaceDescriptorInterface[];
     addImplementation(classDescriptor: ClassDescriptorInterface<any>): InterfaceDescriptorInterface;
-    addExtension(packagePath: string, packageName: string, packageVersion: string | undefined, interfaceName: string): InterfaceDescriptorInterface;
+    addExtension(packagePath: string, packageName: string, packageVersion: string | undefined, location: string, interfaceName: string): InterfaceDescriptorInterface;
     add(object: InterfaceDescriptorInterface | UcpComponentDescriptorInterface): InterfaceDescriptorInterface;
     _getImplementedInterfaces(input: InterfaceDescriptorInterface[]): InterfaceDescriptorInterface[];
     implementations: ClassDescriptorInterface<any>[];
@@ -22,5 +24,5 @@ export default interface InterfaceDescriptorInterface {
 
 export interface InterfaceDescriptorStatics extends Class<InterfaceDescriptorInterface> {
     get lastDescriptor(): InterfaceDescriptorInterface
-    register(packagePath: string, packageName: string, packageVersion: string | undefined, interfaceName: string): InterfaceDescriptorInterface
+    register(packagePath: string, packageName: string, packageVersion: string | undefined, location: string, interfaceName: string): InterfaceDescriptorInterface
 }

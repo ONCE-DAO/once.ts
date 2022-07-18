@@ -16,8 +16,8 @@ export default interface UcpComponentDescriptorInterface {
     get srcPath(): string
     defaultExportObject: ClassDescriptorInterface<Class<any>> | InterfaceDescriptorInterface | undefined
 
-    getUnitByName(name: string, type: 'ClassDescriptor'): ClassDescriptorInterface<Class<any>> | undefined;
-    getUnitByName(name: string, type: 'InterfaceDescriptor'): InterfaceDescriptorInterface | undefined;
+    getUnitByName(uniqueName: string, type: 'ClassDescriptor'): ClassDescriptorInterface<Class<any>> | undefined;
+    getUnitByName(uniqueName: string, type: 'InterfaceDescriptor'): InterfaceDescriptorInterface | undefined;
 
     register(object: InterfaceDescriptorInterface | ClassDescriptorInterface<Class<any>>): void
 

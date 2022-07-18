@@ -51,13 +51,13 @@ export default class DefaultUcpComponentDescriptor implements UcpComponentDescri
     return this.npmPackage.namespace;
   }
 
-  getUnitByName(name: string, type: 'ClassDescriptor'): ClassDescriptorInterface<Class<any>> | undefined;
-  getUnitByName(name: string, type: 'InterfaceDescriptor'): InterfaceDescriptorInterface | undefined;
-  getUnitByName(name: string, type: 'InterfaceDescriptor' | 'ClassDescriptor'): unknown {
+  getUnitByName(uniqueName: string, type: 'ClassDescriptor'): ClassDescriptorInterface<Class<any>> | undefined;
+  getUnitByName(uniqueName: string, type: 'InterfaceDescriptor'): InterfaceDescriptorInterface | undefined;
+  getUnitByName(uniqueName: string, type: 'InterfaceDescriptor' | 'ClassDescriptor'): unknown {
 
     if (type === 'ClassDescriptor') {
       return this.units.filter(u => {
-        if (u.name === name && "class" in u) {
+        if (u.uniqueName === uniqueName && "class" in u) {
           return u;
         }
       })?.[0]
@@ -65,7 +65,7 @@ export default class DefaultUcpComponentDescriptor implements UcpComponentDescri
 
     if (type === 'InterfaceDescriptor') {
       return this.units.filter(u => {
-        if ("allExtendedInterfaces" in u && u.name === name) {
+        if ("allExtendedInterfaces" in u && u.uniqueName === uniqueName) {
           return u;
         }
       })?.[0]
@@ -114,7 +114,7 @@ export default class DefaultUcpComponentDescriptor implements UcpComponentDescri
       object.add(this);
 
     } else if ("implementedInterfaces" in object) {
-      const existingInterfaceDescriptors = this.getUnitByName(object.name, "InterfaceDescriptor");
+      const existingInterfaceDescriptors = this.getUnitByName(object.uniqueName, "InterfaceDescriptor");
       if (existingInterfaceDescriptors) {
         throw new Error(`Duplicated Interface '${object.name}' in UcpComponent ${this.name}`);
       }
@@ -122,6 +122,8 @@ export default class DefaultUcpComponentDescriptor implements UcpComponentDescri
 
       object.add(this);
 
+    } else {
+      throw new Error("Not Implemented")
     }
   }
 

@@ -6,6 +6,14 @@ import UcpComponentDescriptor from "./BaseUcpComponentDescriptor.class.mjs";
 
 let NewInterfaceDescriptor = class InterfaceDescriptor implements InterfaceDescriptorInterface {
     public readonly name: string;
+    public readonly location: string;
+
+    get uniqueName(): string {
+        return InterfaceDescriptor.uniqueName(this.location, this.name);
+    }
+    static uniqueName(location: string, name: string): string {
+        return `${location}:${name}`;
+    }
 
     id: string = Math.round(Math.random() * 10000000) + '';
 
@@ -13,7 +21,6 @@ let NewInterfaceDescriptor = class InterfaceDescriptor implements InterfaceDescr
     readonly implementations: ClassDescriptorInterface<any>[] = [];
     private static _lastDescriptor: InterfaceDescriptorInterface;
     public ucpComponentDescriptor!: UcpComponentDescriptorInterface;
-    public filename: string = "Missing";
     _componentExport: 'namedExport' | 'defaultExport' | undefined;
 
     static get lastDescriptor(): InterfaceDescriptorInterface {
@@ -72,11 +79,13 @@ let NewInterfaceDescriptor = class InterfaceDescriptor implements InterfaceDescr
     }
 
 
-    addExtension(packagePath: string, packageName: string, packageVersion: string | undefined, interfaceName: string): InterfaceDescriptorInterface {
+    addExtension(packagePath: string, packageName: string, packageVersion: string | undefined, location: string, interfaceName: string): InterfaceDescriptorInterface {
         let ucpComponentDescriptor = UcpComponentDescriptor.getDescriptor(packagePath, packageName, packageVersion);
-        let interfaceDesc = ucpComponentDescriptor.getUnitByName(interfaceName, 'InterfaceDescriptor')
+
+        let uniqueName = InterfaceDescriptor.uniqueName(location, interfaceName);
+        let interfaceDesc = ucpComponentDescriptor.getUnitByName(uniqueName, 'InterfaceDescriptor')
         if (interfaceDesc === undefined) {
-            interfaceDesc = new InterfaceDescriptor(ucpComponentDescriptor, interfaceName);
+            interfaceDesc = new InterfaceDescriptor(ucpComponentDescriptor, location, interfaceName);
         }
 
         this.add(interfaceDesc);
@@ -92,22 +101,24 @@ let NewInterfaceDescriptor = class InterfaceDescriptor implements InterfaceDescr
         return this;
     }
 
-    static register(packagePath: string, packageName: string, packageVersion: string | undefined, interfaceName: string): InterfaceDescriptorInterface {
+    static register(packagePath: string, packageName: string, packageVersion: string | undefined, location: string, interfaceName: string): InterfaceDescriptorInterface {
         let ucpComponentDescriptor = UcpComponentDescriptor.getDescriptor(packagePath, packageName, packageVersion);
 
-        let interfaceDesc = ucpComponentDescriptor.getUnitByName(interfaceName, 'InterfaceDescriptor')
+        let uniqueName = this.uniqueName(location, interfaceName);
+        let interfaceDesc = ucpComponentDescriptor.getUnitByName(uniqueName, 'InterfaceDescriptor')
         if (interfaceDesc) {
             this._lastDescriptor = interfaceDesc;
             return interfaceDesc;
         }
 
-        interfaceDesc = new this(ucpComponentDescriptor, interfaceName);
+        interfaceDesc = new this(ucpComponentDescriptor, location, interfaceName);
         this._lastDescriptor = interfaceDesc;
         return interfaceDesc;
     }
 
-    constructor(ucpComponentDescriptor: UcpComponentDescriptorInterface, interfaceName: string) {
+    constructor(ucpComponentDescriptor: UcpComponentDescriptorInterface, location: string, interfaceName: string) {
         this.name = interfaceName;
+        this.location = location;
         ucpComponentDescriptor.register(this);
         //console.log(`New InterfaceDescriptor: ${this.name} ${this.id}`);
         return this;
