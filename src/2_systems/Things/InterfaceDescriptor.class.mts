@@ -1,6 +1,8 @@
 // ##IGNORE_TRANSFORMER##
+import Class from "../../3_services/Class.interface.mjs";
 import ClassDescriptorInterface from "../../3_services/Thing/ClassDescriptor.interface.mjs";
 import InterfaceDescriptorInterface, { InterfaceDescriptorStatics } from "../../3_services/Thing/InterfaceDescriptor.interface.mjs";
+import Thing from "../../3_services/Thing/Thing.interface.mjs";
 import UcpComponentDescriptorInterface from "../../3_services/Thing/UcpComponentDescriptor.interface.mjs";
 import UcpComponentDescriptor from "./BaseUcpComponentDescriptor.class.mjs";
 
@@ -18,10 +20,14 @@ let NewInterfaceDescriptor = class InterfaceDescriptor implements InterfaceDescr
     id: string = Math.round(Math.random() * 10000000) + '';
 
     readonly extends: InterfaceDescriptorInterface[] = [];
-    readonly implementations: ClassDescriptorInterface<any>[] = [];
+    private readonly _implementations: ClassDescriptorInterface<any>[] = [];
     private static _lastDescriptor: InterfaceDescriptorInterface;
     public ucpComponentDescriptor!: UcpComponentDescriptorInterface;
-    _componentExport: 'namedExport' | 'defaultExport' | undefined;
+    _componentExport: 'namedExport' | 'defaultExport' | undefined = 'namedExport';
+
+    get implementations(): Class<any>[] {
+        return this._implementations.map(x => x.class)
+    }
 
     static get lastDescriptor(): InterfaceDescriptorInterface {
         if (!this._lastDescriptor) throw new Error("Missing last Descriptor. Check TS transform Script")
@@ -74,7 +80,7 @@ let NewInterfaceDescriptor = class InterfaceDescriptor implements InterfaceDescr
     }
 
     addImplementation(classDescriptor: ClassDescriptorInterface<any>): this {
-        this.implementations.push(classDescriptor);
+        this._implementations.push(classDescriptor);
         return this
     }
 
@@ -122,6 +128,21 @@ let NewInterfaceDescriptor = class InterfaceDescriptor implements InterfaceDescr
         ucpComponentDescriptor.register(this);
         //console.log(`New InterfaceDescriptor: ${this.name} ${this.id}`);
         return this;
+    }
+
+    static getInterfaceDescriptor<Interface extends Thing<any>>(packagePath?: string, packageName?: string, packageVersion?: string | undefined, location?: string, interfaceName?: string): InterfaceDescriptorInterface {
+
+        if (packagePath === undefined) throw new Error("Missing packagePath");
+        if (packageName === undefined) throw new Error("Missing packageName");
+        if (location === undefined) throw new Error("Missing location");
+        if (interfaceName === undefined) throw new Error("Missing interfaceName");
+
+        let ucpComponentDescriptor = UcpComponentDescriptor.getDescriptor(packagePath, packageName, packageVersion);
+        let uniqueName = this.uniqueName(location, interfaceName);
+        let interfaceDesc = ucpComponentDescriptor.getUnitByName(uniqueName, 'InterfaceDescriptor')
+        if (interfaceDesc === undefined) throw new Error(`Can not find the interface, ${packagePath}, ${packageName}, ${packageVersion}, ${location}, ${interfaceName}`)
+        return interfaceDesc;
+
     }
 }
 

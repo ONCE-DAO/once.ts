@@ -1,6 +1,7 @@
 import BaseLoader from "../../1_infrastructure/AbstractDefaultLoader.class.mjs";
 import IOR from "../../3_services/IOR.interface.mjs";
 import Loader, { LoaderID, LoaderStatic, loadingConfig } from "../../3_services/Loader.interface.mjs";
+import InterfaceDescriptor from "./InterfaceDescriptor.class.mjs";
 
 export default class DefaultLoader extends BaseLoader {
     removeObjectFromStore(object: any): void {
@@ -17,7 +18,7 @@ export default class DefaultLoader extends BaseLoader {
     }
 
     static discover(): LoaderStatic[] {
-        return LoaderID.implementations.map(d => d.class)
+        return InterfaceDescriptor.getInterfaceDescriptor<Loader>().implementations as LoaderStatic[];
     }
 
     static findLoader(ior: IOR): Loader | undefined {
