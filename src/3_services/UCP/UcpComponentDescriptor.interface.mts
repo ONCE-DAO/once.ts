@@ -6,6 +6,7 @@ export default interface UcpComponentDescriptorExportInterface {
     version: string
     exportsFile: string
     units: UcpUnit[]
+    exports?: { [file: string]: { [objectName: string]: { name: string, defaultExport: boolean } } }
 }
 
 export interface UcpComponentDescriptorInterface extends UcpComponentDescriptorExportInterface {

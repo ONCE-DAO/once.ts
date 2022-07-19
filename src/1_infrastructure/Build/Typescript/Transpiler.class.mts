@@ -74,13 +74,19 @@ export default class DefaultTranspiler implements Transpiler {
 
         }
         const exportsFile = `${TYPESCRIPT_PROJECT.EXPORTS_FILE_NAME}.${this.ExportFileNameExtension.replace("t", "j")}`
+        let componentDescriptorFile = join(this.buildConfig.distributionFolder, `${name}.component.json`)
+        let exports: any = {};
+        if (ts.sys.fileExists(componentDescriptorFile)) {
+            let rawString = ts.sys.readFile(componentDescriptorFile)?.toString();
+            if (rawString) exports = JSON.parse(rawString)?.exports;
+        }
         const descriptor = new ExportUcpComponentDescriptor(
             {
-                name, namespace, version, exportsFile, units: files
+                name, namespace, version, exports, exportsFile, units: files
                     .map(path => new DefaultUcpUnit(UnitType.File, join(".", relative(this.buildConfig.distributionFolder, path))))
             }
         );
-        ts.sys.writeFile(join(this.buildConfig.distributionFolder, `${name}.component.json`), JSON.stringify(descriptor, null, 2));
+        ts.sys.writeFile(componentDescriptorFile, JSON.stringify(descriptor, null, 2));
     }
 
     async writeTsConfigPaths(files: string[], name: string, namespace: string, version: string): Promise<void> {

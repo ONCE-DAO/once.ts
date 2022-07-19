@@ -7,6 +7,9 @@ export default class ExportUcpComponentDescriptor implements UcpComponentDescrip
     version: string;
     units: UcpUnit[];
     exportsFile: string;
+    exports: {
+        [file: string]: { [objectName: string]: { name: string, defaultExport: boolean } }
+    } = {}
 
     constructor(descriptor: UcpComponentDescriptorExportInterface) {
         this.name = descriptor.name;
@@ -14,5 +17,6 @@ export default class ExportUcpComponentDescriptor implements UcpComponentDescrip
         this.version = descriptor.version;
         this.exportsFile = descriptor.exportsFile;
         this.units = descriptor.units;
+        if (descriptor.exports) this.exports = descriptor.exports;
     }
 }
