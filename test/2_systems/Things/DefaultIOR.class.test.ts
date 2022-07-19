@@ -154,13 +154,12 @@ describe("IOR Class", () => {
   validate.push({
     url: "/ior:esm:/tla.EAM.Once[latest]",
     result: {
-      protocol: ["ior", "esm"],
+      protocol: [urlProtocol.ior, urlProtocol.esm],
       hostName: undefined,
       pathName: undefined,
       origin: undefined,
-      isLoaded: false,
-      namespace: "tla.EAM.Once",
-      namespaceVersion: "latest",
+      package: "tla.EAM.Once",
+      version: "latest",
       href: "ior:esm:/tla.EAM.Once[latest]"
     },
   });

@@ -3,6 +3,8 @@ import BuildConfig from "../../../3_services/Build/BuildConfig.interface.mjs";
 import TypescriptProject from "../../../3_services/Build/Typescript/TypescriptProject.interface.mjs";
 import DefaultTranspiler from "./Transpiler.class.mjs";
 
+import { install } from 'ts-patch';
+
 export default class DefaultTypescriptProject implements TypescriptProject {
     private path: string;
     name: string;
@@ -26,7 +28,8 @@ export default class DefaultTypescriptProject implements TypescriptProject {
     }
 
     async beforeBuild(config: BuildConfig): Promise<void> {
-        execSync("npx ts-patch i", { cwd: this.path, stdio: "inherit" });
+        install();
+        //execSync("npx ts-patch i", { cwd: this.path, stdio: "inherit" });
     }
 
     async build(config: BuildConfig): Promise<void> {
