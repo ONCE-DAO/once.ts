@@ -38,6 +38,7 @@ export default class DefaultTypescriptProject implements TypescriptProject {
         const transpiler = await DefaultTranspiler.init(this.path, config, this.fullQualifiedNamespace)
         const files = await transpiler.transpile()
         await transpiler.writeTsConfigPaths(files, this.name, this.namespace, this.version)
+        await transpiler.writeTsConfigBuildPaths(files, this.name, this.namespace, this.version)
         await transpiler.writeComponentDescriptor(this.name, this.namespace, this.version, files)
         await transpiler.writeSourceIndexFile();
         transpiler.symLinkDistributionFolder()

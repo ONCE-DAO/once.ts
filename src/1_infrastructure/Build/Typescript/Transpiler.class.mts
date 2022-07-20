@@ -1,5 +1,5 @@
 import { existsSync, rmSync, symlinkSync } from "fs";
-import { join, relative } from "path";
+import { basename, join, relative } from "path";
 import ts from "typescript";
 import DefaultUcpUnit from "../../../2_systems/UCP/DefaultUcpUnit.class.mjs";
 import ExportUcpComponentDescriptor from "../../../2_systems/UCP/ExportUcpComponentDescriptor.mjs";
@@ -136,7 +136,14 @@ export default class DefaultTranspiler implements Transpiler {
     }
 
     async writeTsConfigPaths(files: string[], name: string, namespace: string, version: string): Promise<void> {
-        let config = this.pathsConfig;
+        let config = this.getPathsConfig(this.tsconfigFilePath);
+        if (!config.compilerOptions.paths) config.compilerOptions.paths = {}
+        config.compilerOptions.paths[`ior:esm:/${namespace}.${name}[${version}]`] = [relative(this.buildConfig.eamdPath, this.ExportFileName)]
+        ts.sys.writeFile(this.tsconfigFilePath, JSON.stringify(config, null, 2))
+    }
+
+    async writeTsConfigBuildPaths(files: string[], name: string, namespace: string, version: string): Promise<void> {
+        let config = this.getPathsConfig(this.tsconfigFileBuildPath);
         if (!config.compilerOptions.paths) config.compilerOptions.paths = {}
         const d = ".d."
         let exportFiles = files
@@ -154,7 +161,7 @@ export default class DefaultTranspiler implements Transpiler {
         //     !this.incremental && delete config.compilerOptions.paths[`ior:esm:/${namespace}.${name}[${version}]`]
         // }
 
-        ts.sys.writeFile(this.tsconfigFilePath, JSON.stringify(config, null, 2))
+        ts.sys.writeFile(this.tsconfigFileBuildPath, JSON.stringify(config, null, 2))
     }
 
     readDirectory(rootDir: string, extensions: readonly string[], excludes: readonly string[] | undefined, includes: readonly string[], depth?: number): string[] {
@@ -267,11 +274,11 @@ export default class DefaultTranspiler implements Transpiler {
             getNewLine: () => ts.sys.newLine,
         }
     }
-
-    private get pathsConfig() {
-        existsSync(this.tsconfigFilePath) || ts.sys.writeFile(this.tsconfigFilePath, this.defaultPathFile)
-        let configFile = ts.findConfigFile(this.buildConfig.eamdPath, ts.sys.fileExists, TRANSFORMER.CONFIG_PATHS_FILE);
-        if (!configFile) throw `${TRANSFORMER.CONFIG_PATHS_FILE} not found in ${this.buildConfig.eamdPath}`
+    private getPathsConfig(filePath: string): ConfigJsonFile {
+        const fileName: string = basename(filePath);
+        existsSync(filePath) || ts.sys.writeFile(filePath, this.defaultPathFile)
+        let configFile = ts.findConfigFile(this.buildConfig.eamdPath, ts.sys.fileExists, fileName);
+        if (!configFile) throw `${fileName} not found in ${this.buildConfig.eamdPath}`
         const readResult = ts.readConfigFile(configFile, ts.sys.readFile);
         if (!readResult.config) throw readResult.error
         return readResult.config as ConfigJsonFile;
@@ -289,6 +296,10 @@ export default class DefaultTranspiler implements Transpiler {
 
     private get tsconfigFilePath() {
         return join(this.buildConfig.eamdPath, TRANSFORMER.CONFIG_PATHS_FILE)
+    }
+
+    private get tsconfigFileBuildPath() {
+        return join(this.buildConfig.eamdPath, TRANSFORMER.CONFIG_BUILD_PATHS_FILE)
     }
 
     private get ExportFileName() {

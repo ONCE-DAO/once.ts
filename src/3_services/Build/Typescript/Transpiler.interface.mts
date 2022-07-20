@@ -4,6 +4,7 @@ export default interface Transpiler {
     watch(changedFunction: (files: string[]) => Promise<void>): Promise<void>
     transpile(): Promise<string[]>
     writeTsConfigPaths(files: string[], name: string, namespace: string, version: string): Promise<void>
+    writeTsConfigBuildPaths(files: string[], name: string, namespace: string, version: string): Promise<void>
     // extendIndexFile(files: string[]): Promise<void>
     writeComponentDescriptor(name: string, namespace: string, version: string, files: string[]): Promise<void>
     writeSourceIndexFile(): Promise<void>
@@ -12,6 +13,7 @@ export default interface Transpiler {
 
 export const TRANSFORMER = {
     CONFIG_PATHS_FILE: "tsconfig.paths.json",
+    CONFIG_BUILD_PATHS_FILE: "tsconfig.build.paths.json",
 }
 
 export type ExtendedOptions = ts.CompilerOptions & {
