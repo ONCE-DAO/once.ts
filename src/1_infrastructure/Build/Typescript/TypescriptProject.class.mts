@@ -39,6 +39,7 @@ export default class DefaultTypescriptProject implements TypescriptProject {
         const files = await transpiler.transpile()
         await transpiler.writeTsConfigPaths(files, this.name, this.namespace, this.version)
         await transpiler.writeComponentDescriptor(this.name, this.namespace, this.version, files)
+        await transpiler.writeSourceIndexFile();
         transpiler.symLinkDistributionFolder()
 
         console.groupEnd();
@@ -52,6 +53,7 @@ export default class DefaultTypescriptProject implements TypescriptProject {
         await transpiler.watch(async (files: string[]) => {
             await transpiler.writeTsConfigPaths(files, this.name, this.namespace, this.version)
             await transpiler.writeComponentDescriptor(this.name, this.namespace, this.version, files)
+            await transpiler.writeSourceIndexFile();
         })
         transpiler.symLinkDistributionFolder()
 

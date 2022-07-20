@@ -6,6 +6,7 @@ import ExportUcpComponentDescriptor from "../../../2_systems/UCP/ExportUcpCompon
 import BuildConfig from "../../../3_services/Build/BuildConfig.interface.mjs";
 import Transpiler, { ExtendedOptions, PluginConfig, TRANSFORMER } from "../../../3_services/Build/Typescript/Transpiler.interface.mjs";
 import { TYPESCRIPT_PROJECT } from "../../../3_services/Build/Typescript/TypescriptProject.interface.mjs";
+import { UcpComponentDescriptorInterfaceObject } from "../../../3_services/UCP/UcpComponentDescriptor.interface.mjs";
 import { UnitType } from "../../../3_services/UCP/UcpUnit.interface.mjs";
 
 export default class DefaultTranspiler implements Transpiler {
@@ -13,6 +14,7 @@ export default class DefaultTranspiler implements Transpiler {
     private buildConfig: BuildConfig;
     private incremental: boolean = false;
 
+    private descriptor: ExportUcpComponentDescriptor | undefined;
 
     static async init(baseDir: string, buildConfig: BuildConfig, namespace: string): Promise<Transpiler> {
         const configFile = ts.findConfigFile(baseDir, ts.sys.fileExists, "tsconfig.build.json");
@@ -59,12 +61,55 @@ export default class DefaultTranspiler implements Transpiler {
         // options.noEmitOnError = false
         options.tsBuildInfoFile = buildConfig.distributionFolder + "/.tsbuildinfo";
         options.noEmitOnError = existsSync(options.tsBuildInfoFile)
-        // options.noEmitOnError = false;
+        if (process.env.IGNORE_ERRORS == 'true') options.noEmitOnError = false;
 
         // TODO can be remove when exclude will work
         options.suppressOutputPathCheck = true;
         parsedConfig.options = options;
         return parsedConfig;
+    }
+
+    async writeSourceIndexFile(): Promise<void> {
+        ts.sys.writeFile(this.ExportFileName, this.createExportContent());
+    }
+
+    private createExportContent(): string {
+        if (this.descriptor == undefined) throw new Error("Missing descriptor");
+        let exportContent: string = "";
+
+        if (existsSync(this.DefaultExportFileName)) {
+            exportContent += '// #### Default ###\n' + ts.sys.readFile(this.DefaultExportFileName) + '\n// #### Dynamic ####\n'
+        }
+
+        let exports: string[] = [];
+        let filesToExport: { [file: string]: { default?: string, namedExport: string[] } } = {}
+        for (const interfaceObject of this.descriptor.interfaceList.sort((x, y) => { return x.unitName.localeCompare(y.unitName) })) {
+            //TODO Change unitName to lookup of unit => href/path
+            let fileName = './' + interfaceObject.unitName;
+            filesToExport[fileName] = filesToExport[fileName] || { namedExport: [] };
+
+            let name = interfaceObject.name;
+            if (exports.includes(name)) name += '_duplicate'
+            if (interfaceObject.unitDefaultExport) {
+                filesToExport[fileName].default = name
+            } else {
+                let namedImport = name;
+                if (interfaceObject.name !== name) namedImport = `${interfaceObject.name} as ${name}`
+                filesToExport[fileName].namedExport.push(namedImport);
+            }
+
+            exports.push(name)
+        }
+        for (let [file, value] of Object.entries(filesToExport)) {
+            exportContent += `import `;
+            if (value.default) exportContent += ` ${value.default}`;
+            if (value.default && value.namedExport.length > 0) exportContent += `,`
+            if (value.namedExport.length > 0) exportContent += ` { ${value.namedExport.join(', ')} } `;
+            exportContent += ` from "${file}"\n`
+
+        }
+        exportContent += `export {${exports.join(', ')}}`
+        return exportContent;
     }
 
     async writeComponentDescriptor(name: string, namespace: string, version: string, files: string[]): Promise<void> {
@@ -75,17 +120,18 @@ export default class DefaultTranspiler implements Transpiler {
         }
         const exportsFile = `${TYPESCRIPT_PROJECT.EXPORTS_FILE_NAME}.${this.ExportFileNameExtension.replace("t", "j")}`
         let componentDescriptorFile = join(this.buildConfig.distributionFolder, `${name}.component.json`)
-        let exports: any = {};
+        let interfaceList: UcpComponentDescriptorInterfaceObject[] = [];
         if (ts.sys.fileExists(componentDescriptorFile)) {
             let rawString = ts.sys.readFile(componentDescriptorFile)?.toString();
-            if (rawString) exports = JSON.parse(rawString)?.exports;
+            if (rawString) interfaceList = JSON.parse(rawString)?.interfaceList;
         }
         const descriptor = new ExportUcpComponentDescriptor(
             {
-                name, namespace, version, exports, exportsFile, units: files
+                name, namespace, version, interfaceList, exportsFile, units: files
                     .map(path => new DefaultUcpUnit(UnitType.File, join(".", relative(this.buildConfig.distributionFolder, path))))
             }
         );
+        this.descriptor = descriptor;
         ts.sys.writeFile(componentDescriptorFile, JSON.stringify(descriptor, null, 2));
     }
 
@@ -140,7 +186,7 @@ export default class DefaultTranspiler implements Transpiler {
         const emitResult = program.emit(undefined, writeFile);
 
         const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
-        if (emitResult.emitSkipped) {
+        if (emitResult.emitSkipped && process.env.IGNORE_ERRORS !== 'true') {
             console.log(this.formatDiagnostics.bind(this)(allDiagnostics));
             console.error('\x1b[31m%s\x1b[0m', "Emit was skipped. please check errors");
             throw "Emit was skipped. please check errors"

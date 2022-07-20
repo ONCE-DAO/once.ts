@@ -6,6 +6,7 @@ export default interface Transpiler {
     writeTsConfigPaths(files: string[], name: string, namespace: string, version: string): Promise<void>
     // extendIndexFile(files: string[]): Promise<void>
     writeComponentDescriptor(name: string, namespace: string, version: string, files: string[]): Promise<void>
+    writeSourceIndexFile(): Promise<void>
     symLinkDistributionFolder(): void;
 }
 

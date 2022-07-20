@@ -46,7 +46,7 @@ export default abstract class OnceKernel {
       // return await (await import("ior:esm:/tla.EAM.Once.Server[build]")).OnceNodeServer.start()
     }
     if (this.RuntimeIs.BROWSER()) {
-      let BrowserOnce = (await import("ior:esm:/tla.EAM.Once.Browser[dev]")).default;
+      let BrowserOnce = (await import("ior:esm:/tla.EAM.Once.Browser[dev]")).BrowserOnce;
       return BrowserOnce.start();
     }
     if (this.RuntimeIs.SERVICE_WORKER()) {
