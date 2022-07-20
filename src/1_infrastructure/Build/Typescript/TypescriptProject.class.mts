@@ -28,7 +28,7 @@ export default class DefaultTypescriptProject implements TypescriptProject {
     }
 
     async beforeBuild(config: BuildConfig): Promise<void> {
-        install();
+        install({ dir: this.path });
         //execSync("npx ts-patch i", { cwd: this.path, stdio: "inherit" });
     }
 
