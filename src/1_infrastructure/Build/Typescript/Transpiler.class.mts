@@ -1,24 +1,21 @@
 import { existsSync, rmSync, symlinkSync } from "fs";
 import { basename, join, relative } from "path";
 import ts from "typescript";
-import DefaultUcpDependency from "../../../2_systems/UCP/DefaultUcpDependency.mjs";
-import DefaultUcpInterface from "../../../2_systems/UCP/DefaultUcpInterface.class.mjs";
 import DefaultUcpUnit from "../../../2_systems/UCP/DefaultUcpUnit.class.mjs";
-import ExportUcpComponentDescriptor from "../../../2_systems/UCP/ExportUcpComponentDescriptor.mjs";
 import BuildConfig from "../../../3_services/Build/BuildConfig.interface.mjs";
 import NpmPackageInterface from "../../../3_services/Build/Npm/NpmPackage.interface.mjs";
+import BuildUcpComponentDescriptorInterface from "../../../3_services/Build/Typescript/ExportUcpComponentDescriptor.interface.mjs";
 import Transpiler, { ExtendedOptions, PluginConfig, TRANSFORMER } from "../../../3_services/Build/Typescript/Transpiler.interface.mjs";
 import { TYPESCRIPT_PROJECT } from "../../../3_services/Build/Typescript/TypescriptProject.interface.mjs";
-import UcpDependency, { UcpDependencyType } from "../../../3_services/UCP/UcpDependency.interface.mjs";
-import UcpInterfaceObject from "../../../3_services/UCP/UcpInterface.class.mjs";
 import { UnitType } from "../../../3_services/UCP/UcpUnit.interface.mjs";
+import BuildUcpComponentDescriptor from "./BuildUcpComponentDescriptor.class.mjs";
 
 export default class DefaultTranspiler implements Transpiler {
     private config: ts.ParsedCommandLine;
     private buildConfig: BuildConfig;
     private incremental: boolean = false;
 
-    private descriptor: ExportUcpComponentDescriptor | undefined;
+    private descriptor: BuildUcpComponentDescriptorInterface | undefined;
 
     static async init(baseDir: string, buildConfig: BuildConfig, namespace: string, npmPackage: NpmPackageInterface): Promise<Transpiler> {
         const configFile = ts.findConfigFile(baseDir, ts.sys.fileExists, "tsconfig.build.json");
@@ -79,7 +76,9 @@ export default class DefaultTranspiler implements Transpiler {
     }
 
     private createExportContent(): string {
-        if (this.descriptor == undefined) throw new Error("Missing descriptor");
+        if (typeof this.descriptor === "undefined") throw new Error("Missing descriptor");
+        if (typeof this?.descriptor?.interfaceList === "undefined") throw new Error("Missing interfaceList");
+
         let exportContent: string = "";
 
         if (existsSync(this.DefaultExportFileName)) {
@@ -117,42 +116,31 @@ export default class DefaultTranspiler implements Transpiler {
         return exportContent;
     }
 
-    async writeComponentDescriptor(name: string, namespace: string, version: string, files: string[]): Promise<void> {
+    async initComponentDescriptor(name: string, namespace: string, version: string, files: string[]): Promise<BuildUcpComponentDescriptorInterface> {
         if (this.incremental) {
-            console.error("incremental descriptor not implemented yet");
-            return;
-
+            throw new Error("incremental descriptor not implemented yet");
         }
         const exportsFile = `${TYPESCRIPT_PROJECT.EXPORTS_FILE_NAME}.${this.ExportFileNameExtension.replace("t", "j")}`
-        let componentDescriptorFile = join(this.buildConfig.distributionFolder, `${name}.component.json`)
-        let interfaceList: UcpInterfaceObject[] = [];
-        let dependencyList: UcpDependency[] = [];
 
-        // Parse existing Component Descriptor
-        if (ts.sys.fileExists(componentDescriptorFile)) {
-            let rawString = ts.sys.readFile(componentDescriptorFile)?.toString();
-            if (rawString) {
-                const parsedData = JSON.parse(rawString);
-                if (parsedData?.interfaceList)
-                    interfaceList = (parsedData.interfaceList as UcpInterfaceObject[]).map(x => new DefaultUcpInterface(x.type, x.name, x.unitDefaultExport, x.unitName))
-
-                if (parsedData?.dependencyList)
-                    dependencyList = (parsedData.dependencyList as UcpDependency[]).map(x => new DefaultUcpDependency(x.type, x.name, x.reference));
-            }
-        }
-
-        if (this.npmPackage.packageJson.dependencies) {
-            dependencyList = [...dependencyList, ...Object.entries(this.npmPackage.packageJson.dependencies).map(x => new DefaultUcpDependency(UcpDependencyType.npm, x[0], x[1]))]
-        }
-
-        const descriptor = new ExportUcpComponentDescriptor(
+        const descriptor = new BuildUcpComponentDescriptor(
             {
-                name, namespace, version, interfaceList, dependencyList, exportsFile, units: files
+                name, namespace, version, exportsFile, units: files
                     .map(path => new DefaultUcpUnit(UnitType.File, join(".", relative(this.buildConfig.distributionFolder, path))))
             }
         );
+        descriptor.importFile(this.getComponentDescriptorName(name));
+        descriptor.addNpmPackageInfos(this.npmPackage);
         this.descriptor = descriptor;
-        ts.sys.writeFile(componentDescriptorFile, JSON.stringify(descriptor, null, 2));
+        return descriptor;
+    }
+
+    async writeComponentDescriptor(name: string): Promise<void> {
+        if (!this.descriptor) throw new Error("Missing Descriptor. Please Init First")
+        this.descriptor.writeComponentDescriptor(this.getComponentDescriptorName(name))
+    }
+
+    private getComponentDescriptorName(name: string) {
+        return join(this.buildConfig.distributionFolder, `${name}.component.json`)
     }
 
 
@@ -195,14 +183,20 @@ export default class DefaultTranspiler implements Transpiler {
         return ts.sys.readDirectory(rootDir, extensions, excludes, includes, depth);
     }
 
-    async transpile(): Promise<string[]> {
+    async transpileIndex(): Promise<string[]> {
+        return this.transpile(this.ExportFileName);
+    }
+
+    async transpile(file2Transpile?: string): Promise<string[]> {
         const compilerHost = ts.createCompilerHost(this.config.options);
         compilerHost.readFile = this.readFile.bind(this)
 
         compilerHost.readDirectory = this.readDirectory.bind(this)
 
+        let files2Transpile: string[] = file2Transpile ? [file2Transpile] : this.config.fileNames.filter(x => x !== this.ExportFileName);
+
         const program = ts.createProgram({
-            rootNames: [...this.config.fileNames, this.ExportFileName],
+            rootNames: files2Transpile,
             options: this.config.options,
             projectReferences: [],
             host: compilerHost,

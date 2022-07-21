@@ -1,13 +1,15 @@
 import ts from "typescript"
-import NpmPackageInterface from "../Npm/NpmPackage.interface.mjs"
+import BuildUcpComponentDescriptorInterface from "./ExportUcpComponentDescriptor.interface.mjs"
 
 export default interface Transpiler {
     watch(changedFunction: (files: string[]) => Promise<void>): Promise<void>
-    transpile(): Promise<string[]>
+    transpile(file2Transpile?: string): Promise<string[]>
+    transpileIndex(): Promise<string[]>
+    initComponentDescriptor(name: string, namespace: string, version: string, files: string[]): Promise<BuildUcpComponentDescriptorInterface>
     writeTsConfigPaths(files: string[], name: string, namespace: string, version: string): Promise<void>
     writeTsConfigBuildPaths(files: string[], name: string, namespace: string, version: string): Promise<void>
     // extendIndexFile(files: string[]): Promise<void>
-    writeComponentDescriptor(name: string, namespace: string, version: string, files: string[]): Promise<void>
+    writeComponentDescriptor(name: string): Promise<void>
     writeSourceIndexFile(): Promise<void>
     symLinkDistributionFolder(): void;
 }

@@ -5,6 +5,7 @@ import DefaultTranspiler from "./Transpiler.class.mjs";
 
 import { install } from 'ts-patch';
 import NpmPackageInterface from "../../../3_services/Build/Npm/NpmPackage.interface.mjs";
+import { join, relative } from "path";
 
 export default class DefaultTypescriptProject implements TypescriptProject {
     private path: string;
@@ -40,8 +41,15 @@ export default class DefaultTypescriptProject implements TypescriptProject {
         const files = await transpiler.transpile()
         await transpiler.writeTsConfigPaths(files, this.name, this.namespace, this.version)
         await transpiler.writeTsConfigBuildPaths(files, this.name, this.namespace, this.version)
-        await transpiler.writeComponentDescriptor(this.name, this.namespace, this.version, files)
+        let descriptor = await transpiler.initComponentDescriptor(this.name, this.namespace, this.version, files)
+
+        // Create Index File 
         await transpiler.writeSourceIndexFile();
+        let indexFiles = await transpiler.transpileIndex();
+        descriptor.addUnitFiles(indexFiles.map(path => join(".", relative(config.distributionFolder, path))));
+
+        await transpiler.writeComponentDescriptor(this.name)
+
         transpiler.symLinkDistributionFolder()
 
         console.groupEnd();
@@ -54,8 +62,10 @@ export default class DefaultTypescriptProject implements TypescriptProject {
         const transpiler = await DefaultTranspiler.init(this.path, config, `${this.namespace}.${this.name}[${this.version}]`, npmPackage)
         await transpiler.watch(async (files: string[]) => {
             await transpiler.writeTsConfigPaths(files, this.name, this.namespace, this.version)
-            await transpiler.writeComponentDescriptor(this.name, this.namespace, this.version, files)
+            await transpiler.writeTsConfigBuildPaths(files, this.name, this.namespace, this.version)
+            await transpiler.writeComponentDescriptor(this.name)
             await transpiler.writeSourceIndexFile();
+            await transpiler.transpileIndex();
         })
         transpiler.symLinkDistributionFolder()
 
