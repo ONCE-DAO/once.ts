@@ -40,13 +40,14 @@ export default class DefaultTypescriptProject implements TypescriptProject {
         const transpiler = await DefaultTranspiler.init(this.path, config, this.fullQualifiedNamespace, npmPackage)
         const files = await transpiler.transpile()
         await transpiler.writeTsConfigPaths(files, this.name, this.namespace, this.version)
-        await transpiler.writeTsConfigBuildPaths(files, this.name, this.namespace, this.version)
         let descriptor = await transpiler.initComponentDescriptor(this.name, this.namespace, this.version, files)
 
         // Create Index File 
         await transpiler.writeSourceIndexFile();
         let indexFiles = await transpiler.transpileIndex();
         descriptor.addUnitFiles(indexFiles.map(path => join(".", relative(config.distributionFolder, path))));
+
+        await transpiler.writeTsConfigBuildPaths(indexFiles, this.name, this.namespace, this.version)
 
         await transpiler.writeComponentDescriptor(this.name)
 
