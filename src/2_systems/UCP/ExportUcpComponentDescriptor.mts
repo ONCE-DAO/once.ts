@@ -1,4 +1,4 @@
-import UcpComponentDescriptorExportInterface, { UcpComponentDescriptorInterface, UcpComponentDescriptorInterfaceObject } from "../../3_services/UCP/UcpComponentDescriptor.interface.mjs";
+import UcpComponentDescriptorExportInterface, { UcpComponentDescriptorDependencyObject, UcpComponentDescriptorInterfaceObject } from "../../3_services/UCP/UcpComponentDescriptor.interface.mjs";
 import UcpUnit from "../../3_services/UCP/UcpUnit.interface.mjs";
 
 export default class ExportUcpComponentDescriptor implements UcpComponentDescriptorExportInterface {
@@ -8,6 +8,7 @@ export default class ExportUcpComponentDescriptor implements UcpComponentDescrip
     units: UcpUnit[];
     exportsFile: string;
     interfaceList: UcpComponentDescriptorInterfaceObject[] = []
+    dependencyList: UcpComponentDescriptorDependencyObject[] = [];
 
     constructor(descriptor: UcpComponentDescriptorExportInterface) {
         this.name = descriptor.name;
@@ -16,5 +17,7 @@ export default class ExportUcpComponentDescriptor implements UcpComponentDescrip
         this.exportsFile = descriptor.exportsFile;
         this.units = descriptor.units;
         if (descriptor.interfaceList) this.interfaceList = descriptor.interfaceList;
+        if (descriptor.dependencyList) this.dependencyList = descriptor.dependencyList;
+
     }
 }

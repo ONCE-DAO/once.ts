@@ -6,7 +6,7 @@ import ExportUcpComponentDescriptor from "../../../2_systems/UCP/ExportUcpCompon
 import BuildConfig from "../../../3_services/Build/BuildConfig.interface.mjs";
 import Transpiler, { ExtendedOptions, PluginConfig, TRANSFORMER } from "../../../3_services/Build/Typescript/Transpiler.interface.mjs";
 import { TYPESCRIPT_PROJECT } from "../../../3_services/Build/Typescript/TypescriptProject.interface.mjs";
-import { UcpComponentDescriptorInterfaceObject } from "../../../3_services/UCP/UcpComponentDescriptor.interface.mjs";
+import { UcpComponentDescriptorDependencyObject, UcpComponentDescriptorInterfaceObject } from "../../../3_services/UCP/UcpComponentDescriptor.interface.mjs";
 import { UnitType } from "../../../3_services/UCP/UcpUnit.interface.mjs";
 
 export default class DefaultTranspiler implements Transpiler {
@@ -121,13 +121,20 @@ export default class DefaultTranspiler implements Transpiler {
         const exportsFile = `${TYPESCRIPT_PROJECT.EXPORTS_FILE_NAME}.${this.ExportFileNameExtension.replace("t", "j")}`
         let componentDescriptorFile = join(this.buildConfig.distributionFolder, `${name}.component.json`)
         let interfaceList: UcpComponentDescriptorInterfaceObject[] = [];
+        let dependencyList: UcpComponentDescriptorDependencyObject[] = [];
+
+        // Parse existing Component Descriptor
         if (ts.sys.fileExists(componentDescriptorFile)) {
             let rawString = ts.sys.readFile(componentDescriptorFile)?.toString();
-            if (rawString) interfaceList = JSON.parse(rawString)?.interfaceList;
+            if (rawString) {
+                const parsedData = JSON.parse(rawString);
+                interfaceList = parsedData?.interfaceList;
+                dependencyList = parsedData?.dependencyList;
+            }
         }
         const descriptor = new ExportUcpComponentDescriptor(
             {
-                name, namespace, version, interfaceList, exportsFile, units: files
+                name, namespace, version, interfaceList, dependencyList, exportsFile, units: files
                     .map(path => new DefaultUcpUnit(UnitType.File, join(".", relative(this.buildConfig.distributionFolder, path))))
             }
         );

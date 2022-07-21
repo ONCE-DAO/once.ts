@@ -10,6 +10,12 @@ export interface UcpComponentDescriptorInterfaceObject {
     unitName: string
 }
 
+export interface UcpComponentDescriptorDependencyObject {
+    type: 'IOR' | 'npm',
+    name: string,
+    reference: string;
+}
+
 export default interface UcpComponentDescriptorExportInterface {
     name: string
     namespace: string
@@ -17,6 +23,7 @@ export default interface UcpComponentDescriptorExportInterface {
     exportsFile: string
     units: UcpUnit[]
     interfaceList?: UcpComponentDescriptorInterfaceObject[]
+    dependencyList?: UcpComponentDescriptorDependencyObject[]
 }
 export interface UcpComponentDescriptorInterface extends UcpComponentDescriptorExportInterface {
     path: string
