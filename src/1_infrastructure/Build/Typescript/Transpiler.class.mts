@@ -1,12 +1,16 @@
 import { existsSync, rmSync, symlinkSync } from "fs";
 import { basename, join, relative } from "path";
 import ts from "typescript";
+import DefaultUcpDependency from "../../../2_systems/UCP/DefaultUcpDependency.mjs";
+import DefaultUcpInterface from "../../../2_systems/UCP/DefaultUcpInterface.class.mjs";
 import DefaultUcpUnit from "../../../2_systems/UCP/DefaultUcpUnit.class.mjs";
 import ExportUcpComponentDescriptor from "../../../2_systems/UCP/ExportUcpComponentDescriptor.mjs";
 import BuildConfig from "../../../3_services/Build/BuildConfig.interface.mjs";
+import NpmPackageInterface from "../../../3_services/Build/Npm/NpmPackage.interface.mjs";
 import Transpiler, { ExtendedOptions, PluginConfig, TRANSFORMER } from "../../../3_services/Build/Typescript/Transpiler.interface.mjs";
 import { TYPESCRIPT_PROJECT } from "../../../3_services/Build/Typescript/TypescriptProject.interface.mjs";
-import { UcpComponentDescriptorDependencyObject, UcpComponentDescriptorInterfaceObject } from "../../../3_services/UCP/UcpComponentDescriptor.interface.mjs";
+import UcpDependency, { UcpDependencyType } from "../../../3_services/UCP/UcpDependency.interface.mjs";
+import UcpInterfaceObject from "../../../3_services/UCP/UcpInterface.class.mjs";
 import { UnitType } from "../../../3_services/UCP/UcpUnit.interface.mjs";
 
 export default class DefaultTranspiler implements Transpiler {
@@ -16,14 +20,14 @@ export default class DefaultTranspiler implements Transpiler {
 
     private descriptor: ExportUcpComponentDescriptor | undefined;
 
-    static async init(baseDir: string, buildConfig: BuildConfig, namespace: string): Promise<Transpiler> {
+    static async init(baseDir: string, buildConfig: BuildConfig, namespace: string, npmPackage: NpmPackageInterface): Promise<Transpiler> {
         const configFile = ts.findConfigFile(baseDir, ts.sys.fileExists, "tsconfig.build.json");
         if (!configFile)
             throw Error(`no tsconfig file found in folder: ${baseDir}`);
-        return new DefaultTranspiler(buildConfig, configFile, baseDir, namespace);
+        return new DefaultTranspiler(buildConfig, configFile, baseDir, namespace, npmPackage);
     }
 
-    constructor(buildConfig: BuildConfig, configFile: string, private baseDir: string, private namespace: string) {
+    constructor(buildConfig: BuildConfig, configFile: string, private baseDir: string, private namespace: string, private npmPackage: NpmPackageInterface) {
         this.buildConfig = buildConfig;
         this.config = this.parseConfig(configFile, buildConfig);
     }
@@ -55,6 +59,7 @@ export default class DefaultTranspiler implements Transpiler {
             }
             return pluginConfig
         })
+
 
 
         // TODO can be removed when path linking to real .mts files
@@ -120,18 +125,26 @@ export default class DefaultTranspiler implements Transpiler {
         }
         const exportsFile = `${TYPESCRIPT_PROJECT.EXPORTS_FILE_NAME}.${this.ExportFileNameExtension.replace("t", "j")}`
         let componentDescriptorFile = join(this.buildConfig.distributionFolder, `${name}.component.json`)
-        let interfaceList: UcpComponentDescriptorInterfaceObject[] = [];
-        let dependencyList: UcpComponentDescriptorDependencyObject[] = [];
+        let interfaceList: UcpInterfaceObject[] = [];
+        let dependencyList: UcpDependency[] = [];
 
         // Parse existing Component Descriptor
         if (ts.sys.fileExists(componentDescriptorFile)) {
             let rawString = ts.sys.readFile(componentDescriptorFile)?.toString();
             if (rawString) {
                 const parsedData = JSON.parse(rawString);
-                interfaceList = parsedData?.interfaceList;
-                dependencyList = parsedData?.dependencyList;
+                if (parsedData?.interfaceList)
+                    interfaceList = (parsedData.interfaceList as UcpInterfaceObject[]).map(x => new DefaultUcpInterface(x.type, x.name, x.unitDefaultExport, x.unitName))
+
+                if (parsedData?.dependencyList)
+                    dependencyList = (parsedData.dependencyList as UcpDependency[]).map(x => new DefaultUcpDependency(x.type, x.name, x.reference));
             }
         }
+
+        if (this.npmPackage.packageJson.dependencies) {
+            dependencyList = [...dependencyList, ...Object.entries(this.npmPackage.packageJson.dependencies).map(x => new DefaultUcpDependency(UcpDependencyType.npm, x[0], x[1]))]
+        }
+
         const descriptor = new ExportUcpComponentDescriptor(
             {
                 name, namespace, version, interfaceList, dependencyList, exportsFile, units: files
@@ -140,6 +153,12 @@ export default class DefaultTranspiler implements Transpiler {
         );
         this.descriptor = descriptor;
         ts.sys.writeFile(componentDescriptorFile, JSON.stringify(descriptor, null, 2));
+    }
+
+
+    get packageJsonFilePath(): string {
+        if (!this.config.options.rootDir) throw new Error("Missing rootDir")
+        return join(this.config.options.rootDir, 'package.json')
     }
 
     async writeTsConfigPaths(files: string[], name: string, namespace: string, version: string): Promise<void> {
@@ -163,6 +182,7 @@ export default class DefaultTranspiler implements Transpiler {
 
         if (exportFiles.length) {
             config.compilerOptions.paths[`ior:esm:/${namespace}.${name}[${version}]`] = exportFiles
+            config.compilerOptions.paths[`/ior:esm:/${namespace}.${name}[${version}]`] = exportFiles
         }
         // else {
         //     !this.incremental && delete config.compilerOptions.paths[`ior:esm:/${namespace}.${name}[${version}]`]

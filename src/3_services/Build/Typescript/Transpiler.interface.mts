@@ -1,4 +1,5 @@
 import ts from "typescript"
+import NpmPackageInterface from "../Npm/NpmPackage.interface.mjs"
 
 export default interface Transpiler {
     watch(changedFunction: (files: string[]) => Promise<void>): Promise<void>

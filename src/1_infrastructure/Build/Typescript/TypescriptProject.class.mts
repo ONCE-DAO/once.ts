@@ -4,6 +4,7 @@ import TypescriptProject from "../../../3_services/Build/Typescript/TypescriptPr
 import DefaultTranspiler from "./Transpiler.class.mjs";
 
 import { install } from 'ts-patch';
+import NpmPackageInterface from "../../../3_services/Build/Npm/NpmPackage.interface.mjs";
 
 export default class DefaultTypescriptProject implements TypescriptProject {
     private path: string;
@@ -32,10 +33,10 @@ export default class DefaultTypescriptProject implements TypescriptProject {
         //execSync("npx ts-patch i", { cwd: this.path, stdio: "inherit" });
     }
 
-    async build(config: BuildConfig): Promise<void> {
+    async build(config: BuildConfig, distributionFolder: string, npmPackage: NpmPackageInterface): Promise<void> {
         console.group(`DefaultTypescriptProject build ${this.fullQualifiedNamespace} [${import.meta.url}]"`);
 
-        const transpiler = await DefaultTranspiler.init(this.path, config, this.fullQualifiedNamespace)
+        const transpiler = await DefaultTranspiler.init(this.path, config, this.fullQualifiedNamespace, npmPackage)
         const files = await transpiler.transpile()
         await transpiler.writeTsConfigPaths(files, this.name, this.namespace, this.version)
         await transpiler.writeTsConfigBuildPaths(files, this.name, this.namespace, this.version)
@@ -47,10 +48,10 @@ export default class DefaultTypescriptProject implements TypescriptProject {
         console.log("DefaultTypescriptProject build done");
     }
 
-    async watch(config: BuildConfig, distributionFolder: string): Promise<void> {
+    async watch(config: BuildConfig, distributionFolder: string, npmPackage: NpmPackageInterface): Promise<void> {
         console.group(`DefaultTypescriptProject watch ${this.fullQualifiedNamespace} [${import.meta.url}]"`);
 
-        const transpiler = await DefaultTranspiler.init(this.path, config, `${this.namespace}.${this.name}[${this.version}]`)
+        const transpiler = await DefaultTranspiler.init(this.path, config, `${this.namespace}.${this.name}[${this.version}]`, npmPackage)
         await transpiler.watch(async (files: string[]) => {
             await transpiler.writeTsConfigPaths(files, this.name, this.namespace, this.version)
             await transpiler.writeComponentDescriptor(this.name, this.namespace, this.version, files)

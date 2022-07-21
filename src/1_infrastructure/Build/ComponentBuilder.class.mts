@@ -43,13 +43,13 @@ export default class DefaultComponentBuilder implements ComponentBuilder {
 
     async build(config: BuildConfig): Promise<void> {
         for (let buildable of this.buildables) {
-            await buildable.build(config, this.distributionFolder)
+            await buildable.build(config, this.distributionFolder, this.npmPackage)
         }
     }
 
     async watch(config: BuildConfig): Promise<void> {
         for (let buildable of this.buildables) {
-            await buildable.watch(config, this.distributionFolder)
+            await buildable.watch(config, this.distributionFolder, this.npmPackage)
         }
     }
 
