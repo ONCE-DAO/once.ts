@@ -38,6 +38,13 @@ export default class DefaultTranspiler implements Transpiler {
         }
     }
 
+    get onceIOR(): string {
+        // TODO need a better way to get the ONCE IOR
+        let matchResult = process.argv[1].match(/(tla\/.+)\/once@([^\/]+)/)
+        if (!matchResult) throw new Error("Can not parse the once IOR")
+        return `ior:esm:/${matchResult[1].replaceAll('/', '.')}[${matchResult[2]}]`
+    }
+
     private parseConfig(configFile: string, buildConfig: BuildConfig) {
         const readConfig = ts.readConfigFile(configFile, ts.sys.readFile);
         const parsedConfig = ts.parseJsonConfigFileContent(readConfig.config, ts.sys, this.baseDir);
@@ -48,6 +55,7 @@ export default class DefaultTranspiler implements Transpiler {
         options.outDir = parsedConfig.options.outDir ?? buildConfig.distributionFolder;
         options.preserveWatchOutput = true;
         options.listEmittedFiles = true;
+        options.onceIOR = this.onceIOR;
 
         options.plugins = options.plugins?.map(plugin => {
             const pluginConfig: PluginConfig = {
