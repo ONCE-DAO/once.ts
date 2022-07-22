@@ -7,5 +7,5 @@ export default class DefaultUcpUnit implements UcpUnit {
         this.unitType = unitType;
         this.href = href;
     }
-    name: string;
+    name: string = "";
 }

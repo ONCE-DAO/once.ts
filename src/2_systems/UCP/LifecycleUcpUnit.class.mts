@@ -5,9 +5,9 @@ import { UnitType } from "../../3_services/UCP/UcpUnit.interface.mjs";
 export default class LifecycleUcpUnit implements UcpLifecycleUnit {
     name: string = '';
     unitType: UnitType.Lifecycle = UnitType.Lifecycle;
-    stage: UcpComponentDescriptorStage;
+    stage: UcpComponentDescriptorStage = 'undefined';
     targetStage?: UcpComponentDescriptorStage;
-    type: UcpLifecycleUnitType;
+    type: UcpLifecycleUnitType = 'sh';
     lifecycle?: UcpLifecycleUnitLifecycle;
     command: string = "";
 }

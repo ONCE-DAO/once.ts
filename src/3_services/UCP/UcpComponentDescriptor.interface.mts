@@ -19,4 +19,4 @@ export interface UcpComponentDescriptorInterface extends UcpComponentDescriptorE
     path: string
 }
 
-export type UcpComponentDescriptorStage = 'development' | 'validate' | 'compile' | 'test' | 'package' | 'verify' | 'install' | 'deploy'
+export type UcpComponentDescriptorStage = 'development' | 'validate' | 'compile' | 'test' | 'package' | 'verify' | 'install' | 'deploy' | 'undefined'
