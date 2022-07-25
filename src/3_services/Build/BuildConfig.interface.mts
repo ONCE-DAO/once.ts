@@ -21,5 +21,8 @@ export default interface BuildConfig {
 
     distributionFolder: string;
 
+    ignoreErrors: boolean;
+
+    fastRun: boolean;
     // srcPath:string
 }

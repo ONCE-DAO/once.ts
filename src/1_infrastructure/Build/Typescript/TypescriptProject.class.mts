@@ -1,4 +1,3 @@
-import { execSync } from "child_process";
 import BuildConfig from "../../../3_services/Build/BuildConfig.interface.mjs";
 import TypescriptProject from "../../../3_services/Build/Typescript/TypescriptProject.interface.mjs";
 import DefaultTranspiler from "./Transpiler.class.mjs";
@@ -30,7 +29,7 @@ export default class DefaultTypescriptProject implements TypescriptProject {
     }
 
     async beforeBuild(config: BuildConfig): Promise<void> {
-        install({ dir: this.path });
+        if (config.fastRun === false) install({ dir: this.path });
         //execSync("npx ts-patch i", { cwd: this.path, stdio: "inherit" });
     }
 
@@ -63,10 +62,16 @@ export default class DefaultTypescriptProject implements TypescriptProject {
         const transpiler = await DefaultTranspiler.init(this.path, config, `${this.namespace}.${this.name}[${this.version}]`, npmPackage)
         await transpiler.watch(async (files: string[]) => {
             await transpiler.writeTsConfigPaths(files, this.name, this.namespace, this.version)
-            await transpiler.writeTsConfigBuildPaths(files, this.name, this.namespace, this.version)
-            await transpiler.writeComponentDescriptor(this.name)
+            let descriptor = await transpiler.initComponentDescriptor(this.name, this.namespace, this.version, files)
+
+            // Create Index File 
             await transpiler.writeSourceIndexFile();
-            await transpiler.transpileIndex();
+            let indexFiles = await transpiler.transpileIndex();
+            descriptor.addUnitFiles(indexFiles.map(path => join(".", relative(config.distributionFolder, path))));
+
+            await transpiler.writeTsConfigBuildPaths(indexFiles, this.name, this.namespace, this.version)
+
+            await transpiler.writeComponentDescriptor(this.name);
         })
         transpiler.symLinkDistributionFolder()
 

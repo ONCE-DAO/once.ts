@@ -16,6 +16,7 @@ export default class DefaultNpmPackage implements NpmPackage, Buildable {
 
     }
     async install(_config: BuildConfig, _distributionFolder: string): Promise<void> {
+        if (_config.fastRun) return;
         console.group(`DefaultNpmPackage install [${import.meta.url}]"`);
 
         execSync("npm i", { cwd: this.path, stdio: "inherit" });

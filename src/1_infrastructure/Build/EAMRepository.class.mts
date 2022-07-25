@@ -14,7 +14,9 @@ import DefaultGitSubmodule from "./Git/GitSubmodule.class.mjs";
 export default class DefaultEAMRepository implements EAMRepository {
     private gitRepository: GitRepository;
     private buildConfig: BuildConfig;
-    static async init(scenarioDomain: string, basePath: string): Promise<EAMRepository> {
+    private _componentBuilder: Promise<ComponentBuilder[]> | undefined;
+
+    static async init(scenarioDomain: string, basePath: string, fastRun: boolean = false): Promise<EAMRepository> {
         const sourceComponentsPath = join(basePath, "Components");
         const gitRepository = await DefaultGitRepository.init(basePath, sourceComponentsPath);
 
@@ -24,16 +26,20 @@ export default class DefaultEAMRepository implements EAMRepository {
             sourceComponentsPath,
             transformer: [],
             distributionFolder: "",
+            ignoreErrors: false,
+            fastRun
         }
 
         const eamr = new DefaultEAMRepository(buildConfig, gitRepository);
 
-        // TODO remove transformer build
-        const transformer = await eamr.getTransformerBuilder();
-        const config = { ...buildConfig, distributionFolder: transformer.distributionFolder }
-        await transformer.install(config)
-        await transformer.beforeBuild(config)
-        await transformer.build(config)
+        if (fastRun === false) {
+            // TODO remove transformer build
+            const transformer = await eamr.getTransformerBuilder();
+            const config = { ...buildConfig, distributionFolder: transformer.distributionFolder }
+            await transformer.install(config)
+            await transformer.beforeBuild(config)
+            await transformer.build(config)
+        }
         return eamr;
     }
 
@@ -68,17 +74,43 @@ export default class DefaultEAMRepository implements EAMRepository {
 
     install = () => this.run("install");
     beforeBuild = () => this.run("beforeBuild");
-    build = () => this.run("build");
-    watch = () => this.run("watch");
 
-    private async run(prop: keyof Buildable): Promise<void> {
-        for (let componentBuilder of await this.getComponentBuilder()) {
-            await componentBuilder[prop]({ ...this.buildConfig, distributionFolder: componentBuilder.distributionFolder })
+    async build(fastRun: boolean = false): Promise<void> {
+        this.buildConfig.fastRun = fastRun;
+        if (fastRun === false) {
+            this.buildConfig.ignoreErrors = true;
+            await this.run('build');
         }
+        this.buildConfig.ignoreErrors = false;
+        await this.run('build');
     }
 
-    async getComponentBuilder(): Promise<ComponentBuilder[]> {
-        return await DefaultEAMRepository.getComponentBuilder(this.gitRepository, this.buildConfig)
+    async watch(fastRun: boolean = false) {
+        this.buildConfig.fastRun = fastRun;
+        if (fastRun === false) {
+            this.buildConfig.ignoreErrors = true;
+            await this.run('build');
+        }
+        this.buildConfig.ignoreErrors = false;
+        this.run("watch");
+    }
+
+
+    private async run(prop: keyof Buildable): Promise<void> {
+        // let resultPromise: Promise<any>[] = [];
+
+        for (let componentBuilder of await this.getComponentBuilder()) {
+            await componentBuilder[prop]({ ...this.buildConfig, distributionFolder: componentBuilder.distributionFolder });
+        }
+        // await Promise.all(resultPromise);
+
+    }
+
+    getComponentBuilder(): Promise<ComponentBuilder[]> {
+        if (!this._componentBuilder) {
+            this._componentBuilder = DefaultEAMRepository.getComponentBuilder(this.gitRepository, this.buildConfig);
+        }
+        return this._componentBuilder;
     }
 
     async getTransformerBuilder(): Promise<ComponentBuilder> {

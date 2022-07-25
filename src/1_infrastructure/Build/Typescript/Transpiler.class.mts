@@ -71,7 +71,7 @@ export default class DefaultTranspiler implements Transpiler {
         // options.noEmitOnError = false
         options.tsBuildInfoFile = buildConfig.distributionFolder + "/.tsbuildinfo";
         options.noEmitOnError = existsSync(options.tsBuildInfoFile)
-        if (process.env.IGNORE_ERRORS == 'true') options.noEmitOnError = false;
+
 
         // TODO can be remove when exclude will work
         options.suppressOutputPathCheck = true;
@@ -125,9 +125,9 @@ export default class DefaultTranspiler implements Transpiler {
     }
 
     async initComponentDescriptor(name: string, namespace: string, version: string, files: string[]): Promise<BuildUcpComponentDescriptorInterface> {
-        if (this.incremental) {
-            throw new Error("incremental descriptor not implemented yet");
-        }
+        // if (this.incremental) {
+        //     throw new Error("incremental descriptor not implemented yet");
+        // }
         const exportsFile = `${TYPESCRIPT_PROJECT.EXPORTS_FILE_NAME}.${this.ExportFileNameExtension.replace("t", "j")}`
 
         const descriptor = new BuildUcpComponentDescriptor(
@@ -222,7 +222,7 @@ export default class DefaultTranspiler implements Transpiler {
         const emitResult = program.emit(undefined, writeFile);
 
         const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
-        if (emitResult.emitSkipped && process.env.IGNORE_ERRORS !== 'true') {
+        if (emitResult.emitSkipped && this.buildConfig.ignoreErrors === false) {
             console.log(this.formatDiagnostics.bind(this)(allDiagnostics));
             console.error('\x1b[31m%s\x1b[0m', "Emit was skipped. please check errors");
             throw "Emit was skipped. please check errors"

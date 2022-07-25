@@ -1,7 +1,7 @@
 // ##IGNORE_TRANSFORMER##
 
 
-interface callback { (result: any): void };
+interface callback { (result?: any): void };
 interface timeoutCallback { (promiseHandler: promiseHandler): void };
 
 export type promiseHandler = {

@@ -3,10 +3,17 @@ import DefaultEAMRepository from "./EAMRepository.class.mjs"
 
 const scenarioDomain = process.env.SCENARIO_DOMAIN || EAMD_CONSTANTS.DEFAULT_SCENARIO_DOMAIN
 const basePath = process.env.BASE_PATH || process.cwd()
-const watch = process.env.WATCH === "true"
+let watch = process.env.WATCH === "true"
 
-const eamr = await DefaultEAMRepository.init(scenarioDomain, basePath)
+console.log("Call Arguments:" + process.argv.join(" "))
+let fast = false;
+if (typeof process.argv[2] === "string" && process.argv[2].match("fast")) fast = true;
+if (typeof process.argv[2] === "string" && process.argv[2].match("watch")) watch = true;
+
+const eamr = await DefaultEAMRepository.init(scenarioDomain, basePath, fast)
+
+
 await eamr.beforeBuild()
 watch ?
-    await eamr.watch()
-    : await eamr.build()
+    await eamr.watch(fast)
+    : await eamr.build(fast)
