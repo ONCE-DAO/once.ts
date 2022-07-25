@@ -3,7 +3,7 @@
   "namespace": "tla.EAM",
   "version": "build",
   "description": "",
-  "main": "index.mjs",
+  "main": "index.export.mjs",
   "onceDependencies": [
     "Transformer",
     "Thinglish",

@@ -5,15 +5,37 @@ const scenarioDomain = process.env.SCENARIO_DOMAIN || EAMD_CONSTANTS.DEFAULT_SCE
 const basePath = process.env.BASE_PATH || process.cwd()
 let watch = process.env.WATCH === "true"
 
+
+
 console.log("Call Arguments:" + process.argv.join(" "))
 let fast = false;
-if (typeof process.argv[2] === "string" && process.argv[2].match("fast")) fast = true;
-if (typeof process.argv[2] === "string" && process.argv[2].match("watch")) watch = true;
+let ignoreErrors = false;
+let paths: string[] = [];
+
+let cmdArguments = process.argv.splice(2);
+if (cmdArguments.filter(x => x === "fast").length) fast = true;
+if (cmdArguments.filter(x => x === "watch").length) watch = true;
+if (cmdArguments.filter(x => x === "ignoreErrors").length) ignoreErrors = true;
+
+let pathObject = cmdArguments.filter(x => x.match(/^-*buildPath=/))
+if (pathObject.length) {
+    let matchPath = pathObject[0].match(/^-*buildPath=(.+)/)
+    if (matchPath && matchPath[1]) paths = matchPath[1].split(',');
+}
+
 
 const eamr = await DefaultEAMRepository.init(scenarioDomain, basePath, fast)
 
+if (ignoreErrors) eamr.ignoreErrors = true;
 
-await eamr.beforeBuild()
-watch ?
-    await eamr.watch(fast)
-    : await eamr.build(fast)
+if (paths.length) {
+    for (const path of paths) {
+        await eamr.build(fast, path)
+    }
+} else {
+    await eamr.beforeBuild()
+
+    watch ?
+        await eamr.watch(fast)
+        : await eamr.build(fast)
+}

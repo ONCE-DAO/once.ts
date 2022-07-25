@@ -43,6 +43,11 @@ export default class DefaultEAMRepository implements EAMRepository {
         return eamr;
     }
 
+    set ignoreErrors(value: boolean) {
+        this.buildConfig.ignoreErrors = value
+    }
+    get ignoreErrors() { return this.buildConfig.ignoreErrors }
+
     private constructor(buildConfig: BuildConfig, gitRepository: GitRepository) {
         this.buildConfig = buildConfig;
         this.gitRepository = gitRepository;
@@ -75,14 +80,24 @@ export default class DefaultEAMRepository implements EAMRepository {
     install = () => this.run("install");
     beforeBuild = () => this.run("beforeBuild");
 
-    async build(fastRun: boolean = false): Promise<void> {
+    async build(fastRun: boolean = false, buildPath?: string): Promise<void> {
         this.buildConfig.fastRun = fastRun;
+
         if (fastRun === false) {
             this.buildConfig.ignoreErrors = true;
+            if (buildPath) {
+                await this.singleRun('build', buildPath)
+            } else {
+                await this.run('build');
+            }
+            this.buildConfig.ignoreErrors = false;
+        }
+        if (buildPath) {
+            await this.singleRun('build', buildPath)
+        } else {
             await this.run('build');
         }
-        this.buildConfig.ignoreErrors = false;
-        await this.run('build');
+
     }
 
     async watch(fastRun: boolean = false) {
@@ -96,10 +111,21 @@ export default class DefaultEAMRepository implements EAMRepository {
     }
 
 
+    async singleRun(prop: keyof Buildable, path: string): Promise<void> {
+        let componentBuilder = (await this.getComponentBuilder()).filter(x => x.path === path);
+        if (componentBuilder.length) {
+            await componentBuilder[0][prop]({ ...this.buildConfig, distributionFolder: componentBuilder[0].distributionFolder })
+        } else {
+            throw new Error(`Fail to find ComponentBuilder for path "${path}"`);
+        }
+    }
+
+
     private async run(prop: keyof Buildable): Promise<void> {
         // let resultPromise: Promise<any>[] = [];
 
         for (let componentBuilder of await this.getComponentBuilder()) {
+
             await componentBuilder[prop]({ ...this.buildConfig, distributionFolder: componentBuilder.distributionFolder });
         }
         // await Promise.all(resultPromise);

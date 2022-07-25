@@ -6,6 +6,8 @@ import { install } from 'ts-patch';
 import NpmPackageInterface from "../../../3_services/Build/Npm/NpmPackage.interface.mjs";
 import { join, relative } from "path";
 import { existsSync, mkdirSync } from "fs";
+import ExtendedPromise from "../../../2_systems/Promise.class.mjs";
+import { fork } from "child_process";
 
 export default class DefaultTypescriptProject implements TypescriptProject {
     private path: string;
@@ -14,6 +16,8 @@ export default class DefaultTypescriptProject implements TypescriptProject {
     version: string;
 
     private get fullQualifiedNamespace() { return `${this.namespace}.${this.name}[${this.version}]` }
+
+    private requireOwnBuildProcess: boolean = false;
 
     constructor(path: string, name: string, namespace: string, version: string) {
         this.path = path;
@@ -30,11 +34,37 @@ export default class DefaultTypescriptProject implements TypescriptProject {
     }
 
     async beforeBuild(config: BuildConfig): Promise<void> {
-        if (config.fastRun === false) install({ dir: this.path });
+        if (config.fastRun === false) {
+            this.requireOwnBuildProcess = install({ dir: this.path });
+        }
+        //config.requireOwnBuildProcess = true;
         //execSync("npx ts-patch i", { cwd: this.path, stdio: "inherit" });
     }
 
+    private async asyncBuildRun(): Promise<void> {
+
+        const controller = new AbortController();
+        const { signal } = controller;
+        let promiseHandler = ExtendedPromise.createPromiseHandler();
+        const child = fork(process.argv[1], ['--buildPath=' + this.path, 'fast', 'ignoreErrors'], { signal });
+
+
+        child.on('exit', (code: number | null, signal: NodeJS.Signals | null) => {
+            if (code != 0) {
+                promiseHandler.setError(new Error(`Child Build process '${this.path}' exited with code ${code}`));
+            } else {
+                promiseHandler.setSuccess();
+            }
+        });
+
+        return promiseHandler.promise;
+    }
+
     async build(config: BuildConfig, distributionFolder: string, npmPackage: NpmPackageInterface): Promise<void> {
+        if (this.requireOwnBuildProcess) {
+            return await this.asyncBuildRun();
+        }
+
         console.group(`DefaultTypescriptProject build ${this.fullQualifiedNamespace} [${import.meta.url}]"`);
 
         if (!existsSync(config.distributionFolder)) {
