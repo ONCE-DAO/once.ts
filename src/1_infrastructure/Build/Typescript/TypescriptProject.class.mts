@@ -41,12 +41,14 @@ export default class DefaultTypescriptProject implements TypescriptProject {
         //execSync("npx ts-patch i", { cwd: this.path, stdio: "inherit" });
     }
 
-    private async asyncBuildRun(): Promise<void> {
+    private async asyncBuildRun(config: BuildConfig): Promise<void> {
 
         const controller = new AbortController();
         const { signal } = controller;
         let promiseHandler = ExtendedPromise.createPromiseHandler();
-        const child = fork(process.argv[1], ['--buildPath=' + this.path, 'fast', 'ignoreErrors'], { signal });
+        let cmdArguments = ['--buildPath=' + this.path, 'fast'];
+        if (config.ignoreErrors) cmdArguments.push('ignoreErrors')
+        const child = fork(process.argv[1], cmdArguments, { signal });
 
 
         child.on('exit', (code: number | null, signal: NodeJS.Signals | null) => {
@@ -62,7 +64,7 @@ export default class DefaultTypescriptProject implements TypescriptProject {
 
     async build(config: BuildConfig, distributionFolder: string, npmPackage: NpmPackageInterface): Promise<void> {
         if (this.requireOwnBuildProcess) {
-            return await this.asyncBuildRun();
+            return await this.asyncBuildRun(config);
         }
 
         console.group(`DefaultTypescriptProject build ${this.fullQualifiedNamespace} [${import.meta.url}]"`);
