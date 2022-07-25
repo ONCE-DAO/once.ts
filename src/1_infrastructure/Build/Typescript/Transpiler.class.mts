@@ -221,8 +221,8 @@ export default class DefaultTranspiler implements Transpiler {
             }
         }
         let customTransformer: ts.CustomTransformers | undefined;
-        // HACK Need to find a better way
-        if (this.namespace && this.namespace.startsWith("tla"))
+
+        if (this.needCustomTransformer)
             customTransformer = { before: [transformerFactory(program, "before")], after: [transformerFactory(program, "after")] }
 
         const emitResult = program.emit(undefined, writeFile, undefined, undefined, customTransformer);
@@ -235,6 +235,11 @@ export default class DefaultTranspiler implements Transpiler {
         }
 
         return emitResult.emittedFiles || []
+    }
+
+    get needCustomTransformer(): boolean {
+        // HACK Need to find a better way
+        return this.namespace !== undefined && this.namespace.startsWith("tla")
     }
 
     async watch(changedFunction: (files: string[]) => Promise<void>): Promise<void> {
@@ -269,11 +274,19 @@ export default class DefaultTranspiler implements Transpiler {
         };
 
         const origPostProgramCreate = host.afterProgramCreate;
+
+
         host.afterProgramCreate = program => {
             // if (firstCreateProgram) {
             const oldemit = program.emit
+            let myCustomTransformer: ts.CustomTransformers | undefined;
+            if (this.needCustomTransformer)
+                myCustomTransformer = { before: [transformerFactory(program.getProgram(), "before")], after: [transformerFactory(program.getProgram(), "after")] }
+
             program.emit = (targetSourceFile, writeFile, cancellationToken, emitOnlyDtsFiles, customTransformers) => {
-                const emitResult = oldemit?.(targetSourceFile, writeFile, cancellationToken, emitOnlyDtsFiles, customTransformers);
+
+
+                const emitResult = oldemit?.(targetSourceFile, writeFile, cancellationToken, emitOnlyDtsFiles, myCustomTransformer);
                 if (emitResult?.emittedFiles)
                     changedFunction(emitResult.emittedFiles)
                 return emitResult

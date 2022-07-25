@@ -105,8 +105,8 @@ export default class DefaultEAMRepository implements EAMRepository {
         if (fastRun === false) {
             this.buildConfig.ignoreErrors = true;
             await this.run('build');
+            this.buildConfig.ignoreErrors = false;
         }
-        this.buildConfig.ignoreErrors = false;
         this.run("watch");
     }
 

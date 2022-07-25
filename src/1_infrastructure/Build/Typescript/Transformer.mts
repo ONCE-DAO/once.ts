@@ -929,6 +929,8 @@ class ThinglishFileVisitor {
 
 }
 
+
+//interface for ts-patch
 const programTransformer = (program: TS.Program) => {
 
   return {
@@ -951,17 +953,12 @@ const programTransformer = (program: TS.Program) => {
   }
 }
 
+// Direct interface for the Compiler
 export function transformerFactory(program: TS.Program, run: "before" | "after"): TS.TransformerFactory<TS.SourceFile> {
   return (context: TS.TransformationContext) => (sourceFile: TS.SourceFile) => {
     return new ThinglishFileVisitor(program, context, sourceFile, run).transform();
   }
 }
-
-// export function transformerAfter(program: TS.Program): TS.TransformerFactory<TS.SourceFile> {
-//   return (context: TS.TransformationContext) => (sourceFile: TS.SourceFile) => {
-//     return new ThinglishFileVisitor(program, context, sourceFile, "after").transform();
-//   }
-// }
 
 /**
  * Anything other than a node transformer will need to specifiy its type as an export

@@ -34,39 +34,9 @@ export default class DefaultTypescriptProject implements TypescriptProject {
     }
 
     async beforeBuild(config: BuildConfig): Promise<void> {
-        if (config.fastRun === false) {
-            // this.requireOwnBuildProcess = install({ dir: this.path });
-        }
-        //config.requireOwnBuildProcess = true;
-        //execSync("npx ts-patch i", { cwd: this.path, stdio: "inherit" });
-    }
-
-    private async asyncBuildRun(config: BuildConfig): Promise<void> {
-
-        const controller = new AbortController();
-        const { signal } = controller;
-        let promiseHandler = ExtendedPromise.createPromiseHandler();
-        let cmdArguments = ['--buildPath=' + this.path, 'fast'];
-        if (config.ignoreErrors) cmdArguments.push('ignoreErrors')
-        const child = fork(process.argv[1], cmdArguments, { signal });
-
-
-        child.on('exit', (code: number | null, signal: NodeJS.Signals | null) => {
-            if (code != 0) {
-                promiseHandler.setError(new Error(`Child Build process '${this.path}' exited with code ${code}`));
-            } else {
-                promiseHandler.setSuccess();
-            }
-        });
-
-        return promiseHandler.promise;
     }
 
     async build(config: BuildConfig, distributionFolder: string, npmPackage: NpmPackageInterface): Promise<void> {
-        if (this.requireOwnBuildProcess) {
-            return await this.asyncBuildRun(config);
-        }
-
         console.group(`DefaultTypescriptProject build ${this.fullQualifiedNamespace}`); //[${import.meta.url}]
 
         if (!existsSync(config.distributionFolder)) {
