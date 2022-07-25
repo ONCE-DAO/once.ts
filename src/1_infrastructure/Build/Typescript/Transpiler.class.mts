@@ -9,6 +9,7 @@ import Transpiler, { ExtendedOptions, PluginConfig, TRANSFORMER } from "../../..
 import { TYPESCRIPT_PROJECT } from "../../../3_services/Build/Typescript/TypescriptProject.interface.mjs";
 import { UnitType } from "../../../3_services/UCP/UcpUnit.interface.mjs";
 import BuildUcpComponentDescriptor from "./BuildUcpComponentDescriptor.class.mjs";
+import { transformerFactory } from "./Transformer.mjs";
 
 export default class DefaultTranspiler implements Transpiler {
     private config: ts.ParsedCommandLine;
@@ -219,7 +220,12 @@ export default class DefaultTranspiler implements Transpiler {
 
             }
         }
-        const emitResult = program.emit(undefined, writeFile);
+        let customTransformer: ts.CustomTransformers | undefined;
+        // HACK Need to find a better way
+        if (this.namespace && this.namespace.startsWith("tla"))
+            customTransformer = { before: [transformerFactory(program, "before")], after: [transformerFactory(program, "after")] }
+
+        const emitResult = program.emit(undefined, writeFile, undefined, undefined, customTransformer);
 
         const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
         if (emitResult.emitSkipped && this.buildConfig.ignoreErrors === false) {

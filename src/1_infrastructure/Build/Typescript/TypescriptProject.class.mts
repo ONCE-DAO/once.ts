@@ -35,7 +35,7 @@ export default class DefaultTypescriptProject implements TypescriptProject {
 
     async beforeBuild(config: BuildConfig): Promise<void> {
         if (config.fastRun === false) {
-            this.requireOwnBuildProcess = install({ dir: this.path });
+            // this.requireOwnBuildProcess = install({ dir: this.path });
         }
         //config.requireOwnBuildProcess = true;
         //execSync("npx ts-patch i", { cwd: this.path, stdio: "inherit" });
@@ -67,7 +67,7 @@ export default class DefaultTypescriptProject implements TypescriptProject {
             return await this.asyncBuildRun(config);
         }
 
-        console.group(`DefaultTypescriptProject build ${this.fullQualifiedNamespace} [${import.meta.url}]"`);
+        console.group(`DefaultTypescriptProject build ${this.fullQualifiedNamespace}`); //[${import.meta.url}]
 
         if (!existsSync(config.distributionFolder)) {
             mkdirSync(config.distributionFolder, { recursive: true });

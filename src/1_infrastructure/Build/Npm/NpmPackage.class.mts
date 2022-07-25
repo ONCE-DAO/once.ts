@@ -30,7 +30,7 @@ export default class DefaultNpmPackage implements NpmPackage, Buildable {
     }
 
     async build(_config: BuildConfig, distributionFolder: string): Promise<void> {
-        console.group(`DefaultNpmPackage build [${import.meta.url}]"`);
+        console.group(`DefaultNpmPackage build`); // [${import.meta.url}]
         this.symlinkNodeModules(this.path, distributionFolder)
         console.groupEnd();
         console.log("DefaultNpmPackage build done");
