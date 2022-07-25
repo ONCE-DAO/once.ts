@@ -5,6 +5,7 @@ import DefaultTranspiler from "./Transpiler.class.mjs";
 import { install } from 'ts-patch';
 import NpmPackageInterface from "../../../3_services/Build/Npm/NpmPackage.interface.mjs";
 import { join, relative } from "path";
+import { existsSync, mkdirSync } from "fs";
 
 export default class DefaultTypescriptProject implements TypescriptProject {
     private path: string;
@@ -35,6 +36,10 @@ export default class DefaultTypescriptProject implements TypescriptProject {
 
     async build(config: BuildConfig, distributionFolder: string, npmPackage: NpmPackageInterface): Promise<void> {
         console.group(`DefaultTypescriptProject build ${this.fullQualifiedNamespace} [${import.meta.url}]"`);
+
+        if (!existsSync(config.distributionFolder)) {
+            mkdirSync(config.distributionFolder, { recursive: true });
+        }
 
         const transpiler = await DefaultTranspiler.init(this.path, config, this.fullQualifiedNamespace, npmPackage)
         const files = await transpiler.transpile()
