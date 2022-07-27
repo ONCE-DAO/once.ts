@@ -142,7 +142,12 @@ let NewInterfaceDescriptor = class InterfaceDescriptor implements InterfaceDescr
         let interfaceDesc = ucpComponentDescriptor.getUnitByName(uniqueName, 'InterfaceDescriptor')
         if (interfaceDesc === undefined) throw new Error(`Can not find the interface, ${packagePath}, ${packageName}, ${packageVersion}, ${location}, ${interfaceName}`)
         return interfaceDesc;
+    }
 
+    static isInterface<InterfaceImplementation extends Thing<any>>(object: Thing<any>, packagePath?: string, packageName?: string, packageVersion?: string | undefined, location?: string, interfaceName?: string): object is InterfaceImplementation {
+
+        let interfaceDescriptor = this.getInterfaceDescriptor(packagePath, packageName, packageVersion, location, interfaceName);
+        return object.classDescriptor.implements(interfaceDescriptor)
     }
 }
 

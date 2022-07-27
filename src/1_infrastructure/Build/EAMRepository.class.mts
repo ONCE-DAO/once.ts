@@ -32,14 +32,6 @@ export default class DefaultEAMRepository implements EAMRepository {
 
         const eamr = new DefaultEAMRepository(buildConfig, gitRepository);
 
-        if (fastRun === false) {
-            // TODO remove transformer build
-            const transformer = await eamr.getTransformerBuilder();
-            const config = { ...buildConfig, distributionFolder: transformer.distributionFolder }
-            await transformer.install(config)
-            await transformer.beforeBuild(config)
-            await transformer.build(config)
-        }
         return eamr;
     }
 
@@ -63,12 +55,12 @@ export default class DefaultEAMRepository implements EAMRepository {
     }
 
 
-    private static async getTransformerBuilder(gitRepository: GitRepository, buildConfig: BuildConfig): Promise<ComponentBuilder[]> {
-        const componentBuilders = await this.getAllComponentBuilder(gitRepository, buildConfig);
-        return [
-            ...componentBuilders.filter(x => `${x.namespace}.${x.name}` === "tla.EAM.Thinglish.Transformer"),
-        ]
-    }
+    // private static async getTransformerBuilder(gitRepository: GitRepository, buildConfig: BuildConfig): Promise<ComponentBuilder[]> {
+    //     const componentBuilders = await this.getAllComponentBuilder(gitRepository, buildConfig);
+    //     return [
+    //         ...componentBuilders.filter(x => `${x.namespace}.${x.name}` === "tla.EAM.Thinglish.Transformer"),
+    //     ]
+    // }
 
     private static async getComponentBuilder(gitRepository: GitRepository, buildConfig: BuildConfig): Promise<ComponentBuilder[]> {
         const componentBuilders = await this.getAllComponentBuilder(gitRepository, buildConfig);
@@ -139,14 +131,14 @@ export default class DefaultEAMRepository implements EAMRepository {
         return this._componentBuilder;
     }
 
-    async getTransformerBuilder(): Promise<ComponentBuilder> {
-        const transformers = await DefaultEAMRepository.getTransformerBuilder(this.gitRepository, this.buildConfig)
-        if (transformers.length > 1) {
-            throw new Error("More than one transformer found")
-        }
-        if (transformers.length === 0) {
-            throw new Error("No transformer found")
-        }
-        return transformers[0]
-    }
+    // async getTransformerBuilder(): Promise<ComponentBuilder> {
+    //     const transformers = await DefaultEAMRepository.getTransformerBuilder(this.gitRepository, this.buildConfig)
+    //     if (transformers.length > 1) {
+    //         throw new Error("More than one transformer found")
+    //     }
+    //     if (transformers.length === 0) {
+    //         throw new Error("No transformer found")
+    //     }
+    //     return transformers[0]
+    // }
 }

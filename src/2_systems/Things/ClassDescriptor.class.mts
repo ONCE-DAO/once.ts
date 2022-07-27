@@ -2,6 +2,7 @@
 import Class from "../../3_services/Class.interface.mjs";
 import ClassDescriptorInterface, { ClassDescriptorStatics } from "../../3_services/Thing/ClassDescriptor.interface.mjs";
 import InterfaceDescriptorInterface from "../../3_services/Thing/InterfaceDescriptor.interface.mjs";
+import Thing from "../../3_services/Thing/Thing.interface.mjs";
 import UcpComponentDescriptorInterface from "../../3_services/Thing/UcpComponentDescriptor.interface.mjs";
 import InterfaceDescriptor from "./InterfaceDescriptor.class.mjs";
 
@@ -17,9 +18,11 @@ const NewClassDescriptor = class ClassDescriptor<ClassType extends Class<any>> i
 
         return ClassDescriptor.uniqueName(this.location, this.name);
     }
+
     static uniqueName(location: string, name: string): string {
         return `${location}:${name}`;
     }
+
     private static _classDescriptorStore = new WeakMap<Class<any>, ClassDescriptorInterface<Class<any>>>();
     ucpComponentDescriptor!: UcpComponentDescriptorInterface;
     filename: string | undefined;
@@ -69,8 +72,19 @@ const NewClassDescriptor = class ClassDescriptor<ClassType extends Class<any>> i
      }
      */
 
-    implements(interfaceObject: InterfaceDescriptorInterface) {
+    implements(interfaceObject: InterfaceDescriptorInterface): boolean {
         return this.implementedInterfaces.includes(interfaceObject);
+    }
+
+    implementsInterface<CheckInterface extends Thing<any>>(object: Thing<any>, packagePath?: string, packageName?: string, packageVersion?: string | undefined, location?: string, interfaceName?: string): object is CheckInterface {
+        if (packagePath === undefined) throw new Error("Missing packagePath");
+        if (packageName === undefined) throw new Error("Missing packageName");
+        if (location === undefined) throw new Error("Missing location");
+        if (interfaceName === undefined) throw new Error("Missing interfaceName");
+
+
+        let interfaceDescriptor = InterfaceDescriptor.getInterfaceDescriptor(packagePath, packageName, packageVersion, location, interfaceName);
+        return this.implements(interfaceDescriptor)
     }
 
     get packageFilename(): string {
@@ -192,8 +206,6 @@ const NewClassDescriptor = class ClassDescriptor<ClassType extends Class<any>> i
 
         return interfaceList;
     }
-
-
 
     static addInterfaces(packagePath: string, packageName: string, packageVersion: string | undefined, location: string, interfaceName: string): Function {
         return (aClass: any, name: string, x: any): void => {

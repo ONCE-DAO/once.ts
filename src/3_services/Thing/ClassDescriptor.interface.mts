@@ -1,5 +1,6 @@
 import Class from "../Class.interface.mjs";
 import InterfaceDescriptorInterface from "./InterfaceDescriptor.interface.mjs";
+import Thing from "./Thing.interface.mjs";
 import UcpComponentDescriptorInterface from "./UcpComponentDescriptor.interface.mjs";
 export default interface ClassDescriptorInterface<ClassType extends Class<any>> {
     ucpComponentDescriptor: UcpComponentDescriptorInterface;
@@ -24,6 +25,7 @@ export default interface ClassDescriptorInterface<ClassType extends Class<any>> 
     implementedInterfaces: InterfaceDescriptorInterface[];
     addInterfaces(packagePath: string, packageName: string, packageVersion: string | undefined, location: string, interfaceName: string): this
     _getImplementedInterfaces(input: InterfaceDescriptorInterface[]): InterfaceDescriptorInterface[];
+    implementsInterface<CheckInterface extends Thing<any>>(object: Thing<any>): object is CheckInterface
 }
 
 export interface ClassDescriptorStatics extends Class<ClassDescriptorInterface<any>> {

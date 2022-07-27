@@ -220,6 +220,10 @@ class ComponentDescriptor {
     //if (debug) console.log("Get package 4 Path " + path);
     if (pathArray.length === 1) throw new Error("Could not find a *.component.json File! " + originalFilename)
 
+    let nodeModulesIndex = pathArray.indexOf('node_modules');
+    if (nodeModulesIndex > -1)
+      pathArray = pathArray.splice(0, nodeModulesIndex);
+
     let currentPath = pathArray.join('/')
     let files = readdirSync(currentPath);
     let componentsFile = files.filter(x => x.match(/\.component.json$/));
@@ -246,7 +250,8 @@ class DeclarationDescriptor {
 
   type!: TS.Type;
 
-  originalNodeObject!: TS.Node;
+  originalNodeObject: TS.Node | undefined;
+  private _isNodeJs: boolean | undefined;
   get location(): string {
     return this.path.replace(/^\/?src\/?/, '')
   }
@@ -257,6 +262,23 @@ class DeclarationDescriptor {
 
   get typeChecker() {
     return activeProgram.getTypeChecker();
+  }
+
+  isNodeJs(alreadyHitSourceFiles: TS.SourceFile[] = []): boolean {
+
+    if (this._isNodeJs === undefined) {
+      if (this.path.match('node_modules') !== null) {
+        this._isNodeJs = true;
+      } else {
+        if (!this.sourceFile)
+          throw new Error("Missing sourceFile")
+        if (alreadyHitSourceFiles.includes(this.sourceFile)) return false;
+        alreadyHitSourceFiles.push(this.sourceFile);
+        this._isNodeJs = new ThinglishFileVisitor(this.sourceFile).isNodeJs(alreadyHitSourceFiles);
+      }
+
+    }
+    return this._isNodeJs;
   }
 
   static MISSING_DECLARATION = "MissingDeclarations"
@@ -272,7 +294,8 @@ class DeclarationDescriptor {
 
     this.originalNodeObject = this.type.symbol.declarations[0] as TS.Node;
 
-    let sourceFile = TSAstFactory.getFile4NodeObject(this.originalNodeObject);
+    let sourceFile = this.sourceFile;
+    if (!sourceFile) throw new Error("Missing source file")
 
     this.componentDescriptor = ComponentDescriptor.getComponentDescriptor(sourceFile.fileName);
 
@@ -286,6 +309,11 @@ class DeclarationDescriptor {
     this.path = path.relative(this.componentDescriptor.packagePath, this.normalizeFile(sourceFile.fileName))
 
     return this;
+  }
+
+  get sourceFile(): TS.SourceFile | undefined {
+    if (this.originalNodeObject === undefined) return undefined;
+    return TSAstFactory.getFile4NodeObject(this.originalNodeObject)
   }
 
   private normalizeFile(filePath: string): string {
@@ -604,19 +632,7 @@ class ThinglishCallExpressionVisitor extends BaseVisitor implements TSNodeVisito
     if (this.context.fileVisitor.phase === "before") {
 
       // getInterfaceDescriptor transform Interface to identifier
-      if (node.typeArguments !== undefined && node.typeArguments.length === 1 && TS.isTypeReferenceNode(node.typeArguments[0]) &&
-        ((node.expression as TS.PropertyAccessExpression)?.expression as TS.Identifier)?.escapedText === 'InterfaceDescriptor' &&
-        (node.expression as TS.PropertyAccessExpression)?.name?.escapedText === 'getInterfaceDescriptor') {
-
-        let dd = new DeclarationDescriptor((node.typeArguments[0].typeName as TS.Identifier));
-        return TS.factory.updateCallExpression(node, node.expression, node.typeArguments, [
-          TS.factory.createStringLiteral(dd.componentDescriptor.package),
-          TS.factory.createStringLiteral(dd.componentDescriptor.name),
-          TS.factory.createStringLiteral(dd.componentDescriptor.version),
-          TS.factory.createStringLiteral(dd.location),
-          TS.factory.createStringLiteral(dd.name)
-        ])
-      }
+      node = this.addInterfacePattern(node);
       return TS.visitEachChild(node, fileVisitor.visitor.bind(fileVisitor), fileVisitor.context);
     } else {
 
@@ -635,6 +651,25 @@ class ThinglishCallExpressionVisitor extends BaseVisitor implements TSNodeVisito
       return TS.visitEachChild(node, fileVisitor.visitor.bind(fileVisitor), fileVisitor.context);
     }
   }
+
+  addInterfacePattern(node: TS.CallExpression): TS.CallExpression {
+    if (node.typeArguments !== undefined && node.typeArguments.length === 1 && TS.isTypeReferenceNode(node.typeArguments[0]) &&
+      ((node.expression as TS.PropertyAccessExpression)?.expression as TS.Identifier)?.text === 'InterfaceDescriptor' &&
+      (node.expression as TS.PropertyAccessExpression)?.name?.text.match(/^(getInterfaceDescriptor|isInterface)$/)) {
+
+      let dd = new DeclarationDescriptor((node.typeArguments[0].typeName as TS.Identifier));
+      return TS.factory.updateCallExpression(node, node.expression, node.typeArguments, [
+        ...node.arguments,
+        TS.factory.createStringLiteral(dd.componentDescriptor.package),
+        TS.factory.createStringLiteral(dd.componentDescriptor.name),
+        TS.factory.createStringLiteral(dd.componentDescriptor.version),
+        TS.factory.createStringLiteral(dd.location),
+        TS.factory.createStringLiteral(dd.name)
+      ])
+    }
+    return node;
+  }
+
 }
 
 
@@ -844,14 +879,24 @@ class ThinglishClassVisitor extends BaseVisitor implements TSNodeVisitor {
 }
 
 class ThinglishFileVisitor {
-  constructor(private program: TS.Program, public context: TS.TransformationContext, public sourceFile: TS.SourceFile, public phase: "before" | "after") {
-    activeProgram = program;
+  private componentDescriptor: ComponentDescriptor;
+  private _isNodeJs: boolean | undefined;
+  context!: TS.TransformationContext;
+  phase: "before" | "after" = "before";
+
+  constructor(public sourceFile: TS.SourceFile,) {
+    this.componentDescriptor = ComponentDescriptor.getComponentDescriptor(this.sourceFile);
+  }
+  init(context: TS.TransformationContext, phase: "before" | "after"): this {
+    this.context = context;
+    this.phase = phase;
+
+    return this;
   }
 
   add2Header(key: string, node: TS.ImportDeclaration): void {
     this.addItionalHeader[key] = node;
   }
-
 
   addItionalHeader: Record<string, TS.ImportDeclaration> = {};
 
@@ -859,6 +904,8 @@ class ThinglishFileVisitor {
     if (debug) console.log("myTransformer " + this.phase, this.sourceFile.fileName)
     if (this.sourceFile.fileName.match('/zod/')) return this.sourceFile;
 
+    // let isNodeJs = this.isNodeJs();
+    // console.log(`isNodeJs ${this.sourceFile.fileName} = ${isNodeJs}`);
     if (this.sourceFile.getFullText().match(/\/\/ *##IGNORE_TRANSFORMER##/)) return this.sourceFile;
 
 
@@ -876,6 +923,7 @@ class ThinglishFileVisitor {
     if (newImports.length > 0) {
       this.sourceFile = TS.factory.updateSourceFile(this.sourceFile, [...newImports, ...this.sourceFile.statements]);
     }
+    if (this.phase === "before") this.componentDescriptor.write2File();
 
     return this.sourceFile;
   }
@@ -884,6 +932,22 @@ class ThinglishFileVisitor {
   //   let existingClasses = this.sourceFile.statements.filter(x => TS.isImportDeclaration(x)) as TS.ClassDeclaration[];
   //   return existingClasses.map(x => x.name?.escapedText as string).filter(x => !!x)
   // }
+
+  isNodeJs(alreadyHitSourceFiles: TS.SourceFile[] = []): boolean {
+    if (this._isNodeJs === undefined) {
+      alreadyHitSourceFiles.push(this.sourceFile);
+      let existingImports = this.sourceFile.statements.filter(x => TS.isImportDeclaration(x)) as TS.ImportDeclaration[];
+      existingImports.forEach(importDeclaration => {
+        if (importDeclaration?.importClause?.namedBindings && TS.isNamedImports(importDeclaration.importClause.namedBindings)) {
+          for (const namedElement of importDeclaration.importClause.namedBindings.elements) {
+            let dd = new DeclarationDescriptor(namedElement.name);
+            if (dd.isNodeJs(alreadyHitSourceFiles) === true) this._isNodeJs = true;
+          }
+        }
+      });
+    }
+    return this._isNodeJs || false;
+  }
 
   private getAllImportedVariables(): string[] {
     let existingImports = this.sourceFile.statements.filter(x => TS.isImportDeclaration(x)) as TS.ImportDeclaration[];
@@ -906,9 +970,7 @@ class ThinglishFileVisitor {
 
   visitor(node: TS.Node): TS.VisitResult<TS.Node> {
 
-    let componentDescriptor = ComponentDescriptor.getComponentDescriptor(this.sourceFile);
-
-    let visitorContext: VisitorContext = { transformationContext: this.context, sourceFile: this.sourceFile, program: this.program, fileVisitor: this, componentDescriptor }
+    let visitorContext: VisitorContext = { transformationContext: this.context, sourceFile: this.sourceFile, program: activeProgram, fileVisitor: this, componentDescriptor: this.componentDescriptor }
     let visitorList = BaseVisitor.implementations.filter(aTSNodeVisitor => aTSNodeVisitor.validTSSyntaxKind === node.kind);
     if (visitorList.length > 1) throw new Error("Can not have more then one visitor");
 
@@ -923,7 +985,6 @@ class ThinglishFileVisitor {
     }
 
     let result = TS.visitEachChild(node, this.visitor.bind(this), this.context);
-    if (visitorContext.fileVisitor.phase === "before") componentDescriptor.write2File();
     return result;
   }
 
@@ -932,13 +993,13 @@ class ThinglishFileVisitor {
 
 //interface for ts-patch
 const programTransformer = (program: TS.Program) => {
-
+  activeProgram = program;
   return {
 
     before(context: TS.TransformationContext) {
       return (sourceFile: TS.SourceFile): TS.SourceFile => {
 
-        return new ThinglishFileVisitor(program, context, sourceFile, "before").transform();
+        return new ThinglishFileVisitor(sourceFile).init(context, "before").transform();
 
       }
     },
@@ -946,7 +1007,7 @@ const programTransformer = (program: TS.Program) => {
 
       return (sourceFile: TS.SourceFile): TS.SourceFile => {
 
-        return new ThinglishFileVisitor(program, context, sourceFile, "after").transform();
+        return new ThinglishFileVisitor(sourceFile).init(context, "after").transform();
 
       }
     },
@@ -955,8 +1016,10 @@ const programTransformer = (program: TS.Program) => {
 
 // Direct interface for the Compiler
 export function transformerFactory(program: TS.Program, run: "before" | "after"): TS.TransformerFactory<TS.SourceFile> {
+  activeProgram = program;
+
   return (context: TS.TransformationContext) => (sourceFile: TS.SourceFile) => {
-    return new ThinglishFileVisitor(program, context, sourceFile, run).transform();
+    return new ThinglishFileVisitor(sourceFile).init(context, run).transform();
   }
 }
 

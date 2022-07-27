@@ -30,4 +30,5 @@ export interface InterfaceDescriptorStatics extends Class<InterfaceDescriptorInt
 
     getInterfaceDescriptor<Interface>(): InterfaceDescriptorInterface
     getInterfaceDescriptor<Interface>(packagePath: string, packageName: string, packageVersion: string | undefined, location: string, interfaceName: string): InterfaceDescriptorInterface
+    isInterface<Interface extends Thing<any>>(object: Thing<any>): object is Interface
 }
