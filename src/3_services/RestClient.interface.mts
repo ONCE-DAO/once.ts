@@ -12,4 +12,3 @@ export default interface REST_Client extends Client {
   PUT(ior: IOR, data?: any): Promise<HttpResponse>
   DELETE(ior: IOR): Promise<HttpResponse>
 }
-export const REST_ClientID = InterfaceDescriptor.lastDescriptor 

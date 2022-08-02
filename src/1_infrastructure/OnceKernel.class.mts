@@ -47,6 +47,8 @@ export default abstract class OnceKernel {
     }
     if (this.RuntimeIs.BROWSER()) {
       let BrowserOnce = (await import("ior:esm:/tla.EAM.Once.Browser[dev]")).BrowserOnce;
+      // HACK keine Ahnung, warum das interface hier nicht mehr erfüllt wird
+      //@ts-ignore
       return BrowserOnce.start();
     }
     if (this.RuntimeIs.SERVICE_WORKER()) {

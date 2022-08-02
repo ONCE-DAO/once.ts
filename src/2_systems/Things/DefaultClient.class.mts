@@ -1,8 +1,7 @@
-import Client, { ClientID, ClientStatic } from "../../3_services/Client.interface.mjs";
+import Client, { ClientStatic } from "../../3_services/Client.interface.mjs";
 import IOR from "../../3_services/IOR.interface.mjs";
-import { REST_ClientID } from "../../3_services/RestClient.interface.mjs";
 import DefaultCRUDClient from "./CRUDClient.class.mjs";
-import InterfaceDescriptor from "./InterfaceDescriptor.class.mjs";
+import InterfaceDescriptorHandler from "./InterfaceDescriptorHandler.class.mjs";
 
 DefaultCRUDClient;
 
@@ -10,8 +9,7 @@ DefaultCRUDClient;
 export default class DefaultClient {
 
     static discover(): ClientStatic[] {
-        REST_ClientID;
-        return InterfaceDescriptor.getInterfaceDescriptor<Client>().implementations as ClientStatic[]
+        return InterfaceDescriptorHandler.getInterfaceDescriptor<Client>().implementations as ClientStatic[]
     }
 
     static findClient(ior: IOR): Client | undefined {

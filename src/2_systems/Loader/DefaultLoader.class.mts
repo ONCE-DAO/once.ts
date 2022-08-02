@@ -2,6 +2,7 @@ import AbstractDefaultLoader from "../../1_infrastructure/AbstractDefaultLoader.
 import IOR from "../../3_services/IOR.interface.mjs";
 import Loader, { LoaderStatic, loadingConfig } from "../../3_services/Loader.interface.mjs";
 import InterfaceDescriptor from "../Things/InterfaceDescriptor.class.mjs";
+import InterfaceDescriptorHandler from "../Things/InterfaceDescriptorHandler.class.mjs";
 import FileSystemLoader from "./FileSystemLoader.class.mjs";
 
 FileSystemLoader
@@ -20,7 +21,7 @@ export default class DefaultLoader extends AbstractDefaultLoader {
     }
 
     static discover(): LoaderStatic[] {
-        return InterfaceDescriptor.getInterfaceDescriptor<Loader>().implementations as LoaderStatic[];
+        return InterfaceDescriptorHandler.getInterfaceDescriptor<Loader>().implementations as LoaderStatic[];
     }
 
     static findLoader(ior: IOR): Loader | undefined {

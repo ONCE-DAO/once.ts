@@ -104,7 +104,8 @@ export default class DefaultEAMRepository implements EAMRepository {
 
 
     async singleRun(prop: keyof Buildable, path: string): Promise<void> {
-        let componentBuilder = (await this.getComponentBuilder()).filter(x => x.path === path);
+        let buildList = await this.getComponentBuilder()
+        let componentBuilder = buildList.filter(x => x.path.match(path));
         if (componentBuilder.length) {
             await componentBuilder[0][prop]({ ...this.buildConfig, distributionFolder: componentBuilder[0].distributionFolder })
         } else {

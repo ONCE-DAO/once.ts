@@ -12,6 +12,7 @@ export default interface Transpiler {
     writeComponentDescriptor(name: string): Promise<void>
     writeSourceIndexFile(): Promise<void>
     symLinkDistributionFolder(): void;
+    setupNamespace(name: string, namespace: string, version: string): Promise<void>
 }
 
 export const TRANSFORMER = {

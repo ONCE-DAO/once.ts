@@ -12,21 +12,17 @@ interface MyString {
   myString: string;
 }
 
-const MyStringID = InterfaceDescriptor.lastDescriptor;
 
 interface MyString2 {
   myString: string;
 }
-const MyString2ID = InterfaceDescriptor.lastDescriptor;
 
 interface MyUrl extends MyString {
   myUrl: string;
 }
 
-const MyUrlID = InterfaceDescriptor.lastDescriptor;
 
 
-@ClassDescriptor.componentExport('defaultExport')
 //@ts-ignore
 class TestClass1 extends DefaultUrl implements MyUrl, MyString, MyString2 {
   myUrl: string = "";

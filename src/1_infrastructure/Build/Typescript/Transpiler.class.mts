@@ -1,6 +1,9 @@
 import { existsSync, rmSync, symlinkSync } from "fs";
 import { basename, join, relative } from "path";
 import ts from "typescript";
+import DefaultUcpComponentFolder from "../../../2_systems/Namespace/DefaultUcpComponentFolder.class.mjs";
+import DefaultVersion from "../../../2_systems/Namespace/DefaultVersion.class.mjs";
+import RawPersistenceManager from "../../../2_systems/Things/OnceInternalPersistenceManager.class.mjs";
 import DefaultUcpUnit from "../../../2_systems/UCP/DefaultUcpUnit.class.mjs";
 import BuildConfig from "../../../3_services/Build/BuildConfig.interface.mjs";
 import NpmPackageInterface from "../../../3_services/Build/Npm/NpmPackage.interface.mjs";
@@ -9,7 +12,7 @@ import Transpiler, { ExtendedOptions, PluginConfig, TRANSFORMER } from "../../..
 import { TYPESCRIPT_PROJECT } from "../../../3_services/Build/Typescript/TypescriptProject.interface.mjs";
 import { UnitType } from "../../../3_services/UCP/UcpUnit.interface.mjs";
 import BuildUcpComponentDescriptor from "./BuildUcpComponentDescriptor.class.mjs";
-import { transformerFactory } from "./Transformer.mjs";
+import { transformerFactory } from "./Transformer/Transformer.mjs";
 
 export default class DefaultTranspiler implements Transpiler {
     private config: ts.ParsedCommandLine;
@@ -125,6 +128,17 @@ export default class DefaultTranspiler implements Transpiler {
         return exportContent;
     }
 
+    async setupNamespace(name: string, namespace: string, version: string): Promise<void> {
+        let cd = new DefaultUcpComponentFolder();
+        cd.name = name;
+        ONCE.rootNamespace.add(cd, [...namespace.split('.'), name]);
+
+        let vd = new DefaultVersion();
+        vd.name = version;
+        ONCE.rootNamespace.add(vd, [...namespace.split('.'), name, version]);
+
+    }
+
     async initComponentDescriptor(name: string, namespace: string, version: string, files: string[]): Promise<BuildUcpComponentDescriptorInterface> {
         // if (this.incremental) {
         //     throw new Error("incremental descriptor not implemented yet");
@@ -227,14 +241,26 @@ export default class DefaultTranspiler implements Transpiler {
 
         const emitResult = program.emit(undefined, writeFile, undefined, undefined, customTransformer);
 
-        const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
+        // TODO Check if both need to be concat. This create duplicates
+        const allDiagnostics = [...new Set(ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics))];
         if (emitResult.emitSkipped && this.buildConfig.ignoreErrors === false) {
             console.log(this.formatDiagnostics.bind(this)(allDiagnostics));
             console.error('\x1b[31m%s\x1b[0m', "Emit was skipped. please check errors");
             throw "Emit was skipped. please check errors"
         }
 
+        await this.writeAllDescriptors();
+
         return emitResult.emittedFiles || []
+    }
+
+    private async writeAllDescriptors() {
+        for (const object of ONCE.rootNamespace.getAllLoadedChildren.filter(x => x.name)) {
+            if ("export" in object && "IOR" in object) {
+                await RawPersistenceManager.write2File(object)
+            }
+        }
+
     }
 
     get needCustomTransformer(): boolean {

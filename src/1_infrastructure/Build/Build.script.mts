@@ -1,4 +1,6 @@
+import DefaultNodeOnceImportLoader from "../../2_systems/Once/DefaultNodeOnceImportLoader.mjs"
 import { EAMD_CONSTANTS } from "../../3_services/UCP/EAMD.interface.mjs"
+import OnceKernel from "../OnceKernel.class.mjs"
 import DefaultEAMRepository from "./EAMRepository.class.mjs"
 
 const scenarioDomain = process.env.SCENARIO_DOMAIN || EAMD_CONSTANTS.DEFAULT_SCENARIO_DOMAIN
@@ -17,12 +19,13 @@ if (cmdArguments.filter(x => x === "fast").length) fast = true;
 if (cmdArguments.filter(x => x === "watch").length) watch = true;
 if (cmdArguments.filter(x => x === "ignoreErrors").length) ignoreErrors = true;
 
-let pathObject = cmdArguments.filter(x => x.match(/^-*buildPath=/))
+let pathObject = cmdArguments.filter(x => x.match(/^buildPath=/))
 if (pathObject.length) {
-    let matchPath = pathObject[0].match(/^-*buildPath=(.+)/)
+    let matchPath = pathObject[0].match(/^buildPath=(.+)/)
     if (matchPath && matchPath[1]) paths = matchPath[1].split(',');
 }
 
+global.ONCE = await DefaultNodeOnceImportLoader.start();
 
 const eamr = await DefaultEAMRepository.init(scenarioDomain, basePath, fast)
 

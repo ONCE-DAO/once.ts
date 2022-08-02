@@ -4,11 +4,10 @@ import Class from "../../3_services/Class.interface.mjs";
 import NpmPackage from "../../3_services/NpmPackage.interface.mjs";
 import ClassDescriptorInterface from "../../3_services/Thing/ClassDescriptor.interface.mjs";
 import InterfaceDescriptorInterface from "../../3_services/Thing/InterfaceDescriptor.interface.mjs";
-import { ThingStatics } from "../../3_services/Thing/Thing.interface.mjs";
 import UcpComponentDescriptorInterface, { UcpComponentDescriptorStatics } from "../../3_services/Thing/UcpComponentDescriptor.interface.mjs";
-import { DefaultNpmPackage } from "./NpmPackage.class.mjs";
+import DefaultNamespace from "../Namespace/DefaultNamespace.class.mjs";
 
-export default class DefaultUcpComponentDescriptor implements UcpComponentDescriptorInterface {
+export default class DefaultUcpComponentDescriptor extends DefaultNamespace implements UcpComponentDescriptorInterface {
 
   exportFile: string = "index.ts";
 
@@ -31,11 +30,6 @@ export default class DefaultUcpComponentDescriptor implements UcpComponentDescri
   };
 
 
-  get name(): string {
-    if (!this.npmPackage.name) throw new Error("NPM Name is missing for " + this.name);
-    return this.npmPackage.name;
-  }
-
   get version(): string {
     if (!this.npmPackage.version) throw new Error("NPM version is missing for " + this.name);
     return this.npmPackage.version;
@@ -54,43 +48,43 @@ export default class DefaultUcpComponentDescriptor implements UcpComponentDescri
   getUnitByName(uniqueName: string, type: 'ClassDescriptor'): ClassDescriptorInterface<Class<any>> | undefined;
   getUnitByName(uniqueName: string, type: 'InterfaceDescriptor'): InterfaceDescriptorInterface | undefined;
   getUnitByName(uniqueName: string, type: 'InterfaceDescriptor' | 'ClassDescriptor'): unknown {
+    throw new Error("Not implemented");
+    // if (type === 'ClassDescriptor') {
+    //   return this.units.filter(u => {
+    //     if (u.uniqueName === uniqueName && "class" in u) {
+    //       return u;
+    //     }
+    //   })?.[0]
+    // }
 
-    if (type === 'ClassDescriptor') {
-      return this.units.filter(u => {
-        if (u.uniqueName === uniqueName && "class" in u) {
-          return u;
-        }
-      })?.[0]
-    }
-
-    if (type === 'InterfaceDescriptor') {
-      return this.units.filter(u => {
-        if ("allExtendedInterfaces" in u && u.uniqueName === uniqueName) {
-          return u;
-        }
-      })?.[0]
-    }
+    // if (type === 'InterfaceDescriptor') {
+    //   return this.units.filter(u => {
+    //     if ("allExtendedInterfaces" in u && u.uniqueName === uniqueName) {
+    //       return u;
+    //     }
+    //   })?.[0]
+    // }
 
 
   }
 
-  init({ path, relativePath }: UcpComponentDescriptorInitParameters) {
-    (this.relativeSrcPath = relativePath);
+  // init({ path, relativePath }: UcpComponentDescriptorInitParameters) {
+  //   (this.relativeSrcPath = relativePath);
 
-    // TODO Deaktiviert wegen Browser
-    throw new Error("To Do");
-    //this.identifier = basename(relativePath);
+  //   // TODO Deaktiviert wegen Browser
+  //   throw new Error("To Do");
+  //   //this.identifier = basename(relativePath);
 
 
-    //@ts-ignore
-    let npmPackage = NpmPackage.getByFolder(path);
-    if (!npmPackage) throw new Error("Could not find a NPM Package");
+  //   //@ts-ignore
+  //   let npmPackage = NpmPackage.getByFolder(path);
+  //   if (!npmPackage) throw new Error("Could not find a NPM Package");
 
-    this.npmPackage = npmPackage;
-    // this.name = npmPackage?.name;
-    // this.version = npmPackage?.version;
-    return this;
-  }
+  //   this.npmPackage = npmPackage;
+  //   // this.name = npmPackage?.name;
+  //   // this.version = npmPackage?.version;
+  //   return this;
+  // }
 
 
 
@@ -107,33 +101,33 @@ export default class DefaultUcpComponentDescriptor implements UcpComponentDescri
 
 
 
-  register(object: ClassDescriptorInterface<Class<any>> | InterfaceDescriptorInterface): void {
+  // register(object: ClassDescriptorInterface<Class<any>> | InterfaceDescriptorInterface): void {
 
-    if ("class" in object) {
-      this.units.push(object);
-      object.add(this);
+  //   if ("class" in object) {
+  //     this.units.push(object);
+  //     object.add(this);
 
-    } else if ("implementedInterfaces" in object) {
-      const existingInterfaceDescriptors = this.getUnitByName(object.uniqueName, "InterfaceDescriptor");
-      if (existingInterfaceDescriptors) {
-        throw new Error(`Duplicated Interface '${object.name}' in UcpComponent ${this.name}`);
-      }
-      this.units.push(object);
+  //   } else if ("implementedInterfaces" in object) {
+  //     const existingInterfaceDescriptors = this.getUnitByName(object.uniqueName, "InterfaceDescriptor");
+  //     if (existingInterfaceDescriptors) {
+  //       throw new Error(`Duplicated Interface '${object.name}' in UcpComponent ${this.name}`);
+  //     }
+  //     this.units.push(object);
 
-      object.add(this);
+  //     object.add(this);
 
-    } else {
-      throw new Error("Not Implemented")
-    }
-  }
+  //   } else {
+  //     throw new Error("Not Implemented")
+  //   }
+  // }
 
-  static register(packagePath: string, packageName: string, packageVersion: string | undefined): Function {
-    return (aClass: any, name: string, x: any): void => {
+  // static register(packagePath: string, packageName: string, packageVersion: string | undefined): Function {
+  //   return (aClass: any, name: string, x: any): void => {
 
-      const descriptor = this.getDescriptor(packagePath, packageName, packageVersion);
-      descriptor.register(aClass);
-    }
-  }
+  //     const descriptor = this.getDescriptor(packagePath, packageName, packageVersion);
+  //     descriptor.register(aClass);
+  //   }
+  // }
 
 
 

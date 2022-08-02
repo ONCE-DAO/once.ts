@@ -1,4 +1,3 @@
-import { existsSync } from "fs";
 import { loaderReturnValue } from "../../3_services/Loader.interface.mjs";
 import Once, { OnceMode, OnceState, resolveContext, loadContext, OnceNodeImportLoader } from "../../3_services/Once.interface.mjs";
 import DefaultIOR from "../NewThings/DefaultIOR.class.mjs";

@@ -8,11 +8,9 @@ export default interface Client {
     init(ior: IOR): Client;
 
 }
-export const ClientID = InterfaceDescriptor.lastDescriptor;
 
 
 export interface ClientStatic extends Class<ClientStatic> {
     factory(ior: IOR): Client;
     canConnect(ior: IOR): number;
 }
-export const ClientStaticID = InterfaceDescriptor.lastDescriptor;

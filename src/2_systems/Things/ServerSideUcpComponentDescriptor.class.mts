@@ -14,22 +14,22 @@ import Submodule from '../../3_services/Submodule.interface.mjs';
 import Class from '../../3_services/Class.interface.mjs';
 
 
-const NewServerSideUcpComponentDescriptor = class ServerSideUcpComponentDescriptor extends DefaultUcpComponentDescriptor implements ServerSideUcpComponentDescriptorInterface {
+export default class ServerSideUcpComponentDescriptor extends DefaultUcpComponentDescriptor implements ServerSideUcpComponentDescriptorInterface {
 
   exportFile: string = "index.ts";
 
 
-  init({ path, relativePath }: UcpComponentDescriptorInitParameters) {
-    (this.relativeSrcPath = relativePath);
+  // init({ path, relativePath }: UcpComponentDescriptorInitParameters) {
+  //   (this.relativeSrcPath = relativePath);
 
-    this.identifier = basename(relativePath);
+  //   this.identifier = basename(relativePath);
 
-    let npmPackage = DefaultNpmPackage.getByFolder(path) as NpmPackage;
-    if (!npmPackage) throw new Error("Could not find a NPM Package");
+  //   let npmPackage = DefaultNpmPackage.getByFolder(path) as NpmPackage;
+  //   if (!npmPackage) throw new Error("Could not find a NPM Package");
 
-    this.npmPackage = npmPackage;
-    return this;
-  }
+  //   this.npmPackage = npmPackage;
+  //   return this;
+  // }
 
   writeToDistPath() {
     try {
@@ -226,7 +226,3 @@ const NewServerSideUcpComponentDescriptor = class ServerSideUcpComponentDescript
   }
 
 }
-
-let ServerSideUcpComponentDescriptor: UcpComponentDescriptorStatics = NewServerSideUcpComponentDescriptor;
-
-export default ServerSideUcpComponentDescriptor;

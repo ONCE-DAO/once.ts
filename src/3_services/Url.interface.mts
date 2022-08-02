@@ -44,8 +44,4 @@ export interface Url extends JSONProvider {
   clone(): Url;
 }
 
-// TODO
-// export const UrlID = InterfaceDescriptor.lastDescriptor;
-
-
 export default Url;

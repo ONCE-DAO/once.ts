@@ -1,9 +1,11 @@
 import Class from "../Class.interface.mjs";
+import { NamespaceParent } from "../Namespace/Namespace.interface.mjs";
 import NpmPackage from "../NpmPackage.interface.mjs";
 import ClassDescriptorInterface from "./ClassDescriptor.interface.mjs";
 import InterfaceDescriptorInterface from "./InterfaceDescriptor.interface.mjs";
 
 export default interface UcpComponentDescriptorInterface {
+    parent: NamespaceParent | undefined;
 
     // TODO: specify better
     units: (ClassDescriptorInterface<Class<any>> | InterfaceDescriptorInterface)[];
@@ -19,7 +21,7 @@ export default interface UcpComponentDescriptorInterface {
     getUnitByName(uniqueName: string, type: 'ClassDescriptor'): ClassDescriptorInterface<Class<any>> | undefined;
     getUnitByName(uniqueName: string, type: 'InterfaceDescriptor'): InterfaceDescriptorInterface | undefined;
 
-    register(object: InterfaceDescriptorInterface | ClassDescriptorInterface<Class<any>>): void
+    // register(object: InterfaceDescriptorInterface | ClassDescriptorInterface<Class<any>>): void
 
     initBasics(packagePath: string, packageName: string, packageVersion: string | undefined): UcpComponentDescriptorInterface
 }
@@ -31,7 +33,7 @@ export interface ServerSideUcpComponentDescriptorInterface extends UcpComponentD
 }
 
 export interface UcpComponentDescriptorStatics {
-    register(packagePath: string, packageName: string, packageVersion: string | undefined): Function
+    // register(packagePath: string, packageName: string, packageVersion: string | undefined): Function
     getDescriptor(packagePath: string, packageName: string, packageVersion: string | undefined): UcpComponentDescriptorInterface;
     getDescriptorName(packagePath: string, packageName: string, packageVersion: string | undefined): string
     registerDescriptor(object: UcpComponentDescriptorInterface, packagePath: string, packageName: string, packageVersion: string | undefined): void

@@ -2,6 +2,7 @@ import Thing, { ThingObjectState } from "../3_services/Thing/Thing.interface.mjs
 import EventService from "../3_services/Thing/EventService.interface.mjs";
 import ClassDescriptorInterface from "../3_services/Thing/ClassDescriptor.interface.mjs";
 import Class from "../3_services/Class.interface.mjs";
+import ClassDescriptorHandler from "../2_systems/Things/ClassDescriptorHandler.class.mjs";
 // import ClassDescriptor from "../2_systems/Things/ClassDescriptor.class.mjs";
 
 export enum emptyEventList { }
@@ -18,8 +19,8 @@ export default abstract class BaseThing<ClassInterface> implements Thing<ClassIn
     //   //return undefined;
     // }
     // TODO@MERGE 
-    // @ts-ignore
-    return ClassDescriptor.getClassDescriptor4Class(this) as ClassDescriptorInterface<typeof this>;
+    //@ts-ignore
+    return ClassDescriptorHandler.getClassDescriptor4Class(this) as ClassDescriptorInterface<typeof this>;
   }
 
   get classDescriptor(): ClassDescriptorInterface<Class<any>> {
