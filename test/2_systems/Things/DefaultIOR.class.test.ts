@@ -164,6 +164,41 @@ describe("IOR Class", () => {
     },
   });
 
+  validate.push({
+    url: "ior:/EAMD.ucp/Components/org/shift/EAM/5_ux/ShifterNetwork/4.3.0/src/html/ShifterNetwork.html",
+    result: {
+      protocol: [urlProtocol.ior],
+      pathName:
+        "/EAMD.ucp/Components/org/shift/EAM/5_ux/ShifterNetwork/4.3.0/src/html/ShifterNetwork.html",
+      fileName: "ShifterNetwork.html",
+      fileType: "html",
+      search: "",
+      searchParameters: {},
+      hash: undefined,
+      port: undefined,
+      normalizedHref: "/EAMD.ucp/Components/org/shift/EAM/5_ux/ShifterNetwork/4.3.0/src/html/ShifterNetwork.html",
+      origin: undefined,
+      hostName: undefined,
+      href: "ior:/EAMD.ucp/Components/org/shift/EAM/5_ux/ShifterNetwork/4.3.0/src/html/ShifterNetwork.html",
+    },
+  });
+
+
+  validate.push({
+    url: "ior:esm:/tla.EAM.Once.Server[build]/OnceNodeServer",
+    result: {
+      protocol: [urlProtocol.ior, urlProtocol.esm],
+      hostName: undefined,
+      pathName: undefined,
+      origin: undefined,
+      package: "tla.EAM.Once.Server",
+      version: "build",
+      namespaceObject: "OnceNodeServer",
+      href: "ior:esm:/tla.EAM.Once.Server[build]/OnceNodeServer"
+    },
+  });
+
+
 
   // validate.push({
   //   url: "ior:esm:github:tla.EAM.OnceService.Once.express#/ONCE-DAO/Once.express",

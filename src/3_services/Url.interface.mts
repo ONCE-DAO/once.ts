@@ -12,7 +12,8 @@ export enum urlProtocol {
   "github" = "github",
   "file" = "file",
   "esm" = "esm",
-  "rest" = "rest"
+  "rest" = "rest",
+  "meta" = "meta",
 }
 
 type numberOrUndefined = number | undefined

@@ -16,7 +16,6 @@ export default abstract class OnceKernel {
     -------------------------------------------------------------------------
     `);
 
-    once.global.ONCE = once;
     return once;
   }
 

@@ -7,7 +7,6 @@ import DefaultNamespace from "../Namespace/DefaultNamespace.class.mjs";
 export default abstract class AbstractDefaultOnce implements Once {
     abstract ENV: NodeJS.ProcessEnv;
     abstract mode: OnceMode;
-    abstract start(): Promise<void>;
     abstract global: typeof globalThis;
     abstract eamd: EAMD;
     abstract oldEamd: OLD_EAMD;
@@ -15,10 +14,15 @@ export default abstract class AbstractDefaultOnce implements Once {
     creationDate: Date;
     state: OnceState = OnceState.DISCOVER;
 
+    async start(): Promise<void> {
+        this.global.ONCE = this;
+
+        await this.rootNamespace.discover(undefined, { recursive: true });
+    }
+
     constructor() {
         this.creationDate = new Date();
         this.rootNamespace = new DefaultNamespace();
-
     }
     rootNamespace: NamespaceInterface;
 

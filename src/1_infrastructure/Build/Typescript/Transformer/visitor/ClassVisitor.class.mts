@@ -3,7 +3,7 @@
 import path from "path";
 import ts from "typescript";
 import ClassDescriptor from "../../../../../2_systems/Things/ClassDescriptor.class.mjs";
-import InterfaceDescriptor from "../../../../../2_systems/Things/InterfaceDescriptor.class.mjs";
+import ClassDescriptorHandler from "../../../../../2_systems/Things/ClassDescriptorHandler.class.mjs";
 import ClassDescriptorInterface from "../../../../../3_services/Thing/ClassDescriptor.interface.mjs";
 import DeclarationDescriptor from '../DeclarationDescriptor.class.mjs';
 import { TSNodeVisitor } from '../Transformer.interface.mjs';
@@ -36,14 +36,14 @@ export default class ClassVisitor extends BaseVisitor implements TSNodeVisitor {
 
         // Create ClassDescriptor
         let dd = new DeclarationDescriptor(node.name, this.context);
-        let cd = new ClassDescriptor().init(dd);
+        let cd = ClassDescriptorHandler.factory(dd);
 
         // if (this.context.sourceFile.fileName.match("ClassDescriptor") || this.context.sourceFile.fileName.match("NpmPackage") || this.context.sourceFile.fileName.match("UcpComponentDescriptor") || this.context.sourceFile.fileName.match("OnceZod")) {
         //   if (debug) console.log("Cancel ClassDescriptor");
         //   return ts.visitEachChild(node, fileVisitor.visitor.bind(fileVisitor), fileVisitor.context);
         // }
         this.checkHeritageClause(node, cd);
-
+        node = this.addClassDescriptorLink(node);
         //descriptor.push(this.getDecoratorFilename());
         // descriptor.push(this.getDecoratorRegister(node));
 
@@ -72,6 +72,44 @@ export default class ClassVisitor extends BaseVisitor implements TSNodeVisitor {
             declarationDescriptor.componentDescriptor.name,
             declarationDescriptor.componentDescriptor.version,
             declarationDescriptor.location]);
+    }
+
+
+    addClassDescriptorLink(node: ts.ClassDeclaration): ts.ClassDeclaration {
+        if (!node.name) return node;
+        let dd = new DeclarationDescriptor(node.name, this.context);
+        let getter = this.createOnceNamespaceSearch(dd, false);
+        let getterStatic = this.createOnceNamespaceSearch(dd, true);
+
+        node = ts.factory.updateClassDeclaration(node, node.decorators, node.modifiers, node.name, node.typeParameters, node.heritageClauses, [...node.members, getter, getterStatic])
+        return node;
+    }
+
+    createOnceNamespaceSearch(dd: DeclarationDescriptor, staticType: boolean) {
+        return ts.factory.createGetAccessorDeclaration(
+            undefined,
+            staticType === true ? [ts.factory.createModifier(ts.SyntaxKind.StaticKeyword)] : undefined,
+            ts.factory.createIdentifier("classDescriptor"),
+            [],
+            undefined,
+            ts.factory.createBlock(
+                [ts.factory.createReturnStatement(ts.factory.createCallExpression(
+                    ts.factory.createPropertyAccessExpression(
+                        ts.factory.createPropertyAccessExpression(
+                            ts.factory.createIdentifier("ONCE"),
+                            ts.factory.createIdentifier("rootNamespace")
+                        ),
+                        ts.factory.createIdentifier("search")
+                    ),
+                    undefined,
+                    [ts.factory.createArrayLiteralExpression(
+                        dd.packageAndLocation.map(x => ts.factory.createStringLiteral(x)),
+                        false
+                    )]
+                ))],
+                true
+            )
+        )
     }
 
 

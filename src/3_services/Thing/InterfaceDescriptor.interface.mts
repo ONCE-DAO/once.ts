@@ -32,6 +32,7 @@ export interface InterfaceDescriptorStatics {
     getInterfaceDescriptor<Interface extends Thing<any>>(location?: string[]): InterfaceDescriptorInterface | undefined
     isInterface<Interface extends Thing<any>>(object: Thing<any>): object is Interface
     getFileName(interfaceName: string): string
+    factory(declarationDescriptor: DeclarationDescriptor): InterfaceDescriptorInterface
 }
 
 export interface InterfaceDescriptorFileFormat {

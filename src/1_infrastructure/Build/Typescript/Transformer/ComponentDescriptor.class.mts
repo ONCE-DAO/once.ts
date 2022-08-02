@@ -47,11 +47,18 @@ export default class ComponentDescriptorTR extends BaseDescriptorTR implements C
     }
 
     get outDir(): string {
-        let compilerOptions = this.visitorContext.program.getCompilerOptions();
-        if (!compilerOptions.outDir)
-            throw new Error("Missing compiler option 'outDir'");
+        //HACK
+        if (this.packagePath.match('/Scenarios/')) return this.packagePath;
+        let matchResult = this.packagePath.match(/\/Components\/(.+\/)[^\/]+@(.+)$/);
+        if (!matchResult)
+            throw new Error("Fail to Match ! Fix HACK")
 
-        return compilerOptions.outDir;
+        return path.join(ONCE.eamd.currentScenario.scenarioPath, matchResult[1], matchResult[2])
+        // let compilerOptions = this.visitorContext.program.getCompilerOptions();
+        // if (!compilerOptions.outDir)
+        //     throw new Error("Missing compiler option 'outDir'");
+
+        // return compilerOptions.outDir;
     }
 
     get exportFilePath(): string {

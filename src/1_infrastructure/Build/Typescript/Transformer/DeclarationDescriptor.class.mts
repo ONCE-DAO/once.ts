@@ -2,8 +2,10 @@
 
 import path, { relative } from "path";
 import TS from 'typescript';
-import InterfaceDescriptor from '../../../../2_systems/Things/InterfaceDescriptor.class.mjs';
+import ClassDescriptorHandler from "../../../../2_systems/Things/ClassDescriptorHandler.class.mjs";
 import InterfaceDescriptorHandler from "../../../../2_systems/Things/InterfaceDescriptorHandler.class.mjs";
+import IOR from "../../../../3_services/IOR.interface.mjs";
+import ClassDescriptorInterface from "../../../../3_services/Thing/ClassDescriptor.interface.mjs";
 import InterfaceDescriptorInterface from '../../../../3_services/Thing/InterfaceDescriptor.interface.mjs';
 import BaseDescriptorTR from './BaseDescriptorTR.class.mjs';
 import ComponentDescriptorTR from './ComponentDescriptor.class.mjs';
@@ -49,16 +51,33 @@ export default class DeclarationDescriptor extends BaseDescriptorTR {
     }
 
     interfaceDescriptorFactory(): InterfaceDescriptorInterface | undefined {
-        if (!this.originalNodeObject) throw new Error("Missing originalNodeObject");
+        if (!this.originalNodeObject) return undefined;
         if (!TS.isInterfaceDeclaration(this.originalNodeObject)) return undefined;
+        return InterfaceDescriptorHandler.factory(this)
+    }
 
-        try {
-            return InterfaceDescriptorHandler.getInterfaceDescriptor(this.packageAndLocation)
-        } catch (e) {
+    classDescriptorFactory(): ClassDescriptorInterface<any> | undefined {
+        if (!this.originalNodeObject) return undefined;
+        if (!TS.isClassDeclaration(this.originalNodeObject)) return undefined;
+        return ClassDescriptorHandler.factory(this)
 
+    }
+
+    heritageClassDeclarationDescriptorFactory(): DeclarationDescriptor | undefined {
+        if (!this.originalNodeObject) return undefined;
+        if (TS.isClassDeclaration(this.originalNodeObject) && this.originalNodeObject.heritageClauses) {
+            let heritage = this.originalNodeObject.heritageClauses.filter(h => h.token === TS.SyntaxKind.ExtendsKeyword)[0];
+            if (heritage && heritage?.types?.[0])
+                return new DeclarationDescriptor(heritage.types[0].expression as TS.Identifier, this.visitorContext)
         }
-
-        return new InterfaceDescriptor().init(this);
+    }
+    heritageClassDescriptorIOR(): IOR | undefined {
+        let heritageClass = this.heritageClassDeclarationDescriptorFactory();
+        if (heritageClass) {
+            let heritageClassDescriptor = heritageClass.classDescriptorFactory();
+            if (heritageClassDescriptor)
+                return heritageClassDescriptor.IOR;
+        }
     }
 
     isNodeJs(alreadyHitSourceFiles: TS.SourceFile[] = []): boolean {

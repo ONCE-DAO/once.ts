@@ -19,7 +19,7 @@ export default interface ClassDescriptorInterface<ClassType extends Class<any>> 
     packageFilename: string
     //TODO Change that to Component export path
     classIOR: IOR
-    extends: Class<any>[]
+    extends: (ClassDescriptorInterface<any> | undefined)
     class: ClassType;
     init(declarationDescriptor: DeclarationDescriptor): this
     add(object: InterfaceDescriptorInterface | UcpComponentDescriptorInterface): ClassDescriptorInterface<ClassType>
@@ -27,14 +27,19 @@ export default interface ClassDescriptorInterface<ClassType extends Class<any>> 
     _getImplementedInterfaces(input: InterfaceDescriptorInterface[]): InterfaceDescriptorInterface[];
     implementsInterface<CheckInterface extends Thing<any>>(object: Thing<any>): object is CheckInterface
 
+    /** 
+     * register itself to all Interfaces as Implementation 
+     */
+    registerAllInterfaces(): void;
     parent: NamespaceInterface
 }
 
 export interface ClassDescriptorFileFormat {
     name: string,
     //classIOR: string
-    classFile: string,
+    //classFile: string,
     interfaces: string[],
+    extends: string | undefined
     componentExport: 'defaultExport' | 'namedExport',
 }
 

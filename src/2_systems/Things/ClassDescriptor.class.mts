@@ -8,8 +8,8 @@ import ClassDescriptorInterface, { ClassDescriptorFileFormat } from "../../3_ser
 import InterfaceDescriptorInterface from "../../3_services/Thing/InterfaceDescriptor.interface.mjs";
 import Thing from "../../3_services/Thing/Thing.interface.mjs";
 import UcpComponentDescriptorInterface from "../../3_services/Thing/UcpComponentDescriptor.interface.mjs";
+import { urlProtocol } from "../../3_services/Url.interface.mjs";
 import DefaultIOR from "../NewThings/DefaultIOR.class.mjs";
-import ClassDescriptorHandler from "./ClassDescriptorHandler.class.mjs";
 import InterfaceDescriptorHandler from "./InterfaceDescriptorHandler.class.mjs";
 
 
@@ -18,10 +18,7 @@ export default class ClassDescriptor<ClassType extends Class<any>> implements Cl
 
     get IOR(): IOR {
         if (!this._IOR) {
-            let location = [... this.location]
-            location.pop();
-            location.push(ClassDescriptorHandler.getFileName(this.name));
-            this._IOR = new DefaultIOR().init('ior:/' + location.join('/'));
+            this._IOR = new DefaultIOR().init('ior:meta:/' + this.location.join('/'));
         }
         return this._IOR;
     }
@@ -75,24 +72,36 @@ export default class ClassDescriptor<ClassType extends Class<any>> implements Cl
     export(): ClassDescriptorFileFormat {
         return {
             name: this.name,
-            interfaces: this._interfaces.map(i => i.IOR.href),
-            classFile: this.filename,
-            //classIOR: this.classIOR.href,
+            interfaces: this._interfaces.map(i => "IOR" in i ? i.IOR.href : i.href),
+            //classFile: this.filename,
+            extends: this.extends?.IOR?.href,
+            // classIOR: this.classIOR.href,
             componentExport: this.componentExport
         }
     }
 
     import(data: ClassDescriptorFileFormat): void {
         this._name = data.name;
+        if (data.extends)
+            this._extends = new DefaultIOR().init(data.extends);
         //this._classIOR = new DefaultIOR().init(data.classIOR);
         this.componentExport = data.componentExport;
-        this._interfaces = data.interfaces.map(i => ONCE.rootNamespace.search(new DefaultIOR().init(i)) as InterfaceDescriptorInterface);
+
+        // if (data.interfaces)
+        this._interfaces = data.interfaces.map(i => new DefaultIOR().init(i));
     }
 
     init(declarationDescriptor: DeclarationDescriptor): this {
         this._name = declarationDescriptor.name;
         ONCE.rootNamespace.add(this, declarationDescriptor.packageAndLocation);
         this.filename = declarationDescriptor.path;
+        let heritageClassIOR = declarationDescriptor.heritageClassDescriptorIOR();
+        if (heritageClassIOR) {
+            let loadedObject = ONCE.rootNamespace.search(heritageClassIOR);
+            if (loadedObject && "implements" in loadedObject) {
+                this._extends = loadedObject;
+            }
+        }
         return this;
     }
 
@@ -147,29 +156,18 @@ export default class ClassDescriptor<ClassType extends Class<any>> implements Cl
     }
 
     private _class!: ClassType;
-    private _interfaces: InterfaceDescriptorInterface[] = [];
-    private _extends: Class<any>[] = [];
-    get extends(): Class<any>[] {
-        if (!this._class) return [];
-        if (this._extends.length == 0) {
-            let myClass = this._class;
-
-            // let myPrototype = myClass.prototype;
-            // let myType = Object.getPrototypeOf(myClass);
-
-            while (Object.getPrototypeOf(myClass)) {
-                myClass = Object.getPrototypeOf(myClass);
-                this._extends.push(myClass);
+    private _interfaces: (InterfaceDescriptorInterface | IOR)[] = [];
+    private _extends: ClassDescriptorInterface<any> | IOR | undefined;
+    get extends(): (ClassDescriptorInterface<any> | undefined) {
+        if (this._extends && "href" in this._extends) {
+            let loadedObject = ONCE.rootNamespace.search(this._extends);
+            if (loadedObject && "implements" in loadedObject) {
+                this._extends = loadedObject;
             }
-
-            // //@ts-ignore
-            // while (myClass.__proto__) {
-            //     //@ts-ignore
-            //     myClass = myClass.__proto__;
-            //     this._extends.push(myClass);
-            // }
         }
-        return this._extends;
+        if (this._extends && "href" in this._extends)
+            throw new Error("Fail to load extends IOR: " + this._extends.href)
+        return this._extends as ClassDescriptorInterface<any> | undefined;
     };
 
     get class(): ClassType { // TODO Missing Type
@@ -186,7 +184,7 @@ export default class ClassDescriptor<ClassType extends Class<any>> implements Cl
         return this;
     }
 
-    private registerAllInterfaces(): void {
+    registerAllInterfaces(): void {
         const allInterfaces = this.implementedInterfaces;
         for (const aInterface of allInterfaces) {
             aInterface.addImplementation(this);
@@ -199,18 +197,23 @@ export default class ClassDescriptor<ClassType extends Class<any>> implements Cl
 
     _getImplementedInterfaces(interfaceList: InterfaceDescriptorInterface[] = []): InterfaceDescriptorInterface[] {
 
+        for (let i = 0; i < this._interfaces.length; i++) {
+            let object = this._interfaces[i];
+            if ("href" in object) {
+                let loadedObject = ONCE.rootNamespace.search(object);
+                if (loadedObject && "implementation" in loadedObject) {
+                    this._interfaces[i] = loadedObject;
+                }
+            }
+        }
         for (const aInterfaceDescriptor of this._interfaces) {
-            if (!interfaceList.includes(aInterfaceDescriptor)) {
+            if ("IOR" in aInterfaceDescriptor && !interfaceList.includes(aInterfaceDescriptor)) {
                 aInterfaceDescriptor._getImplementedInterfaces(interfaceList)
             }
         }
 
-        //@ts-ignore
-        if (this.extends[0] && this.extends[0]?.classDescriptor) {
-            //@ts-ignore
-            const classDescriptor = this.extends[0]?.classDescriptor as ClassDescriptorInterface;
-
-            classDescriptor._getImplementedInterfaces(interfaceList);
+        if (this.extends) {
+            this.extends._getImplementedInterfaces(interfaceList);
         }
 
         return interfaceList;

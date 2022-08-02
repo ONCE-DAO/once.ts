@@ -2,14 +2,19 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 import Exportable from "../../3_services/Exportable.interface.mjs";
 import IOR from "../../3_services/IOR.interface.mjs";
+import NamespacePersistanceManager, { NamespacePersistanceManagerReadFromFile } from "../../3_services/Namespace/NamespacePersistanceManager.interface.mjs";
 import DefaultNamespace from "../Namespace/DefaultNamespace.class.mjs";
+import DefaultUcpComponentFolder from "../Namespace/DefaultUcpComponentFolder.class.mjs";
+import DefaultVersion from "../Namespace/DefaultVersion.class.mjs";
 import DefaultIOR from "../NewThings/DefaultIOR.class.mjs";
 import ClassDescriptor from "./ClassDescriptor.class.mjs";
 import InterfaceDescriptor from "./InterfaceDescriptor.class.mjs";
+
+
 type ExportableFileType = { typeIOR: string, particle: any }
 
 
-class OnceInternalPersistenceManagerClass {
+class OnceInternalPersistenceManagerClass implements NamespacePersistanceManager {
 
     write2File(object: Exportable): void {
         const scenarioPath = ONCE.eamd.currentScenario.scenarioPath;
@@ -17,12 +22,12 @@ class OnceInternalPersistenceManagerClass {
         const ior = object.IOR;
         const exportData: ExportableFileType = { typeIOR: object.classDescriptor.IOR.href, particle: data }
 
-        const filePath = join(scenarioPath, ior.originPath as string)
+        const filePath = join(scenarioPath, (ior.originPath as string) + '.meta.json')
         writeFileSync(filePath, JSON.stringify(exportData, null, 2))
     }
-    readFromFile(path: string): (ClassDescriptor<any> | InterfaceDescriptor | DefaultNamespace)
-    readFromFile(ior: IOR): (ClassDescriptor<any> | InterfaceDescriptor | DefaultNamespace)
-    readFromFile(arg1: IOR | string): (ClassDescriptor<any> | InterfaceDescriptor | DefaultNamespace) {
+    readFromFile(path: string): NamespacePersistanceManagerReadFromFile
+    readFromFile(ior: IOR): NamespacePersistanceManagerReadFromFile
+    readFromFile(arg1: IOR | string): NamespacePersistanceManagerReadFromFile {
         const scenarioPath = ONCE.eamd.currentScenario.scenarioPath;
         const filePath = join(scenarioPath, (typeof arg1 == "string" ? arg1 : arg1.package as string))
 
@@ -37,7 +42,7 @@ class OnceInternalPersistenceManagerClass {
     }
 
     // This function make the loading sync as async is not possible
-    private getClass4IOR(ior: IOR): typeof ClassDescriptor | typeof InterfaceDescriptor | typeof DefaultNamespace {
+    private getClass4IOR(ior: IOR): typeof ClassDescriptor | typeof InterfaceDescriptor | typeof DefaultNamespace | typeof DefaultUcpComponentFolder {
         let className = ior.href.split('/').pop();
         switch (className) {
             case "ClassDescriptor":
@@ -46,6 +51,10 @@ class OnceInternalPersistenceManagerClass {
                 return InterfaceDescriptor;
             case "DefaultNamespace":
                 return DefaultNamespace;
+            case "DefaultUcpComponentFolder":
+                return DefaultUcpComponentFolder;
+            case "DefaultVersion":
+                return DefaultVersion;
         }
 
         throw new Error("Fail to identify: " + ior.href)
@@ -55,12 +64,12 @@ class OnceInternalPersistenceManagerClass {
         return ONCE.eamd.currentScenario.scenarioPath;
     }
 
-    loadFilesInFolder(dirPath: string, filePostFix: string | RegExp): (ClassDescriptor<any> | InterfaceDescriptor | DefaultNamespace)[] {
+    loadFilesInFolder(dirPath: string, filePostFix: string | RegExp): NamespacePersistanceManagerReadFromFile[] {
         let files = this._discoverFiles(join(this.scenarioPath, dirPath), filePostFix);
         return files.map(f => this.readFromFile(join(dirPath, f)))
     }
 
-    loadFoldersInFolder(dirPath: string, directoryPostFix: string | RegExp): (ClassDescriptor<any> | InterfaceDescriptor | DefaultNamespace)[] {
+    loadFoldersInFolder(dirPath: string, directoryPostFix: string | RegExp): NamespacePersistanceManagerReadFromFile[] {
         let files = this._discoverFolders(join(this.scenarioPath, dirPath), directoryPostFix);
         return files.map(f => this.readFromFile(join(dirPath, f)))
     }
@@ -88,9 +97,9 @@ class OnceInternalPersistenceManagerClass {
         if (!existsSync(dirPath)) return [];
         let allFiles = readdirSync(dirPath);
         if (typeof filePostFix == "string") {
-            return allFiles.filter(x => x.endsWith(filePostFix))
+            return allFiles.filter(x => x.endsWith(filePostFix) && x !== 'object.meta.json')
         } else {
-            return allFiles.filter(x => x.match(filePostFix))
+            return allFiles.filter(x => x.match(filePostFix) && x !== 'object.meta.json')
 
         }
     }

@@ -3,11 +3,11 @@ import IOR from "../IOR.interface.mjs";
 import ClassDescriptorInterface from "../Thing/ClassDescriptor.interface.mjs";
 import InterfaceDescriptorInterface from "../Thing/InterfaceDescriptor.interface.mjs";
 import UcpComponentDescriptorInterface from "../Thing/UcpComponentDescriptor.interface.mjs";
+import LayerFolder from "./LayerFolder.mjs";
 import UcpComponentFolder from "./UcpComponentFolder.interface.mjs";
 import VersionFolder from "./VersionFolder.interface.mjs";
 
 export type NamespaceChildren = NamespaceInterface | ClassDescriptorInterface<any> | UcpComponentDescriptorInterface | InterfaceDescriptorInterface | UcpComponentFolder | VersionFolder
-
 export type NamespaceParent = NamespaceInterface | VersionFolder;
 
 export type NamespaceBrowsable = { [index: string]: NamespaceChildren | NamespaceBrowsable }
@@ -26,7 +26,17 @@ export default interface NamespaceInterface extends Folder {
     getAllLoadedChildren: NamespaceChildren[]
     get location(): string[]
     getParentInstanceType(instanceTypeName: NamespaceObjectTypeName): NamespaceChildren | undefined
+
+    discover(name?: string, options?: { recursive?: boolean, level?: number }): Promise<NamespaceChildren[]>
+
+    getParentType(typeName: 'VersionFolder'): VersionFolder | undefined
+    getParentType(typeName: 'LayerFolder'): LayerFolder | undefined
+    getParentType(typeName: 'UcpComponentFolder'): UcpComponentFolder | undefined
+    getParentType(typeName: 'Namespace'): NamespaceInterface | undefined
+
 }
+
+
 
 export interface NamespaceFileFormat {
     name: string,

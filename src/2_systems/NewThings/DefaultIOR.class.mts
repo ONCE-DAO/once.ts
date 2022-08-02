@@ -65,8 +65,8 @@ export default class DefaultIOR extends DefaultUrl implements IOR {
 
     }
 
-    private _parsePackageAndVersion(url: string): string {
-        let packageMatch = url.match(/^([^:\[]+)(\[([\^\.\d\-_a-zA-Z#]+)\])?(\/(.+))?$/);
+    protected _parsePackageAndVersion(url: string): string {
+        let packageMatch = url.match(/^\/?([^:\[]+)(\[([\^\.\d\-_a-zA-Z#]+)\])?(\/(.+))?$/);
         if (packageMatch) {
             this.package = packageMatch[1];
             this.version = packageMatch[3];
@@ -118,7 +118,7 @@ export default class DefaultIOR extends DefaultUrl implements IOR {
     set id(newId) {
         if (this.protocol.includes(urlProtocol.ude)) {
             let path = this.pathName?.split('/')
-            if (!path) throw new Error('Wron ude Format')
+            if (!path) throw new Error('Wrong ude Format')
             path.splice(-1)
             this.pathName = path.join('/') + '/' + newId
 

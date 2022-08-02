@@ -8,7 +8,6 @@ export default abstract class BaseOnce implements Once {
     abstract ENV: NodeJS.ProcessEnv;
     abstract mode: OnceMode;
     private _onceLoader: OnceNodeImportLoader | undefined;
-    abstract start(): Promise<void>;
     abstract global: typeof globalThis;
     abstract eamd: EAMDInterface2;
 
@@ -17,6 +16,11 @@ export default abstract class BaseOnce implements Once {
 
     creationDate: Date;
     state: OnceState = OnceState.DISCOVER;
+
+    async start(): Promise<void> {
+        this.global.ONCE = this;
+        await this.rootNamespace.discover(undefined, { recursive: true });
+    }
 
     constructor() {
         this.creationDate = new Date();

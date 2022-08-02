@@ -1,6 +1,8 @@
 // ##IGNORE_TRANSFORMER##
+import DeclarationDescriptor from "../../1_infrastructure/Build/Typescript/Transformer/DeclarationDescriptor.class.mjs";
 import InterfaceDescriptorInterface, { InterfaceDescriptorStatics } from "../../3_services/Thing/InterfaceDescriptor.interface.mjs";
 import Thing from "../../3_services/Thing/Thing.interface.mjs";
+import InterfaceDescriptor from "./InterfaceDescriptor.class.mjs";
 
 class InterfaceDescriptorHandlerClass implements InterfaceDescriptorStatics {
 
@@ -28,6 +30,12 @@ class InterfaceDescriptorHandlerClass implements InterfaceDescriptorStatics {
 
     getFileName(interfaceName: string): string {
         return interfaceName + '.interface.meta.json';
+    }
+
+    factory(declarationDescriptor: DeclarationDescriptor): InterfaceDescriptorInterface {
+        let existingInstance = ONCE.rootNamespace.search(declarationDescriptor.packageAndLocation);
+        if (existingInstance && "implementations" in existingInstance) return existingInstance;
+        return new InterfaceDescriptor().init(declarationDescriptor)
     }
 
 

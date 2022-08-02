@@ -1,11 +1,12 @@
 import Exportable from "../../3_services/Exportable.interface.mjs";
 import File from "../../3_services/File/File.interface.mjs";
 import IOR from "../../3_services/IOR.interface.mjs";
+import LayerFolder from "../../3_services/Namespace/LayerFolder.mjs";
 import NamespaceInterface, { NamespaceBrowsable, NamespaceChildren, NamespaceFileFormat, NamespaceObjectTypeName, NamespaceParent } from "../../3_services/Namespace/Namespace.interface.mjs";
+import UcpComponentFolderInterface from "../../3_services/Namespace/UcpComponentFolder.interface.mjs";
+import VersionFolderInterface from "../../3_services/Namespace/VersionFolder.interface.mjs";
 import DefaultIOR from "../NewThings/DefaultIOR.class.mjs";
-import OnceInternalPersistenceManager from "../Things/OnceInternalPersistenceManager.class.mjs";
-
-// let OnceInternalPersistenceManager = (await import("../Things/OnceInternalPersistenceManager.class.mjs")).default
+// import OnceInternalPersistenceManager from "../Things/OnceInternalPersistenceManager.class.mjs";
 
 // let possibleChildrenClasses = [
 //     (await import("./DefaultUcpComponentFolder.class.mjs")).default,
@@ -14,6 +15,7 @@ import OnceInternalPersistenceManager from "../Things/OnceInternalPersistenceMan
 
 
 export default class DefaultNamespace implements NamespaceInterface, Exportable {
+
     objectType: NamespaceObjectTypeName = NamespaceObjectTypeName.NamespaceInterface;
 
     private _IOR: IOR | undefined;
@@ -22,7 +24,7 @@ export default class DefaultNamespace implements NamespaceInterface, Exportable 
     get IOR(): IOR {
         if (!this._IOR) {
             if (this.name === "") throw new Error("Missing name")
-            this._IOR = new DefaultIOR().init(this.location.join('/') + `/object.meta.json`);
+            this._IOR = new DefaultIOR().init('ior:meta:/' + this.location.join('/') + `/object`);
         }
         return this._IOR;
     };
@@ -136,25 +138,44 @@ export default class DefaultNamespace implements NamespaceInterface, Exportable 
         }
     }
 
-    private discover(name?: string): NamespaceChildren[] {
+    async discover(name?: string, options?: { recursive?: boolean, level?: number }): Promise<NamespaceChildren[]> {
+        let resultList: NamespaceChildren[] = [];
         if (ONCE.isNodeJSEnvironment) {
+
+            let level = options?.level || 0;
+
+            let OnceInternalPersistenceManager = (await import("../Things/OnceInternalPersistenceManager.class.mjs")).default;
 
             //TODO zentrale haltung von 'meta.json'
             let filePostFix: string | RegExp = name ? new RegExp(`^${name}\..*meta.json$`) : 'meta.json';
 
-            let result = OnceInternalPersistenceManager.loadFilesInFolder(this.location.join('/'), filePostFix);
-            for (const newChid of result) {
+            resultList = OnceInternalPersistenceManager.loadFilesInFolder(this.location.join('/'), filePostFix);
+            for (const newChid of resultList) {
                 this.add(newChid, [], false)
             }
 
             let resultSubDir = OnceInternalPersistenceManager.loadFoldersInFolder([...this.location].join('/'), name || '');
             for (const newChid of resultSubDir) {
                 this.add(newChid, [], false)
+                resultList.push(newChid);
             }
 
-            return [...result, ...resultSubDir];
+            if (options && options.recursive) {
+                for (const child of this.children) {
+                    if ("discover" in child)
+                        resultList.push(...(await child.discover(undefined, { recursive: true, level: level + 1 })));
+                }
+            }
+
+            if (level == 0) {
+                for (const child of resultList) {
+                    if ("implements" in child) {
+                        child.registerAllInterfaces();
+                    }
+                }
+            }
         }
-        return [];
+        return resultList;
     }
 
     public get location(): string[] {
@@ -163,6 +184,8 @@ export default class DefaultNamespace implements NamespaceInterface, Exportable 
         parentLocation.push(this.name);
         return parentLocation;
     }
+
+
 
     init(name: string, parent: NamespaceParent): this {
         this.name = name;
@@ -192,11 +215,16 @@ export default class DefaultNamespace implements NamespaceInterface, Exportable 
         return child;
     }
 
+    getParentType(typeName: "VersionFolder"): VersionFolderInterface | undefined;
+    getParentType(typeName: "LayerFolder"): LayerFolder | undefined;
+    getParentType(typeName: "UcpComponentFolder"): UcpComponentFolderInterface | undefined;
+    getParentType(typeName: "Namespace"): NamespaceInterface | undefined;
+    getParentType(typeName: unknown): NamespaceInterface | import("../../3_services/Namespace/VersionFolder.interface.mjs").default | import("../../3_services/Namespace/UcpComponentFolder.interface.mjs").default | import("../../3_services/Namespace/LayerFolder.mjs").default | undefined {
+        throw new Error("Method not implemented.");
+    }
+
     getChildByName(name: string): NamespaceChildren | undefined {
         let child: NamespaceChildren | undefined = this.children.filter(childName => childName.name === name)[0];
-        if (child === undefined) {
-            child = this.discover(name)[0];
-        }
         return child;
     }
 

@@ -2,12 +2,9 @@ import BuildConfig from "../../../3_services/Build/BuildConfig.interface.mjs";
 import TypescriptProject from "../../../3_services/Build/Typescript/TypescriptProject.interface.mjs";
 import DefaultTranspiler from "./Transpiler.class.mjs";
 
-import { install } from 'ts-patch';
-import NpmPackageInterface from "../../../3_services/Build/Npm/NpmPackage.interface.mjs";
-import { join, relative } from "path";
 import { existsSync, mkdirSync } from "fs";
-import ExtendedPromise from "../../../2_systems/Promise.class.mjs";
-import { fork } from "child_process";
+import { join, relative } from "path";
+import NpmPackageInterface from "../../../3_services/Build/Npm/NpmPackage.interface.mjs";
 
 export default class DefaultTypescriptProject implements TypescriptProject {
     private path: string;

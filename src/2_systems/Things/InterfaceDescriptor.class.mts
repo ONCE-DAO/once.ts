@@ -6,6 +6,7 @@ import { NamespaceParent } from "../../3_services/Namespace/Namespace.interface.
 import ClassDescriptorInterface from "../../3_services/Thing/ClassDescriptor.interface.mjs";
 import InterfaceDescriptorInterface, { InterfaceDescriptorFileFormat } from "../../3_services/Thing/InterfaceDescriptor.interface.mjs";
 import UcpComponentDescriptorInterface from "../../3_services/Thing/UcpComponentDescriptor.interface.mjs";
+import { urlProtocol } from "../../3_services/Url.interface.mjs";
 import DefaultIOR from "../NewThings/DefaultIOR.class.mjs";
 import InterfaceDescriptorHandler from "./InterfaceDescriptorHandler.class.mjs";
 
@@ -15,17 +16,14 @@ export default class InterfaceDescriptor implements InterfaceDescriptorInterface
 
     get IOR(): IOR {
         if (!this._IOR) {
-            let location = [...this.location]
-            location.pop();
-            location.push(InterfaceDescriptorHandler.getFileName(this.name));
-            this._IOR = new DefaultIOR().init('ior:/' + location.join('/'));
+            this._IOR = new DefaultIOR().init('ior:meta:/' + this.location.join('/'));
         }
         return this._IOR;
     }
 
     static get IOR(): IOR {
         // HACK with hardcoded IOR
-        return new DefaultIOR().init('ior:esm:/tla/EAM/Once/once[build]/ClassDescriptor');
+        return new DefaultIOR().init('ior:esm:/tla/EAM/Once/once[build]/InterfaceDescriptor');
     }
     classDescriptor = { IOR: InterfaceDescriptor.IOR };
 
@@ -133,7 +131,7 @@ export default class InterfaceDescriptor implements InterfaceDescriptorInterface
         if (!interfaceList.includes(this)) {
             interfaceList.push(this);
             for (const interfaceObject of this.extends) {
-                (interfaceObject as InterfaceDescriptor)._getImplementedInterfaces(interfaceList);
+                interfaceObject._getImplementedInterfaces(interfaceList);
             }
         }
         return interfaceList;

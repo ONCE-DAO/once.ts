@@ -26,6 +26,7 @@ if (pathObject.length) {
 }
 
 global.ONCE = await DefaultNodeOnceImportLoader.start();
+await global.ONCE.start();
 
 const eamr = await DefaultEAMRepository.init(scenarioDomain, basePath, fast)
 

@@ -51,7 +51,7 @@ export default class DefaultUrl extends BaseThing<DefaultUrl> implements Url {
     }
 
     protected _parseProtocols(url: string) {
-        const protocolMatch = url.match(/^\/?([^\/]+):(\/\/?)?/);
+        const protocolMatch = url.match(/^\/?([^\/]+):/);
 
         let protocolList: urlProtocol[] = [];
         if (protocolMatch) {
@@ -72,6 +72,10 @@ export default class DefaultUrl extends BaseThing<DefaultUrl> implements Url {
     protected _parseHost(url: string) {
         this.hostNames = [];
         this.ports = [];
+        if (!url.startsWith('//')) return url;
+
+        url = url.substring(2);
+
         const hostRegex = /^,?([^:\/]+)(:(\d+))?/;
 
         let hostMatch = url.match(hostRegex);
@@ -126,10 +130,12 @@ export default class DefaultUrl extends BaseThing<DefaultUrl> implements Url {
 
         if (protocol && protocol.length > 0) url += protocol.join(':') + (this.hostName ? '://' : ':');
 
-        if (type == formatType.normalizedHref || type == formatType.origin) {
-            url += this.host;
-        } else {
-            url += this.hosts.join(',');
+        if (this.hostNames.length) {
+            if (type == formatType.normalizedHref || type == formatType.origin) {
+                url += this.host;
+            } else {
+                url += this.hosts.join(',');
+            }
         }
 
 

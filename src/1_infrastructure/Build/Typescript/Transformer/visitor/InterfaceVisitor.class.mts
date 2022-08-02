@@ -3,6 +3,7 @@
 import path from "path";
 import TS from 'typescript';
 import InterfaceDescriptor from '../../../../../2_systems/Things/InterfaceDescriptor.class.mjs';
+import InterfaceDescriptorHandler from "../../../../../2_systems/Things/InterfaceDescriptorHandler.class.mjs";
 import DeclarationDescriptor from '../DeclarationDescriptor.class.mjs';
 import { TSNodeVisitor } from '../Transformer.interface.mjs';
 import { debug, localInterfaceDescriptorPath } from '../Transformer.mjs';
@@ -27,7 +28,10 @@ export default class InterfaceVisitor extends BaseVisitor implements TSNodeVisit
         let fileVisitor = this.context.fileVisitor;
 
         let dd = new DeclarationDescriptor(node.name, this.context);
-        let id = new InterfaceDescriptor().init(dd);
+
+        let id = dd.interfaceDescriptorFactory();
+
+
 
         // this.addImportInterfaceDescriptor();
         // const exportVariableStatement = this.getInterfaceDescriptorRegister(node);

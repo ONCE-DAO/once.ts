@@ -1,6 +1,7 @@
 import IOR from "../../3_services/IOR.interface.mjs";
 import Loader, {
   loaderReturnValue,
+  LoaderStatic,
   loadingConfig,
 } from "../../3_services/Loader.interface.mjs";
 import { urlProtocol } from "../../3_services/Url.interface.mjs";
