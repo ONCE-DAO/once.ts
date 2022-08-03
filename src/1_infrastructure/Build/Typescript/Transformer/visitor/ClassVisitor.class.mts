@@ -2,7 +2,6 @@
 
 import path from "path";
 import ts from "typescript";
-import ClassDescriptor from "../../../../../2_systems/Things/ClassDescriptor.class.mjs";
 import ClassDescriptorHandler from "../../../../../2_systems/Things/ClassDescriptorHandler.class.mjs";
 import ClassDescriptorInterface from "../../../../../3_services/Thing/ClassDescriptor.interface.mjs";
 import DeclarationDescriptor from '../DeclarationDescriptor.class.mjs';
@@ -36,7 +35,9 @@ export default class ClassVisitor extends BaseVisitor implements TSNodeVisitor {
 
         // Create ClassDescriptor
         let dd = new DeclarationDescriptor(node.name, this.context);
-        let cd = ClassDescriptorHandler.factory(dd);
+        let cd = dd.classDescriptorFactory();
+        if (!cd) throw new Error("Fail to get ClassDescriptor")
+        // let cd = ClassDescriptorHandler.factory(dd);
 
         // if (this.context.sourceFile.fileName.match("ClassDescriptor") || this.context.sourceFile.fileName.match("NpmPackage") || this.context.sourceFile.fileName.match("UcpComponentDescriptor") || this.context.sourceFile.fileName.match("OnceZod")) {
         //   if (debug) console.log("Cancel ClassDescriptor");
@@ -154,7 +155,7 @@ export default class ClassVisitor extends BaseVisitor implements TSNodeVisitor {
         ));
     }
 
-    private checkHeritageClause(tsClass: ts.ClassDeclaration, classDescriptor: ClassDescriptorInterface<any>): void {
+    private checkHeritageClause(tsClass: ts.ClassDeclaration, classDescriptor: ClassDescriptorInterface): void {
         if (!tsClass.heritageClauses) return;
         for (const element of tsClass.heritageClauses) {
             if (element.token === ts.SyntaxKind.ExtendsKeyword) continue;

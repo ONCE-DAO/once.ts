@@ -1,10 +1,15 @@
 // ##IGNORE_TRANSFORMER##
 
+import path from 'path';
 import TS from 'typescript';
+import DefaultFileUcpUnit from '../../../../../2_systems/Things/FileUnit.class.mjs';
+import FileUcpUnit from '../../../../../3_services/UCP/FileUcpUnit.interface.mjs';
+import { UnitType } from '../../../../../3_services/UCP/UcpUnit.interface.mjs';
 import ComponentDescriptorTR from '../ComponentDescriptor.class.mjs';
 import DeclarationDescriptor from '../DeclarationDescriptor.class.mjs';
 import { VisitorContext } from '../Transformer.interface.mjs';
 import { debug } from '../Transformer.mjs';
+import TranspileFactory from '../TranspileFactorys.class.mjs';
 import BaseVisitor from './BaseVisitor.class.mjs';
 import CallExpressionVisitor from './CallExpressionVisitor.class.mjs';
 import ClassVisitor from './ClassVisitor.class.mjs';
@@ -27,6 +32,7 @@ export default class FileVisitor {
     phase: "before" | "after" = "before";
     program: TS.Program | undefined;
     private _visitorContext: VisitorContext | undefined;
+    private _fileUnit: DefaultFileUcpUnit | undefined;
 
     constructor(public sourceFile: TS.SourceFile) {
     }
@@ -71,6 +77,7 @@ export default class FileVisitor {
         if (this.sourceFile.getFullText().match(/\/\/ *##IGNORE_TRANSFORMER##/))
             return this.sourceFile;
 
+        TranspileFactory.fileUnitFactory(this.sourceFile, this.visitorContext)
 
         this.sourceFile = TS.visitNode(this.sourceFile, this.visitor.bind(this));
 
@@ -87,11 +94,10 @@ export default class FileVisitor {
         if (newImports.length > 0) {
             this.sourceFile = TS.factory.updateSourceFile(this.sourceFile, [...newImports, ...this.sourceFile.statements]);
         }
-        if (this.phase === "before")
-            this.componentDescriptor.write2File();
 
         return this.sourceFile;
     }
+
 
     isNodeJs(alreadyHitSourceFiles: TS.SourceFile[] = []): boolean {
         if (this._isNodeJs === undefined) {

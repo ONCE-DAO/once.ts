@@ -11,7 +11,6 @@ export default abstract class BaseDescriptorTR {
     abstract name: string;
     abstract type: string;
 
-    abstract write2File(): void
 
     constructor(visitor: VisitorContext,) {
         this.visitorContext = visitor;
@@ -30,12 +29,6 @@ export abstract class ExportBaseDescriptorTR extends BaseDescriptorTR {
 
     abstract export: any
     originalFilePath: string;
-    write2File(): void {
-        let exportFile = this.exportPath;
-
-        mkdirSync(dirname(exportFile), { recursive: true });
-        writeFileSync(exportFile, JSON.stringify(this.export, null, 2));
-    }
 
     constructor(declarationDescriptor: DeclarationDescriptor) {
         super(declarationDescriptor.visitorContext);

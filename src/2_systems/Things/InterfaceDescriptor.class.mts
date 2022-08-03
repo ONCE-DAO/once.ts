@@ -1,25 +1,33 @@
 // ##IGNORE_TRANSFORMER##
+import AbstractNamespaceChild from "../../1_infrastructure/AbstractNamespaceChild.class.mjs";
 import DeclarationDescriptor from "../../1_infrastructure/Build/Typescript/Transformer/DeclarationDescriptor.class.mjs";
 import Class from "../../3_services/Class.interface.mjs";
 import IOR from "../../3_services/IOR.interface.mjs";
-import { NamespaceParent } from "../../3_services/Namespace/Namespace.interface.mjs";
+import { NamespaceObjectTypeName, NamespaceParent } from "../../3_services/Namespace/Namespace.interface.mjs";
+import VersionFolder from "../../3_services/Namespace/VersionFolder.interface.mjs";
 import ClassDescriptorInterface from "../../3_services/Thing/ClassDescriptor.interface.mjs";
 import InterfaceDescriptorInterface, { InterfaceDescriptorFileFormat } from "../../3_services/Thing/InterfaceDescriptor.interface.mjs";
 import UcpComponentDescriptorInterface from "../../3_services/Thing/UcpComponentDescriptor.interface.mjs";
-import { urlProtocol } from "../../3_services/Url.interface.mjs";
+import FileUcpUnit from "../../3_services/UCP/FileUcpUnit.interface.mjs";
+import { UnitType } from "../../3_services/UCP/UcpUnit.interface.mjs";
 import DefaultIOR from "../NewThings/DefaultIOR.class.mjs";
-import InterfaceDescriptorHandler from "./InterfaceDescriptorHandler.class.mjs";
 
-export default class InterfaceDescriptor implements InterfaceDescriptorInterface {
+export default class InterfaceDescriptor extends AbstractNamespaceChild implements InterfaceDescriptorInterface {
+    unitType: UnitType = UnitType.TypescriptInterface;
+    objectType: NamespaceObjectTypeName.InterfaceDescriptor = NamespaceObjectTypeName.InterfaceDescriptor
 
-    private _IOR: IOR | undefined;
-
-    get IOR(): IOR {
-        if (!this._IOR) {
-            this._IOR = new DefaultIOR().init('ior:meta:/' + this.location.join('/'));
-        }
-        return this._IOR;
+    get ucpComponentDescriptor(): UcpComponentDescriptorInterface {
+        return this.version.ucpComponentDescriptor;
     }
+
+    get version(): VersionFolder {
+        let v = this.parent.getParentType(NamespaceObjectTypeName.VersionFolder);
+        if (!v) throw new Error("Missing Parent Version")
+        return v;
+    }
+
+    fileExport: 'defaultExport' | 'namedExport' | 'noExport' = 'noExport';
+
 
     static get IOR(): IOR {
         // HACK with hardcoded IOR
@@ -27,88 +35,60 @@ export default class InterfaceDescriptor implements InterfaceDescriptorInterface
     }
     classDescriptor = { IOR: InterfaceDescriptor.IOR };
 
-
-    public get location(): string[] {
-        if (!this._parent && this.name === "") return [];
-        let parentLocation = this.parent.location;
-        parentLocation.push(this.name);
-        return parentLocation;
-    }
-
-    get locationString(): string {
-        return this.location.join('.');
-    }
-
-    get name(): string {
-        if (!this._name) throw new Error("Missing name. Please init");
-        return this._name
-    }
-
-    private _name: string | undefined;
-
-
-    protected _parent: NamespaceParent | undefined = undefined;
-    get parent(): NamespaceParent {
-        if (!this._parent)
-            throw new Error("Missing parent")
-        return this._parent
-    }
-
-    set parent(value: NamespaceParent) {
-        this._parent = value
-    }
-
     init(declarationDescriptor: DeclarationDescriptor): this {
-        this._name = declarationDescriptor.name;
+        this.name = declarationDescriptor.name;
+        this._fileUnit = declarationDescriptor.fileUnitFactory();
         ONCE.rootNamespace.add(this, declarationDescriptor.packageAndLocation);
+        this.fileExport = declarationDescriptor.exportType();
+        this.componentExport = this.fileExport === "noExport" ? "noExport" : "namedExport"
         return this;
     }
 
+    private _fileUnit: FileUcpUnit | IOR | undefined;
+    public get fileUnit(): FileUcpUnit {
+        if (!this._fileUnit) throw new Error("Missing filename");
+        if ("pathName" in this._fileUnit) {
+            let loaded = ONCE.rootNamespace.search(this._fileUnit);
+            if (loaded && "pathName" in loaded)
+                this._fileUnit = loaded;
+        }
+        if ("pathName" in this._fileUnit) throw new Error("Fail to load IOR:" + this._fileUnit);
+        return this._fileUnit;
+    }
 
     export(): InterfaceDescriptorFileFormat {
         return {
             name: this.name,
             extends: this.extends.map(i => i.IOR.href),
-            //classIOR: this.classIOR.href,
-            // componentExport: this.componentExport
+            fileUnit: this.fileUnit.IOR.href,
+            fileExport: this.fileExport,
+            componentExport: this.componentExport
         }
     }
 
     import(data: InterfaceDescriptorFileFormat): void {
-        this._name = data.name;
-        //this._classIOR = new DefaultIOR().init(data.classIOR);
+        this.name = data.name;
+        this._fileUnit = new DefaultIOR().init(data.fileUnit);
         this.extends = data.extends.map(i => ONCE.rootNamespace.search(new DefaultIOR().init(i)) as InterfaceDescriptorInterface);
+        this.fileExport = data.fileExport;
+        this.componentExport = data.componentExport;
     }
 
 
     id: string = Math.round(Math.random() * 10000000) + '';
 
     extends: InterfaceDescriptorInterface[] = [];
-    private readonly _implementations: ClassDescriptorInterface<any>[] = [];
-    public ucpComponentDescriptor!: UcpComponentDescriptorInterface;
-    _componentExport: 'namedExport' | 'defaultExport' | undefined = 'namedExport';
+    private readonly _implementations: ClassDescriptorInterface[] = [];
 
-    get implementations(): Class<any>[] {
-        return this._implementations.map(x => x.class)
-    }
+    async getImplementations(): Promise<Class<any>[]> {
+        let result: Class<any>[] = [];
 
-    get componentExportName(): string {
-        return this.name + 'ID';
-    }
-
-    get packagePath(): string {
-        if (!this.ucpComponentDescriptor?.srcPath) throw new Error("Missing srcPath in ucpComponentDescriptor");
-        return this.ucpComponentDescriptor.srcPath;
-    }
-    get packageName(): string {
-        if (!this.ucpComponentDescriptor?.name) throw new Error("Missing name in ucpComponentDescriptor");
-        return this.ucpComponentDescriptor.name;
+        for (const classDescriptor of this._implementations) {
+            result.push(await classDescriptor.getClass());
+        }
+        return result;
     }
 
-    get packageVersion(): string {
-        if (!this.ucpComponentDescriptor?.version) throw new Error("Missing version in ucpComponentDescriptor");
-        return this.ucpComponentDescriptor.version;
-    }
 
     get allExtendedInterfaces(): InterfaceDescriptorInterface[] {
         let result: InterfaceDescriptorInterface[] = [];
@@ -124,8 +104,7 @@ export default class InterfaceDescriptor implements InterfaceDescriptorInterface
         return this._getImplementedInterfaces();
     }
 
-    get componentExport(): 'namedExport' | 'defaultExport' | undefined { return this._componentExport }
-    set componentExport(value: 'namedExport' | 'defaultExport' | undefined) { this._componentExport = value; }
+    componentExport: 'namedExport' | 'defaultExport' | 'noExport' = 'noExport';
 
     _getImplementedInterfaces(interfaceList: InterfaceDescriptorInterface[] = []): InterfaceDescriptorInterface[] {
         if (!interfaceList.includes(this)) {
@@ -137,25 +116,17 @@ export default class InterfaceDescriptor implements InterfaceDescriptorInterface
         return interfaceList;
     }
 
-    addImplementation(classDescriptor: ClassDescriptorInterface<any>): InterfaceDescriptorInterface {
+    addImplementation(classDescriptor: ClassDescriptorInterface): InterfaceDescriptorInterface {
         this._implementations.push(classDescriptor);
         return this
     }
 
 
-    add(object: InterfaceDescriptorInterface | UcpComponentDescriptorInterface): this {
+    add(object: InterfaceDescriptorInterface): this {
         if (object instanceof InterfaceDescriptor) {
             this.extends.push(object)
-        } else if ("writeToPath" in object) {
-            this.ucpComponentDescriptor = object;
         }
         return this;
     }
-
-
-    constructor() {
-        return this;
-    }
-
 
 }

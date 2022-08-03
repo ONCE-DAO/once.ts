@@ -7,17 +7,17 @@ import InterfaceDescriptorHandler from "../../../../2_systems/Things/InterfaceDe
 import IOR from "../../../../3_services/IOR.interface.mjs";
 import ClassDescriptorInterface from "../../../../3_services/Thing/ClassDescriptor.interface.mjs";
 import InterfaceDescriptorInterface from '../../../../3_services/Thing/InterfaceDescriptor.interface.mjs';
+import FileUcpUnit from "../../../../3_services/UCP/FileUcpUnit.interface.mjs";
 import BaseDescriptorTR from './BaseDescriptorTR.class.mjs';
 import ComponentDescriptorTR from './ComponentDescriptor.class.mjs';
 import { VisitorContext } from './Transformer.interface.mjs';
+import TranspileFactory from "./TranspileFactorys.class.mjs";
 import FileVisitor from './visitor/FileVisitor.class.mjs';
 
 
 
 export default class DeclarationDescriptor extends BaseDescriptorTR {
-    write2File(): void {
-        throw new Error('Method not implemented.');
-    }
+
     type = '';
     path!: string;
     name!: string;
@@ -56,27 +56,43 @@ export default class DeclarationDescriptor extends BaseDescriptorTR {
         return InterfaceDescriptorHandler.factory(this)
     }
 
-    classDescriptorFactory(): ClassDescriptorInterface<any> | undefined {
+    classDescriptorFactory(): ClassDescriptorInterface | undefined {
         if (!this.originalNodeObject) return undefined;
         if (!TS.isClassDeclaration(this.originalNodeObject)) return undefined;
         return ClassDescriptorHandler.factory(this)
+    }
 
+    exportType(): 'defaultExport' | 'namedExport' | 'noExport' {
+        if (this.originalNodeObject && this.originalNodeObject.modifiers) {
+            if (this.originalNodeObject.modifiers.filter(x => x.kind === TS.SyntaxKind.DefaultKeyword).length) return 'defaultExport'
+            if (this.originalNodeObject.modifiers.filter(x => x.kind === TS.SyntaxKind.ExportKeyword).length) return 'namedExport';
+        }
+        return 'noExport';
+
+    }
+
+    fileUnitFactory(): FileUcpUnit {
+        if (!this.sourceFile) throw new Error("Missing sourceFile")
+        return TranspileFactory.fileUnitFactory(this.sourceFile, this.visitorContext)
     }
 
     heritageClassDeclarationDescriptorFactory(): DeclarationDescriptor | undefined {
         if (!this.originalNodeObject) return undefined;
         if (TS.isClassDeclaration(this.originalNodeObject) && this.originalNodeObject.heritageClauses) {
             let heritage = this.originalNodeObject.heritageClauses.filter(h => h.token === TS.SyntaxKind.ExtendsKeyword)[0];
-            if (heritage && heritage?.types?.[0])
-                return new DeclarationDescriptor(heritage.types[0].expression as TS.Identifier, this.visitorContext)
+            if (heritage && heritage?.types?.[0]) {
+                let result = new DeclarationDescriptor(heritage.types[0].expression as TS.Identifier, this.visitorContext)
+                if (result.name === DeclarationDescriptor.MISSING_DECLARATION) return undefined;
+                return result;
+            }
         }
     }
-    heritageClassDescriptorIOR(): IOR | undefined {
+    heritageClassDescriptor(): ClassDescriptorInterface | undefined {
         let heritageClass = this.heritageClassDeclarationDescriptorFactory();
         if (heritageClass) {
             let heritageClassDescriptor = heritageClass.classDescriptorFactory();
             if (heritageClassDescriptor)
-                return heritageClassDescriptor.IOR;
+                return heritageClassDescriptor;
         }
     }
 

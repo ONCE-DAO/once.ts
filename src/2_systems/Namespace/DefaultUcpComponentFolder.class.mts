@@ -12,9 +12,6 @@ export default class DefaultUcpComponentFolder extends DefaultNamespace implemen
         return new DefaultIOR().init('ior:esm:/tla/EAM/Once/once[build]/DefaultUcpComponentFolder');
     }
 
-    get package(): string {
-        return this.location.join('.')
-    }
 
     classDescriptor = { IOR: DefaultUcpComponentFolder.IOR };
 
@@ -32,7 +29,4 @@ export default class DefaultUcpComponentFolder extends DefaultNamespace implemen
         this._parent = value
     }
 
-    // static canHandle(name: string, parent: NamespaceInterface): boolean {
-    //     if (name[0].match(/^[A-Z]/) && !name.match(/\./)
-    // }
 }

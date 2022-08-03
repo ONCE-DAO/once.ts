@@ -8,13 +8,13 @@ DefaultCRUDClient;
 
 export default class DefaultClient {
 
-    static discover(): ClientStatic[] {
-        return InterfaceDescriptorHandler.getInterfaceDescriptor<Client>().implementations as ClientStatic[]
+    static async discover(): Promise<ClientStatic[]> {
+        return (await InterfaceDescriptorHandler.getInterfaceDescriptor<Client>().getImplementations()) as ClientStatic[]
     }
 
-    static findClient(ior: IOR): Client | undefined {
+    static async findClient(ior: IOR): Promise<Client | undefined> {
 
-        const clientList = this.discover();
+        const clientList = await this.discover();
         let ratedLoader = clientList.map(client => {
             return { rating: client.canConnect(ior), client }
         })

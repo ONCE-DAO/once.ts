@@ -11,7 +11,7 @@ class InterfaceDescriptorHandlerClass implements InterfaceDescriptorStatics {
         // l.push(this.getFileName(l.pop() as string));
 
         let result = ONCE.rootNamespace.search(l);
-        if (result && "implementations" in result) return result;
+        if (result && "getImplementations" in result) return result;
     }
 
     getInterfaceDescriptor<Interface extends Thing<any>>(location?: string[]): InterfaceDescriptorInterface {
@@ -34,7 +34,7 @@ class InterfaceDescriptorHandlerClass implements InterfaceDescriptorStatics {
 
     factory(declarationDescriptor: DeclarationDescriptor): InterfaceDescriptorInterface {
         let existingInstance = ONCE.rootNamespace.search(declarationDescriptor.packageAndLocation);
-        if (existingInstance && "implementations" in existingInstance) return existingInstance;
+        if (existingInstance && "getImplementations" in existingInstance) return existingInstance;
         return new InterfaceDescriptor().init(declarationDescriptor)
     }
 

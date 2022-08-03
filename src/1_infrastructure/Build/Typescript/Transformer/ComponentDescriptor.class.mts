@@ -66,10 +66,15 @@ export default class ComponentDescriptorTR extends BaseDescriptorTR implements C
     }
 
     get rootDir(): string {
-        let compilerOptions = this.visitorContext.program.getCompilerOptions();
-        if (!compilerOptions.rootDir)
-            throw new Error("Missing compiler option 'rootDir'");
-        return compilerOptions.rootDir;
+        //HACK Can not use Compiler as other Components are also referenced
+        if (this.packagePath.match('/Scenarios/')) {
+            return this.packagePath;
+        }
+        return path.join(this.packagePath, 'src');
+        // let compilerOptions = this.visitorContext.program.getCompilerOptions();
+        // if (!compilerOptions.rootDir)
+        //     throw new Error("Missing compiler option 'rootDir'");
+        // return compilerOptions.rootDir;
     }
 
     addIORDependency(iorString: string): void {
@@ -131,33 +136,28 @@ export default class ComponentDescriptorTR extends BaseDescriptorTR implements C
         throw new Error("Not implemented yet");
     }
 
-    write2File() {
-        if (!this.exportUpdates)
-            return;
-        let interfaceList = this.formatExports();
-        let currentData: any = {};
-        if (existsSync(this.exportFilePath)) {
-            currentData = JSON.parse(readFileSync(this.exportFilePath, 'utf8').toString());
-        }
-        //if (currentData.interfaceList) data = [...data, ...currentData.interfaceList]
-        currentData.interfaceList = interfaceList;
-        currentData.dependencyList = this.dependency;
-        writeFileSync(this.exportFilePath, JSON.stringify(currentData, null, 2));
-        this.exportUpdates = false;
-        this.writeAllDescriptors();
-    }
+    // write2File() {
+    //     if (!this.exportUpdates)
+    //         return;
+    //     let interfaceList = this.formatExports();
+    //     let currentData: any = {};
+    //     if (existsSync(this.exportFilePath)) {
+    //         currentData = JSON.parse(readFileSync(this.exportFilePath, 'utf8').toString());
+    //     }
+    //     //if (currentData.interfaceList) data = [...data, ...currentData.interfaceList]
+    //     currentData.interfaceList = interfaceList;
+    //     currentData.dependencyList = this.dependency;
+    //     writeFileSync(this.exportFilePath, JSON.stringify(currentData, null, 2));
+    //     this.exportUpdates = false;
+    //     this.writeAllDescriptors();
+    // }
 
-    writeAllDescriptors(): void {
-        for (const descriptor of this.descriptors) {
-            descriptor.write2File();
-        }
-    }
 
-    static writeAllComponentDescriptors() {
-        for (const descriptor of this.instanceStore) {
-            descriptor.write2File();
-        }
-    }
+    // static writeAllComponentDescriptors() {
+    //     for (const descriptor of this.instanceStore) {
+    //         descriptor.write2File();
+    //     }
+    // }
 
 
     static getComponentDescriptor(object: TS.SourceFile | string | TS.Node, visitorContext: VisitorContext): ComponentDescriptorTR {
@@ -180,6 +180,10 @@ export default class ComponentDescriptorTR extends BaseDescriptorTR implements C
             return componentDescriptor;
         }
 
+    }
+
+    get location(): string[] {
+        return [...this.package.split('.'), this.name, this.version]
     }
 
     static UNKNOWN_NAME = "Unknown name";

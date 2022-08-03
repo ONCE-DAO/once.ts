@@ -8,7 +8,7 @@ import { urlProtocol } from "../../3_services/Url.interface.mjs";
 import AbstractDefaultLoader from "../../1_infrastructure/AbstractDefaultLoader.class.mjs";
 import path from "path";
 
-class EAMDLoader extends AbstractDefaultLoader implements Loader {
+export default class EAMDLoader extends AbstractDefaultLoader implements Loader {
   removeObjectFromStore(object: any): void {
     throw new Error("Method not implemented.");
   }
@@ -88,5 +88,3 @@ class EAMDLoader extends AbstractDefaultLoader implements Loader {
 
 // TODO Check the Problem with the Static interface
 //export default EAMDLoader as LoaderStatic;
-
-export default EAMDLoader

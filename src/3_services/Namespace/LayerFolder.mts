@@ -7,6 +7,6 @@ import VersionFolder from "./VersionFolder.interface.mjs";
 export default interface LayerFolder extends NamespaceInterface {
     objectType: NamespaceObjectTypeName.LayerFolder
     layer: number;
-    children: (NamespaceInterface | ClassDescriptorInterface<any> | UcpComponentDescriptorInterface | InterfaceDescriptorInterface)[];
+    children: (NamespaceInterface | ClassDescriptorInterface | UcpComponentDescriptorInterface | InterfaceDescriptorInterface)[];
     parent: VersionFolder
 }

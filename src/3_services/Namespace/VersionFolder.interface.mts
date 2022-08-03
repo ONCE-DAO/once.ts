@@ -8,6 +8,8 @@ import UcpComponentFolder from "./UcpComponentFolder.interface.mjs";
 export default interface VersionFolder extends NamespaceInterface {
     objectType: NamespaceObjectTypeName.VersionFolder
     version: string;
-    children: (NamespaceInterface | ClassDescriptorInterface<any> | UcpComponentDescriptorInterface | InterfaceDescriptorInterface | LayerFolder)[];
+    children: (NamespaceInterface | ClassDescriptorInterface | UcpComponentDescriptorInterface | InterfaceDescriptorInterface | LayerFolder)[];
     parent: UcpComponentFolder
+    ucpComponentDescriptor: UcpComponentDescriptorInterface
+    package: string
 }

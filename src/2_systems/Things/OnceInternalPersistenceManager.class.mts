@@ -1,5 +1,5 @@
-import { existsSync, readdirSync, readFileSync, writeFileSync } from "fs";
-import { join } from "path";
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "fs";
+import { dirname, join } from "path";
 import Exportable from "../../3_services/Exportable.interface.mjs";
 import IOR from "../../3_services/IOR.interface.mjs";
 import NamespacePersistanceManager, { NamespacePersistanceManagerReadFromFile } from "../../3_services/Namespace/NamespacePersistanceManager.interface.mjs";
@@ -8,6 +8,8 @@ import DefaultUcpComponentFolder from "../Namespace/DefaultUcpComponentFolder.cl
 import DefaultVersion from "../Namespace/DefaultVersion.class.mjs";
 import DefaultIOR from "../NewThings/DefaultIOR.class.mjs";
 import ClassDescriptor from "./ClassDescriptor.class.mjs";
+import DefaultUcpComponentDescriptor from "./DefaultUcpComponentDescriptor.class.mjs";
+import DefaultFileUcpUnit from "./FileUnit.class.mjs";
 import InterfaceDescriptor from "./InterfaceDescriptor.class.mjs";
 
 
@@ -22,14 +24,27 @@ class OnceInternalPersistenceManagerClass implements NamespacePersistanceManager
         const ior = object.IOR;
         const exportData: ExportableFileType = { typeIOR: object.classDescriptor.IOR.href, particle: data }
 
-        const filePath = join(scenarioPath, (ior.originPath as string) + '.meta.json')
+        let fileExtension = '.meta.json';
+
+        const filePath = join(scenarioPath, (this.normalizePath(ior.originPath as string)) + fileExtension);
+
+        mkdirSync(dirname(filePath), { recursive: true });
         writeFileSync(filePath, JSON.stringify(exportData, null, 2))
     }
+
+    fileExtension(object: Exportable) {
+
+    }
+
+    normalizePath(originPath: string): string {
+        return originPath.replaceAll(/[\[\]]+/g, '')
+    }
+
     readFromFile(path: string): NamespacePersistanceManagerReadFromFile
     readFromFile(ior: IOR): NamespacePersistanceManagerReadFromFile
     readFromFile(arg1: IOR | string): NamespacePersistanceManagerReadFromFile {
         const scenarioPath = ONCE.eamd.currentScenario.scenarioPath;
-        const filePath = join(scenarioPath, (typeof arg1 == "string" ? arg1 : arg1.package as string))
+        const filePath = join(scenarioPath, (typeof arg1 == "string" ? arg1 : (this.normalizePath(arg1.package as string)) as string))
 
         if (!existsSync(filePath)) throw new Error(`fail to load the file ${filePath}`)
 
@@ -42,7 +57,7 @@ class OnceInternalPersistenceManagerClass implements NamespacePersistanceManager
     }
 
     // This function make the loading sync as async is not possible
-    private getClass4IOR(ior: IOR): typeof ClassDescriptor | typeof InterfaceDescriptor | typeof DefaultNamespace | typeof DefaultUcpComponentFolder {
+    private getClass4IOR(ior: IOR): typeof ClassDescriptor | typeof InterfaceDescriptor | typeof DefaultNamespace | typeof DefaultUcpComponentFolder | typeof DefaultUcpComponentDescriptor | typeof DefaultFileUcpUnit {
         let className = ior.href.split('/').pop();
         switch (className) {
             case "ClassDescriptor":
@@ -55,6 +70,11 @@ class OnceInternalPersistenceManagerClass implements NamespacePersistanceManager
                 return DefaultUcpComponentFolder;
             case "DefaultVersion":
                 return DefaultVersion;
+            case "DefaultUcpComponentDescriptor":
+                return DefaultUcpComponentDescriptor
+            case "DefaultFileUcpUnit":
+                return DefaultFileUcpUnit
+
         }
 
         throw new Error("Fail to identify: " + ior.href)

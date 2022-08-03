@@ -17,9 +17,10 @@ export default abstract class BaseOnce implements Once {
     creationDate: Date;
     state: OnceState = OnceState.DISCOVER;
 
-    async start(): Promise<void> {
+    async start(setStateSTARTED: boolean = true): Promise<void> {
         this.global.ONCE = this;
         await this.rootNamespace.discover(undefined, { recursive: true });
+        if (setStateSTARTED) this.state = OnceState.STARTED;
     }
 
     constructor() {

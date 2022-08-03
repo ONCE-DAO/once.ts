@@ -7,5 +7,7 @@ export default interface UcpUnit {
 
 export enum UnitType {
     File = "File",
-    Lifecycle = "Lifecycle"
+    Lifecycle = "Lifecycle",
+    TypescriptInterface = "TypescriptInterface",
+    TypescriptClass = "TypescriptClass",
 }

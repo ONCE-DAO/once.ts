@@ -18,13 +18,13 @@ export default class DefaultLoader extends BaseLoader {
         return 0;
     }
 
-    static discover(): LoaderStatic[] {
-        return [...new Set([...InterfaceDescriptorHandler.getInterfaceDescriptor<Loader>().implementations, FileSystemLoader] as LoaderStatic[])];
+    static async discover(): Promise<LoaderStatic[]> {
+        return [...new Set([...(await InterfaceDescriptorHandler.getInterfaceDescriptor<Loader>().getImplementations()), FileSystemLoader])] as LoaderStatic[];
     }
 
-    static findLoader(ior: IOR): Loader | undefined {
+    static async findLoader(ior: IOR): Promise<Loader | undefined> {
 
-        const loaderList = this.discover();
+        const loaderList = await this.discover();
         let ratedLoader = loaderList.map(loader => {
             return { rating: loader.canHandle(ior), loader }
         })

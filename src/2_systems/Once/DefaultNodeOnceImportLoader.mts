@@ -42,9 +42,9 @@ export default class DefaultNodeOnceImportLoader extends AbstractNodeOnce implem
     //console.log("RESOLVER: " + originalSpecifier + ' ' + specifier);
 
     if (context.parentURL) {
-      let parent = SourceFile.getSourceFile(context.parentURL)
-      let child = parent.addLoadedFile(result.url)
-      child.check4Loop();
+      // let parent = SourceFile.getSourceFile(context.parentURL)
+      // let child = parent.addLoadedFile(result.url)
+      // child.check4Loop();
       //console.log("PUML:", `"${this.normalizePath4Url(parent.path)}" =up=> "${this.normalizePath4Url(child.path)}"`);
     }
     return result

@@ -1,3 +1,4 @@
+import AbstractNamespaceChild from "../../1_infrastructure/AbstractNamespaceChild.class.mjs";
 import Exportable from "../../3_services/Exportable.interface.mjs";
 import File from "../../3_services/File/File.interface.mjs";
 import IOR from "../../3_services/IOR.interface.mjs";
@@ -14,45 +15,17 @@ import DefaultIOR from "../NewThings/DefaultIOR.class.mjs";
 // ];
 
 
-export default class DefaultNamespace implements NamespaceInterface, Exportable {
+export default class DefaultNamespace extends AbstractNamespaceChild implements NamespaceInterface {
 
-    objectType: NamespaceObjectTypeName = NamespaceObjectTypeName.NamespaceInterface;
-
-    private _IOR: IOR | undefined;
-
-
-    get IOR(): IOR {
-        if (!this._IOR) {
-            if (this.name === "") throw new Error("Missing name")
-            this._IOR = new DefaultIOR().init('ior:meta:/' + this.location.join('/') + `/object`);
-        }
-        return this._IOR;
-    };
-
-    get getAllLoadedChildren(): NamespaceChildren[] {
-        let result: NamespaceChildren[] = [this];
-        for (const child of this.children) {
-            if ("getAllLoadedChildren" in child) {
-                result.push(...child.getAllLoadedChildren);
-            } else {
-                result.push(child);
-            }
-        }
-        return result;
+    getParentType(typeName: NamespaceObjectTypeName.VersionFolder): VersionFolderInterface | undefined;
+    getParentType(typeName: NamespaceObjectTypeName.LayerFolder): LayerFolder | undefined;
+    getParentType(typeName: NamespaceObjectTypeName.Namespace): NamespaceInterface | undefined;
+    getParentType(typeName: NamespaceObjectTypeName.UcpComponentFolder): UcpComponentFolderInterface | undefined;
+    getParentType(typeName: NamespaceObjectTypeName): NamespaceInterface | VersionFolderInterface | UcpComponentFolderInterface | LayerFolder | undefined {
+        if (this.objectType === typeName) return this;
+        if (this._parent && "getParentType" in this.parent) return this.parent.getParentType(typeName as NamespaceObjectTypeName.VersionFolder)
     }
-    // TODO add InterfaceDescriptor
-    //** A Enum is needed because of Bootstrap. By default is should be a InterfaceDescriptor */
-    getParentInstanceType(instanceTypeName: NamespaceObjectTypeName): NamespaceChildren | undefined {
-        if (this.constructor.name == instanceTypeName) {
-            return this;
-        }
-        if (this._parent) {
-            return this._parent.getParentInstanceType(instanceTypeName);
-        } else {
-            return undefined;
-        }
 
-    }
 
     static get IOR(): IOR {
         // HACK with hardcoded IOR
@@ -60,25 +33,16 @@ export default class DefaultNamespace implements NamespaceInterface, Exportable 
     }
     classDescriptor = { IOR: DefaultNamespace.IOR };
 
-    name: string = "";
     children: NamespaceChildren[] = [];
 
-    protected _parent: NamespaceParent | undefined = undefined;
-    get parent(): NamespaceParent {
-        if (!this._parent)
-            throw new Error("Missing parent")
-        return this._parent
-    }
-    set parent(value: NamespaceParent) {
-        this._parent = value
-    }
 
     add(object: NamespaceChildren, location: string[], checkOverwrite: boolean = true): void {
         if ("name" in object) {
             if (location.length > 1) {
-                this.getOrCreateChild(location.shift() as string).add(object, location)
+                this.getOrCreateChild(location.shift() as string).add(object, location, checkOverwrite)
             } else {
                 const existingObject = checkOverwrite ? this.getChildByName(object.name) : undefined;
+                if (existingObject === object) return;
                 object.parent = this;
                 this.children.push(object);
                 if (existingObject && existingObject instanceof DefaultNamespace && "objectType" in object) {
@@ -89,11 +53,25 @@ export default class DefaultNamespace implements NamespaceInterface, Exportable 
                     }
 
                 }
+                if (existingObject) this.removeChild(existingObject);
 
             }
         } else {
             throw new Error("Unknown Object was added")
         }
+    }
+
+    recursiveChildren(types?: NamespaceObjectTypeName[]): NamespaceChildren[] {
+        let result: NamespaceChildren[] = [];
+        for (const child of this.children) {
+            if (!types || types.includes(child.objectType)) {
+                result.push(child);
+            }
+            if ("recursiveChildren" in child) {
+                result.push(...child.recursiveChildren(types));
+            }
+        }
+        return result;
     }
 
     removeChild(child: NamespaceChildren): void {
@@ -106,6 +84,7 @@ export default class DefaultNamespace implements NamespaceInterface, Exportable 
             if (child.name)
                 result[child.name] = "browsable" in child ? child.browsable : child
         }
+        result["This"] = this;
         return result;
     }
 
@@ -117,15 +96,24 @@ export default class DefaultNamespace implements NamespaceInterface, Exportable 
         this.name = data.name
     }
 
+    search(packageString: string): NamespaceChildren | undefined
     search(ior: IOR): NamespaceChildren | undefined
     search(originalLocation: string[]): NamespaceChildren | undefined
-    search(arg1: IOR | string[]): NamespaceChildren | undefined {
+    search(arg1: IOR | string[] | string): NamespaceChildren | undefined {
+        let location: string[];
         if (!Array.isArray(arg1)) {
-            if (!arg1.path) throw new Error("Missing path in the IOR")
-            arg1 = arg1.path.split('/');
+            if (typeof arg1 === "string") {
+                location = arg1.split(".");
+            } else {
+                if (!arg1.path) throw new Error("Missing path in the IOR")
+                // HACK with []
+                location = arg1.path.replaceAll(/[\[\]]/g, '').split('/').filter(x => x !== "");
+            }
+        } else {
+            location = [...arg1]
         }
-        if (arg1.length == 0) return undefined;
-        const location = [...arg1]
+
+        if (location.length === 0) return undefined;
         const name = location.shift() as string;
 
         let child = this.getChildByName(name);
@@ -178,14 +166,6 @@ export default class DefaultNamespace implements NamespaceInterface, Exportable 
         return resultList;
     }
 
-    public get location(): string[] {
-        if (!this._parent && this.name === "") return [];
-        let parentLocation = this.parent.location;
-        parentLocation.push(this.name);
-        return parentLocation;
-    }
-
-
 
     init(name: string, parent: NamespaceParent): this {
         this.name = name;
@@ -215,13 +195,7 @@ export default class DefaultNamespace implements NamespaceInterface, Exportable 
         return child;
     }
 
-    getParentType(typeName: "VersionFolder"): VersionFolderInterface | undefined;
-    getParentType(typeName: "LayerFolder"): LayerFolder | undefined;
-    getParentType(typeName: "UcpComponentFolder"): UcpComponentFolderInterface | undefined;
-    getParentType(typeName: "Namespace"): NamespaceInterface | undefined;
-    getParentType(typeName: unknown): NamespaceInterface | import("../../3_services/Namespace/VersionFolder.interface.mjs").default | import("../../3_services/Namespace/UcpComponentFolder.interface.mjs").default | import("../../3_services/Namespace/LayerFolder.mjs").default | undefined {
-        throw new Error("Method not implemented.");
-    }
+
 
     getChildByName(name: string): NamespaceChildren | undefined {
         let child: NamespaceChildren | undefined = this.children.filter(childName => childName.name === name)[0];

@@ -3,6 +3,7 @@ import { basename, join, relative } from "path";
 import ts from "typescript";
 import DefaultUcpComponentFolder from "../../../2_systems/Namespace/DefaultUcpComponentFolder.class.mjs";
 import DefaultVersion from "../../../2_systems/Namespace/DefaultVersion.class.mjs";
+import DefaultUcpComponentDescriptor from "../../../2_systems/Things/DefaultUcpComponentDescriptor.class.mjs";
 import RawPersistenceManager from "../../../2_systems/Things/OnceInternalPersistenceManager.class.mjs";
 import DefaultUcpUnit from "../../../2_systems/UCP/DefaultUcpUnit.class.mjs";
 import BuildConfig from "../../../3_services/Build/BuildConfig.interface.mjs";
@@ -20,6 +21,7 @@ export default class DefaultTranspiler implements Transpiler {
     private incremental: boolean = false;
 
     private descriptor: BuildUcpComponentDescriptorInterface | undefined;
+    private _componentDescriptor: DefaultUcpComponentDescriptor | undefined;
 
     static async init(baseDir: string, buildConfig: BuildConfig, namespace: string, npmPackage: NpmPackageInterface): Promise<Transpiler> {
         const configFile = ts.findConfigFile(baseDir, ts.sys.fileExists, "tsconfig.build.json");
@@ -88,8 +90,10 @@ export default class DefaultTranspiler implements Transpiler {
     }
 
     private createExportContent(): string {
-        if (typeof this.descriptor === "undefined") throw new Error("Missing descriptor");
-        if (typeof this?.descriptor?.interfaceList === "undefined") throw new Error("Missing interfaceList");
+        // if (typeof this.descriptor === "undefined") throw new Error("Missing descriptor");
+        // if (typeof this?.descriptor?.interfaceList === "undefined") throw new Error("Missing interfaceList");
+
+        if (!this._componentDescriptor) throw new Error("Missing componentDescriptor");
 
         let exportContent: string = "";
 
@@ -97,25 +101,30 @@ export default class DefaultTranspiler implements Transpiler {
             exportContent += '// #### Default ###\n' + ts.sys.readFile(this.DefaultExportFileName) + '\n// #### Dynamic ####\n'
         }
 
+        let units = this._componentDescriptor.units;
+
         let exports: string[] = [];
         let filesToExport: { [file: string]: { default?: string, namedExport: string[] } } = {}
-        for (const interfaceObject of this.descriptor.interfaceList.sort((x, y) => { return x.unitName.localeCompare(y.unitName) })) {
-            //TODO Change unitName to lookup of unit => href/path
-            let fileName = './' + interfaceObject.unitName;
+        for (const unit of units.sort((x, y) => { return x.package.localeCompare(y.package) })) {
+            if (!("componentExport" in unit) || !unit.componentExport || unit.componentExport == "noExport") continue;
+            if (unit.fileExport === "noExport") continue;
+
+            let fileName = './' + unit.fileUnit.relativeComponentPath;
             filesToExport[fileName] = filesToExport[fileName] || { namedExport: [] };
 
-            let name = interfaceObject.name;
+            let name = unit.name;
             if (exports.includes(name)) name += '_duplicate'
-            if (interfaceObject.unitDefaultExport) {
+            if (unit.fileExport === "defaultExport") {
                 filesToExport[fileName].default = name
             } else {
                 let namedImport = name;
-                if (interfaceObject.name !== name) namedImport = `${interfaceObject.name} as ${name}`
+                if (unit.name !== name) namedImport = `${unit.name} as ${name}`
                 filesToExport[fileName].namedExport.push(namedImport);
             }
 
             exports.push(name)
         }
+
         for (let [file, value] of Object.entries(filesToExport)) {
             exportContent += `import `;
             if (value.default) exportContent += ` ${value.default}`;
@@ -129,13 +138,16 @@ export default class DefaultTranspiler implements Transpiler {
     }
 
     async setupNamespace(name: string, namespace: string, version: string): Promise<void> {
-        let cd = new DefaultUcpComponentFolder();
-        cd.name = name;
-        ONCE.rootNamespace.add(cd, [...namespace.split('.'), name]);
+        let cdf = new DefaultUcpComponentFolder();
+        cdf.name = name;
+        ONCE.rootNamespace.add(cdf, [...namespace.split('.'), name]);
 
         let vd = new DefaultVersion();
         vd.name = version;
         ONCE.rootNamespace.add(vd, [...namespace.split('.'), name, version]);
+
+        this._componentDescriptor = new DefaultUcpComponentDescriptor().init(name);
+        vd.add(this._componentDescriptor, [], false);
 
     }
 
@@ -255,7 +267,7 @@ export default class DefaultTranspiler implements Transpiler {
     }
 
     private async writeAllDescriptors() {
-        for (const object of ONCE.rootNamespace.getAllLoadedChildren.filter(x => x.name)) {
+        for (const object of ONCE.rootNamespace.recursiveChildren()) {
             if ("export" in object && "IOR" in object) {
                 await RawPersistenceManager.write2File(object)
             }

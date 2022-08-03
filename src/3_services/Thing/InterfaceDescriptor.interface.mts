@@ -1,29 +1,29 @@
 import DeclarationDescriptor from "../../1_infrastructure/Build/Typescript/Transformer/DeclarationDescriptor.class.mjs";
 import Class from "../Class.interface.mjs";
 import Exportable from "../Exportable.interface.mjs";
-import { NamespaceParent } from "../Namespace/Namespace.interface.mjs";
+import { NamespaceChild, NamespaceObjectTypeName, NamespaceParent } from "../Namespace/Namespace.interface.mjs";
+import VersionFolder from "../Namespace/VersionFolder.interface.mjs";
+import FileUcpUnit from "../UCP/FileUcpUnit.interface.mjs";
+import UcpUnit from "../UCP/UcpUnit.interface.mjs";
 import ClassDescriptorInterface from "./ClassDescriptor.interface.mjs";
 import Thing from "./Thing.interface.mjs";
 import UcpComponentDescriptorInterface from "./UcpComponentDescriptor.interface.mjs";
 
-export default interface InterfaceDescriptorInterface extends Exportable {
-    parent: NamespaceParent | undefined;
-
+export default interface InterfaceDescriptorInterface extends NamespaceChild, UcpUnit {
+    objectType: NamespaceObjectTypeName.InterfaceDescriptor
+    fileUnit: FileUcpUnit
     ucpComponentDescriptor: UcpComponentDescriptorInterface;
     extends: InterfaceDescriptorInterface[];
-    name: string;
-    location: string[];
-    componentExport: 'namedExport' | 'defaultExport' | undefined;
-    componentExportName: string;
-    packagePath: string;
-    packageName: string;
-    packageVersion: string;
+    componentExport: 'namedExport' | 'defaultExport' | 'noExport';
+    fileExport: 'defaultExport' | 'namedExport' | 'noExport';
+    version: VersionFolder
+
     allExtendedInterfaces: InterfaceDescriptorInterface[];
     implementedInterfaces: InterfaceDescriptorInterface[];
-    addImplementation(classDescriptor: ClassDescriptorInterface<any>): InterfaceDescriptorInterface;
+    addImplementation(classDescriptor: ClassDescriptorInterface): InterfaceDescriptorInterface;
     add(object: InterfaceDescriptorInterface | UcpComponentDescriptorInterface): InterfaceDescriptorInterface;
     _getImplementedInterfaces(input: InterfaceDescriptorInterface[]): InterfaceDescriptorInterface[];
-    implementations: Class<any>[];
+    getImplementations(): Promise<Class<any>[]>;
     init(declarationDescriptor: DeclarationDescriptor): this
 }
 
@@ -37,7 +37,9 @@ export interface InterfaceDescriptorStatics {
 
 export interface InterfaceDescriptorFileFormat {
     name: string,
+    fileUnit: string
+    fileExport: 'defaultExport' | 'namedExport' | 'noExport';
     // classIOR: string
     extends: string[],
-    // componentExport: 'defaultExport' | 'namedExport',
+    componentExport: 'defaultExport' | 'namedExport' | 'noExport',
 }

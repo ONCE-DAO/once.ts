@@ -157,7 +157,7 @@ export default class DefaultIOR extends DefaultUrl implements IOR {
     async discoverLoader(): Promise<Loader | undefined> {
         if (this.loader === undefined) {
             const DefaultLoader = (await import("../Loader/DefaultLoader.class.mjs")).default;
-            this.loader = DefaultLoader.findLoader(this);
+            this.loader = await DefaultLoader.findLoader(this);
         }
         return this.loader;
     }

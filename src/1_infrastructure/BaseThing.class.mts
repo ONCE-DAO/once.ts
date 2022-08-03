@@ -13,14 +13,14 @@ export default abstract class BaseThing<ClassInterface> implements Thing<ClassIn
   EVENT_NAMES = emptyEventList;
   protected _eventSupport!: EventService<any>;
 
-  static get classDescriptor(): ClassDescriptorInterface<any> {
+  static get classDescriptor(): ClassDescriptorInterface {
     throw new Error("This should be overwritten by the Once Transpiler")
     // TODO@MERGE 
     //@ts-ignore
-    // return ClassDescriptorHandler.getClassDescriptor4Class(this) as ClassDescriptorInterface<typeof this>;
+    // return ClassDescriptorHandler.getClassDescriptor4Class(this) as ClassDescriptorInterface;
   }
 
-  get classDescriptor(): ClassDescriptorInterface<Class<any>> {
+  get classDescriptor(): ClassDescriptorInterface {
     throw new Error("This should be overwritten by the Once Transpiler")
 
     //TODO@MD Check how to do it better

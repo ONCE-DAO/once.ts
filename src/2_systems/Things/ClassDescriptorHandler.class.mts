@@ -9,9 +9,12 @@ class ClassDescriptorHandlerClass implements ClassDescriptorStatics {
         return `${ClassName}.class.meta.json`
     }
 
-    factory(declarationDescriptor: DeclarationDescriptor): ClassDescriptorInterface<any> {
+    factory(declarationDescriptor: DeclarationDescriptor): ClassDescriptorInterface {
         let existingInstance = ONCE.rootNamespace.search(declarationDescriptor.packageAndLocation);
-        if (existingInstance && "implements" in existingInstance) return existingInstance;
+        if (existingInstance && "implements" in existingInstance) {
+            existingInstance.init(declarationDescriptor);
+            return existingInstance;
+        }
         return new ClassDescriptor().init(declarationDescriptor);
     }
 }

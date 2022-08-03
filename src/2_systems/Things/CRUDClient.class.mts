@@ -28,7 +28,7 @@ enum REST_Method { 'GET' = 'GET', 'POST' = 'POST', 'PUT' = 'PUT', 'DELETE' = 'DE
 
 // BUG There should be an interface, but it dose not work!?!
 //const DefaultCRUDClient: ClientStatic = 
-class DefaultCRUDClient extends BaseThing<CRUD_Client> implements CRUD_Client, REST_Client, Client {
+export default class DefaultCRUDClient extends BaseThing<CRUD_Client> implements CRUD_Client, REST_Client, Client {
 
     private static _store: { [index: string]: DefaultCRUDClient } = {};
     private _clientIOR!: IOR;
@@ -119,5 +119,3 @@ class DefaultCRUDClient extends BaseThing<CRUD_Client> implements CRUD_Client, R
 
 
 }
-
-export default DefaultCRUDClient;
