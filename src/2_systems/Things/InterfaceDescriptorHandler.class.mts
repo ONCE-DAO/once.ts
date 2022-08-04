@@ -1,4 +1,3 @@
-// ##IGNORE_TRANSFORMER##
 import DeclarationDescriptor from "../../1_infrastructure/Build/Typescript/Transformer/DeclarationDescriptor.class.mjs";
 import InterfaceDescriptorInterface, { InterfaceDescriptorStatics } from "../../3_services/Thing/InterfaceDescriptor.interface.mjs";
 import Thing from "../../3_services/Thing/Thing.interface.mjs";

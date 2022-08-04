@@ -1,4 +1,3 @@
-// ##IGNORE_TRANSFORMER##
 import AbstractNamespaceChild from "../../1_infrastructure/AbstractNamespaceChild.class.mjs";
 import DeclarationDescriptor from "../../1_infrastructure/Build/Typescript/Transformer/DeclarationDescriptor.class.mjs";
 import Class from "../../3_services/Class.interface.mjs";

@@ -1,9 +1,8 @@
-// ##IGNORE_TRANSFORMER##
 import AbstractNamespaceChild from "../../1_infrastructure/AbstractNamespaceChild.class.mjs";
 import DeclarationDescriptor from "../../1_infrastructure/Build/Typescript/Transformer/DeclarationDescriptor.class.mjs";
 import Class from "../../3_services/Class.interface.mjs";
 import IOR from "../../3_services/IOR.interface.mjs";
-import { NamespaceObjectTypeName, NamespaceParent } from "../../3_services/Namespace/Namespace.interface.mjs";
+import { NamespaceObjectTypeName } from "../../3_services/Namespace/Namespace.interface.mjs";
 import VersionFolder from "../../3_services/Namespace/VersionFolder.interface.mjs";
 import ClassDescriptorInterface from "../../3_services/Thing/ClassDescriptor.interface.mjs";
 import InterfaceDescriptorInterface, { InterfaceDescriptorFileFormat } from "../../3_services/Thing/InterfaceDescriptor.interface.mjs";

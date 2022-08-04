@@ -2,13 +2,10 @@
 
 import path from "path";
 import TS from 'typescript';
-import InterfaceDescriptor from '../../../../../2_systems/Things/InterfaceDescriptor.class.mjs';
-import InterfaceDescriptorHandler from "../../../../../2_systems/Things/InterfaceDescriptorHandler.class.mjs";
 import DeclarationDescriptor from '../DeclarationDescriptor.class.mjs';
 import { TSNodeVisitor } from '../Transformer.interface.mjs';
 import { debug, localInterfaceDescriptorPath } from '../Transformer.mjs';
 import BaseVisitor from './BaseVisitor.class.mjs';
-
 
 export default class InterfaceVisitor extends BaseVisitor implements TSNodeVisitor {
 

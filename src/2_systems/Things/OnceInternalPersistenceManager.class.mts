@@ -28,7 +28,6 @@ class OnceInternalPersistenceManagerClass implements NamespacePersistanceManager
 
         const filePath = join(scenarioPath, (this.normalizePath(ior.originPath as string)) + fileExtension);
 
-        mkdirSync(dirname(filePath), { recursive: true });
         writeFileSync(filePath, JSON.stringify(exportData, null, 2))
     }
 

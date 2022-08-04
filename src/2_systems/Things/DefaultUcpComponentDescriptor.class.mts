@@ -1,5 +1,3 @@
-// ##IGNORE_TRANSFORMER##
-
 import AbstractNamespaceChild from "../../1_infrastructure/AbstractNamespaceChild.class.mjs";
 import IOR from "../../3_services/IOR.interface.mjs";
 import { NamespaceObjectTypeName, NamespaceParent } from "../../3_services/Namespace/Namespace.interface.mjs";
