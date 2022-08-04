@@ -72,9 +72,14 @@ export default class DefaultUrl extends BaseThing<DefaultUrl> implements Url {
     protected _parseHost(url: string) {
         this.hostNames = [];
         this.ports = [];
-        if (!url.startsWith('//')) return url;
 
-        url = url.substring(2);
+        // need to start with // and not /
+        if (url.startsWith("//")) {
+            url = url.substring(2);
+        } else if (url.startsWith("/")) {
+            return url;
+        }
+
 
         const hostRegex = /^,?([^:\/]+)(:(\d+))?/;
 

@@ -49,10 +49,11 @@ export default class InterfaceDescriptor extends AbstractNamespaceChild implemen
         if (!this._fileUnit) throw new Error("Missing filename");
         if ("pathName" in this._fileUnit) {
             let loaded = ONCE.rootNamespace.search(this._fileUnit);
-            if (loaded && "pathName" in loaded)
+            if (loaded && "relativeComponentPath" in loaded)
                 this._fileUnit = loaded;
         }
-        if ("pathName" in this._fileUnit) throw new Error("Fail to load IOR:" + this._fileUnit);
+        if ("pathName" in this._fileUnit)
+            throw new Error("Fail to load IOR:" + this._fileUnit);
         return this._fileUnit;
     }
 
@@ -60,7 +61,7 @@ export default class InterfaceDescriptor extends AbstractNamespaceChild implemen
         return {
             name: this.name,
             extends: this.extends.map(i => i.IOR.href),
-            fileUnit: this.fileUnit.IOR.href,
+            fileUnit: this._fileUnit && "pathName" in this._fileUnit ? this._fileUnit.href : this.fileUnit.IOR.href,
             fileExport: this.fileExport,
             componentExport: this.componentExport
         }

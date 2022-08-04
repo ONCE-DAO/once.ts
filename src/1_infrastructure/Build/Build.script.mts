@@ -25,8 +25,8 @@ if (pathObject.length) {
     if (matchPath && matchPath[1]) paths = matchPath[1].split(',');
 }
 
-global.ONCE = await DefaultNodeOnceImportLoader.start();
-await global.ONCE.start();
+const once = await DefaultNodeOnceImportLoader.start();
+await once.start();
 
 const eamr = await DefaultEAMRepository.init(scenarioDomain, basePath, fast)
 

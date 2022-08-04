@@ -35,6 +35,16 @@ describe("IOR Class", () => {
       href: "ior:https://shifter.staging.shiftphones.com:30484/",
     },
   });
+  validate.push({
+    url: "prod.wo-da.de",
+    result: {
+      protocol: [],
+      hostName: "prod.wo-da.de",
+      port: undefined,
+      pathName: undefined,
+      origin: "prod.wo-da.de",
+    },
+  });
 
   validate.push({
     url: "ior:ude:rest:http://test.wo-da.de/ior/131cac9f-ceb3-401f-a866-73f7a691fed7",

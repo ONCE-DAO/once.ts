@@ -1,4 +1,4 @@
-import DefaultUrl from "../../../src/2_systems/Things/DefaultUrl.class.mjs";
+import DefaultUrl from "../../../src/2_systems/NewThings/DefaultUrl.class.mjs";
 import Url, { urlProtocol } from "../../../src/3_services/Url.interface.mjs";
 
 
@@ -37,6 +37,27 @@ describe("Url Class", () => {
 
 
   var validate: { url: string, result: Partial<Url> }[] = [];
+  validate.push({
+    url: "google.de",
+    result: {
+      protocol: [],
+      hostName: "google.de",
+      port: undefined,
+      pathName: undefined,
+      origin: "google.de",
+    },
+  });
+  validate.push({
+    url: "prod.wo-da.de",
+    result: {
+      protocol: [],
+      hostName: "prod.wo-da.de",
+      port: undefined,
+      pathName: undefined,
+      origin: "prod.wo-da.de",
+    },
+  });
+
   validate.push({
     url: "ior:ude:rest:http://localhost:8080/ior/131cac9f-ceb3-401f-a866-73f7a691fed7",
     result: {
