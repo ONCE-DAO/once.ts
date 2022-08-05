@@ -1,6 +1,7 @@
 import OldEAMD from "../3_services/EAMD.interface.mjs";
 import EAMRepository from "./Build/EAMRepository.interface.mjs";
 import NamespaceInterface from "./Namespace/Namespace.interface.mjs";
+import VersionFolder from "./Namespace/VersionFolder.interface.mjs";
 import EAMD from "./UCP/EAMD.interface.mjs";
 
 declare global {
@@ -15,6 +16,7 @@ export default interface Once {
   state: OnceState;
   global: typeof globalThis;
   eamd: EAMD;
+  version: VersionFolder
   /**
    * @deprecated
    */

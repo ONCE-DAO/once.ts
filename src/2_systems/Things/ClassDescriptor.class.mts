@@ -10,6 +10,7 @@ import Thing from "../../3_services/Thing/Thing.interface.mjs";
 import UcpComponentDescriptorInterface from "../../3_services/Thing/UcpComponentDescriptor.interface.mjs";
 import FileUcpUnit from "../../3_services/UCP/FileUcpUnit.interface.mjs";
 import DefaultIOR from "../NewThings/DefaultIOR.class.mjs";
+import BuildingBootstrapClassDescriptor from "./BuildingBootstrapClassDescriptor.class.mjs";
 import InterfaceDescriptorHandler from "./InterfaceDescriptorHandler.class.mjs";
 
 
@@ -17,12 +18,8 @@ export default class ClassDescriptor extends AbstractNamespaceChild implements C
     fileExport: 'defaultExport' | 'namedExport' | 'noExport' = 'noExport';
     objectType: NamespaceObjectTypeName.ClassDescriptor = NamespaceObjectTypeName.ClassDescriptor;
 
-    static get IOR(): IOR {
-        // HACK with hardcoded IOR
-        return new DefaultIOR().init('ior:esm:/tla/EAM/Once/once[build]/ClassDescriptor');
-    }
-    classDescriptor = { IOR: ClassDescriptor.IOR };
-
+    // Temporary Descriptor
+    classDescriptor = new BuildingBootstrapClassDescriptor('ClassDescriptor');
 
     private _fileUnit: FileUcpUnit | IOR | undefined;
     public get fileUnit(): FileUcpUnit {

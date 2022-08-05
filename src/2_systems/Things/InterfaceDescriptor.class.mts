@@ -10,6 +10,7 @@ import UcpComponentDescriptorInterface from "../../3_services/Thing/UcpComponent
 import FileUcpUnit from "../../3_services/UCP/FileUcpUnit.interface.mjs";
 import { UnitType } from "../../3_services/UCP/UcpUnit.interface.mjs";
 import DefaultIOR from "../NewThings/DefaultIOR.class.mjs";
+import BuildingBootstrapClassDescriptor from "./BuildingBootstrapClassDescriptor.class.mjs";
 
 export default class InterfaceDescriptor extends AbstractNamespaceChild implements InterfaceDescriptorInterface {
     unitType: UnitType = UnitType.TypescriptInterface;
@@ -27,12 +28,8 @@ export default class InterfaceDescriptor extends AbstractNamespaceChild implemen
 
     fileExport: 'defaultExport' | 'namedExport' | 'noExport' = 'noExport';
 
-
-    static get IOR(): IOR {
-        // HACK with hardcoded IOR
-        return new DefaultIOR().init('ior:esm:/tla/EAM/Once/once[build]/InterfaceDescriptor');
-    }
-    classDescriptor = { IOR: InterfaceDescriptor.IOR };
+    // Temporary Descriptor
+    classDescriptor = new BuildingBootstrapClassDescriptor('InterfaceDescriptor');
 
     init(declarationDescriptor: DeclarationDescriptor): this {
         this.name = declarationDescriptor.name;

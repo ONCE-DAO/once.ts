@@ -1,11 +1,11 @@
 import AbstractNamespaceChild from "../../1_infrastructure/AbstractNamespaceChild.class.mjs";
 import IOR from "../../3_services/IOR.interface.mjs";
-import { NamespaceObjectTypeName, NamespaceParent } from "../../3_services/Namespace/Namespace.interface.mjs";
+import { NamespaceObjectTypeName } from "../../3_services/Namespace/Namespace.interface.mjs";
 import VersionFolder from "../../3_services/Namespace/VersionFolder.interface.mjs";
 import ClassDescriptorInterface from "../../3_services/Thing/ClassDescriptor.interface.mjs";
 import InterfaceDescriptorInterface from "../../3_services/Thing/InterfaceDescriptor.interface.mjs";
 import UcpComponentDescriptorInterface, { UcpComponentDescriptorFileFormat } from "../../3_services/Thing/UcpComponentDescriptor.interface.mjs";
-import DefaultIOR from "../NewThings/DefaultIOR.class.mjs";
+import BuildingBootstrapClassDescriptor from "./BuildingBootstrapClassDescriptor.class.mjs";
 
 export default class DefaultUcpComponentDescriptor extends AbstractNamespaceChild implements UcpComponentDescriptorInterface {
   objectType: NamespaceObjectTypeName.UcpComponentDescriptor = NamespaceObjectTypeName.UcpComponentDescriptor;
@@ -24,11 +24,8 @@ export default class DefaultUcpComponentDescriptor extends AbstractNamespaceChil
     return ior;
   }
 
-  static get IOR(): IOR {
-    // HACK with hardcoded IOR
-    return new DefaultIOR().init('ior:esm:/tla/EAM/Once/once[build]/DefaultUcpComponentDescriptor');
-  }
-  classDescriptor = { IOR: DefaultUcpComponentDescriptor.IOR };
+  // Temporary Descriptor
+  classDescriptor = new BuildingBootstrapClassDescriptor('DefaultUcpComponentDescriptor');
 
   protected static readonly _componentDescriptorStore: { [i: string]: UcpComponentDescriptorInterface } = {};
 
