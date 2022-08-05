@@ -3,14 +3,14 @@ import { dirname, join } from "path";
 import Exportable from "../../3_services/Exportable.interface.mjs";
 import IOR from "../../3_services/IOR.interface.mjs";
 import NamespacePersistanceManager, { NamespacePersistanceManagerReadFromFile } from "../../3_services/Namespace/NamespacePersistanceManager.interface.mjs";
-import DefaultNamespace from "../Namespace/DefaultNamespace.class.mjs";
-import DefaultUcpComponentFolder from "../Namespace/DefaultUcpComponentFolder.class.mjs";
-import DefaultVersion from "../Namespace/DefaultVersion.class.mjs";
+import DefaultNamespace from "./DefaultNamespace.class.mjs";
+import DefaultUcpComponentFolder from "./DefaultUcpComponentFolder.class.mjs";
+import DefaultVersion from "./DefaultVersion.class.mjs";
 import DefaultIOR from "../NewThings/DefaultIOR.class.mjs";
-import ClassDescriptor from "./ClassDescriptor.class.mjs";
-import DefaultUcpComponentDescriptor from "./DefaultUcpComponentDescriptor.class.mjs";
-import DefaultFileUcpUnit from "./FileUnit.class.mjs";
-import InterfaceDescriptor from "./InterfaceDescriptor.class.mjs";
+import ClassDescriptor from "../Descriptors/ClassDescriptor.class.mjs";
+import DefaultUcpComponentDescriptor from "../Descriptors/DefaultUcpComponentDescriptor.class.mjs";
+import DefaultFileUcpUnit from "../Things/FileUnit.class.mjs";
+import InterfaceDescriptor from "../Descriptors/InterfaceDescriptor.class.mjs";
 
 
 type ExportableFileType = { typeIOR: string, particle: any }

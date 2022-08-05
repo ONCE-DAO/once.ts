@@ -3,7 +3,7 @@ import IOR from "../../3_services/IOR.interface.mjs";
 import Loader, { LoaderStatic, loadingConfig } from "../../3_services/Loader.interface.mjs";
 import { OnceMode, OnceState } from "../../3_services/Once.interface.mjs";
 import { urlProtocol } from "../../3_services/Url.interface.mjs";
-import InterfaceDescriptorHandler from "../Things/InterfaceDescriptorHandler.class.mjs";
+import InterfaceDescriptorHandler from "../Descriptors/InterfaceDescriptorHandler.class.mjs";
 import FileSystemLoader from "./FileSystemLoader.class.mjs";
 
 FileSystemLoader

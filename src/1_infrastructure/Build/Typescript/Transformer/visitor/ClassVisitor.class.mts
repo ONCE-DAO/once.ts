@@ -2,7 +2,7 @@
 
 import path from "path";
 import ts from "typescript";
-import ClassDescriptorHandler from "../../../../../2_systems/Things/ClassDescriptorHandler.class.mjs";
+import ClassDescriptorHandler from "../../../../../2_systems/Descriptors/ClassDescriptorHandler.class.mjs";
 import ClassDescriptorInterface from "../../../../../3_services/Thing/ClassDescriptor.interface.mjs";
 import DeclarationDescriptor from '../DeclarationDescriptor.class.mjs';
 import { TSNodeVisitor } from '../Transformer.interface.mjs';

@@ -1,7 +1,7 @@
 import Client, { ClientStatic } from "../../3_services/Client.interface.mjs";
 import IOR from "../../3_services/IOR.interface.mjs";
 import DefaultCRUDClient from "./CRUDClient.class.mjs";
-import InterfaceDescriptorHandler from "./InterfaceDescriptorHandler.class.mjs";
+import InterfaceDescriptorHandler from "../Descriptors/InterfaceDescriptorHandler.class.mjs";
 
 DefaultCRUDClient;
 

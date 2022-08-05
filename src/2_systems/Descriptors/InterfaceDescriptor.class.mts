@@ -10,7 +10,7 @@ import UcpComponentDescriptorInterface from "../../3_services/Thing/UcpComponent
 import FileUcpUnit from "../../3_services/UCP/FileUcpUnit.interface.mjs";
 import { UnitType } from "../../3_services/UCP/UcpUnit.interface.mjs";
 import DefaultIOR from "../NewThings/DefaultIOR.class.mjs";
-import BuildingBootstrapClassDescriptor from "./BuildingBootstrapClassDescriptor.class.mjs";
+import BuildingBootstrapClassDescriptor from "../Things/BuildingBootstrapClassDescriptor.class.mjs";
 
 export default class InterfaceDescriptor extends AbstractNamespaceChild implements InterfaceDescriptorInterface {
     unitType: UnitType = UnitType.TypescriptInterface;

@@ -1,4 +1,4 @@
-import InterfaceDescriptor from "../2_systems/Things/InterfaceDescriptor.class.mjs";
+import InterfaceDescriptor from "../2_systems/Descriptors/InterfaceDescriptor.class.mjs";
 
 import Class from "./Class.interface.mjs";
 import IOR from "./IOR.interface.mjs";

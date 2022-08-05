@@ -2,7 +2,7 @@ import BaseLoader from "../../1_infrastructure/AbstractDefaultLoader.class.mjs";
 import IOR from "../../3_services/IOR.interface.mjs";
 import Loader, { LoaderStatic, loadingConfig } from "../../3_services/Loader.interface.mjs";
 import FileSystemLoader from "../Loader/FileSystemLoader.class.mjs";
-import InterfaceDescriptorHandler from "./InterfaceDescriptorHandler.class.mjs";
+import InterfaceDescriptorHandler from "../Descriptors/InterfaceDescriptorHandler.class.mjs";
 
 export default class DefaultLoader extends BaseLoader {
     removeObjectFromStore(object: any): void {

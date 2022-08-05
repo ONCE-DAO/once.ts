@@ -1,4 +1,4 @@
-import ExtendedPromise from "../../src/1_infrastructure/"
+import ExtendedPromise from "../../src/2_systems/Promise.class.mjs";
 
 
 describe("Extended Promise", () => {

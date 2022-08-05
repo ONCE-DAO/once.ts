@@ -5,7 +5,7 @@ import VersionFolder from "../../3_services/Namespace/VersionFolder.interface.mj
 import ClassDescriptorInterface from "../../3_services/Thing/ClassDescriptor.interface.mjs";
 import InterfaceDescriptorInterface from "../../3_services/Thing/InterfaceDescriptor.interface.mjs";
 import UcpComponentDescriptorInterface, { UcpComponentDescriptorFileFormat } from "../../3_services/Thing/UcpComponentDescriptor.interface.mjs";
-import BuildingBootstrapClassDescriptor from "./BuildingBootstrapClassDescriptor.class.mjs";
+import BuildingBootstrapClassDescriptor from "../Things/BuildingBootstrapClassDescriptor.class.mjs";
 
 export default class DefaultUcpComponentDescriptor extends AbstractNamespaceChild implements UcpComponentDescriptorInterface {
   objectType: NamespaceObjectTypeName.UcpComponentDescriptor = NamespaceObjectTypeName.UcpComponentDescriptor;

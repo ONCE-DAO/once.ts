@@ -2,9 +2,9 @@ import DefaultIOR from "../../../src/2_systems/NewThings/DefaultIOR.class.mjs"
 import BaseThing from "../../../src/1_infrastructure/BaseThing.class.mjs";
 import Url from "../../../src/3_services/Url.interface.mjs";
 import DefaultUrl from "../../../src/2_systems/Things/DefaultUrl.class.mjs";
-import InterfaceDescriptor from "../../../src/2_systems/Things/InterfaceDescriptor.class.mjs";
-import ClassDescriptor from "../../../src/2_systems/Things/ClassDescriptor.class.mjs";
-import ServerSideUcpComponentDescriptor from "../../../src/2_systems/Things/ServerSideUcpComponentDescriptor.class.mjs";
+import InterfaceDescriptor from "../../../src/2_systems/Descriptors/InterfaceDescriptor.class.mjs";
+import ClassDescriptor from "../../../src/2_systems/Descriptors/ClassDescriptor.class.mjs";
+// import ServerSideUcpComponentDescriptor from "../../../src/2_systems/Descriptors/ServerSideUcpComponentDescriptor.class.mjs";
 
 
 

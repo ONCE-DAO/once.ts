@@ -132,7 +132,7 @@ export default class DefaultNamespace extends AbstractNamespaceChild implements 
 
             let level = options?.level || 0;
 
-            let OnceInternalPersistenceManager = (await import("../Things/OnceInternalPersistenceManager.class.mjs")).default;
+            let OnceInternalPersistenceManager = (await import("./OnceInternalPersistenceManager.class.mjs")).default;
 
             //TODO zentrale haltung von 'meta.json'
             let filePostFix: string | RegExp = name ? new RegExp(`^${name}\..*meta.json$`) : 'meta.json';
