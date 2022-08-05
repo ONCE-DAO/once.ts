@@ -4,6 +4,7 @@ import { NamespaceObjectTypeName } from "../../3_services/Namespace/Namespace.in
 import DefaultIOR from "../NewThings/DefaultIOR.class.mjs";
 import DefaultNamespace from "./DefaultNamespace.class.mjs";
 
+// TODO is not used right now
 export default class DefaultLayerFolder extends DefaultNamespace implements LayerFolder {
     objectType: LayerFolder["objectType"] = NamespaceObjectTypeName.LayerFolder;
     get layer(): number {

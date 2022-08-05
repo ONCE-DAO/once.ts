@@ -56,6 +56,7 @@ class OnceInternalPersistenceManagerClass implements NamespacePersistanceManager
         return instance;
     }
 
+    //TODO
     // This function make the loading sync as async is not possible
     private getClass4IOR(ior: IOR): typeof ClassDescriptor | typeof InterfaceDescriptor | typeof DefaultNamespace | typeof DefaultUcpComponentFolder | typeof DefaultUcpComponentDescriptor | typeof DefaultFileUcpUnit {
         let className = ior.href.split('/').pop();

@@ -6,7 +6,6 @@ import { urlProtocol } from "../../3_services/Url.interface.mjs";
 import InterfaceDescriptorHandler from "../Descriptors/InterfaceDescriptorHandler.class.mjs";
 import FileSystemLoader from "./FileSystemLoader.class.mjs";
 
-FileSystemLoader
 export default class DefaultLoader extends AbstractDefaultLoader {
     removeObjectFromStore(object: any): void {
         throw new Error("Method not implemented.");
